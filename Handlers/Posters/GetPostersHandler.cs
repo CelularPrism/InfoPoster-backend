@@ -13,13 +13,15 @@ namespace InfoPoster_backend.Handlers.Posters
     public class GetPostersHandler : IRequestHandler<GetPostersRequest, List<PosterResponseModel>>
     {
         private readonly PosterRepository _repository;
-        
-        public GetPostersHandler(PosterRepository repository)
+        private readonly string _lang;
+
+        public GetPostersHandler(PosterRepository repository, IHttpContextAccessor accessor)
         {
             _repository = repository;
+            _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
         public async Task<List<PosterResponseModel>> Handle(GetPostersRequest request, CancellationToken cancellationToken = default) => 
-            await _repository.GetListNoTracking(request.startDate, request.endDate);
+            await _repository.GetListNoTracking(request.startDate, request.endDate, _lang);
     }
 }

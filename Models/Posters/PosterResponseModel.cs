@@ -9,14 +9,12 @@
             ReleaseDate = poster.ReleaseDate;
             CategoryId = poster.CategoryId;
             Place = poster.Place;
-            CategoryName = string.Empty;
         }
 
         public Guid Id { get; set; }
         public string Name { get; set; }
         public DateTime ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
-        public string CategoryName { get; set; }
         public string Place { get; set; }
     }
 }

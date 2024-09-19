@@ -16,11 +16,18 @@ namespace InfoPoster_backend
             builder.Services.AddScoped<CategoryRepository>();
             builder.Services.AddHttpClient<PosterRepository>();
 
+            builder.Services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "wwwroot";
+            });
+
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddMediatR(cfg => {
+            builder.Services.AddMediatR(cfg =>
+            {
                 cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
             });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -35,14 +42,30 @@ namespace InfoPoster_backend
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
+            app.UseRouting();
+
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseSpaStaticFiles();
+            }
+
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "wwwroot";
+
+                //if (app.Environment.IsDevelopment())
+                //{
+                //    spa.UseAngularCliServer(npmScript: "start");
+                //}
+            });
 
             app.UseAuthorization();
             app.UseMiddleware<DefaultLangMiddleware>();
 
-
             app.MapControllers();
+            //app.MapGet("/", () => "Hello world");
 
             app.Run();
         }

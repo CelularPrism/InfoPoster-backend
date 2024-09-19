@@ -1,6 +1,6 @@
 ﻿using InfoPoster_backend.Handlers.Posters;
+using InfoPoster_backend.Models;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InfoPoster_backend.Controllers
@@ -11,6 +11,11 @@ namespace InfoPoster_backend.Controllers
     {
         private readonly IMediator _mediator;
 
+        public PosterController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetPosters([FromQuery] GetPostersRequest request)
         {
@@ -18,17 +23,31 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [HttpGet]
+        [HttpGet("by-category")]
         public async Task<IActionResult> GetPostersByCategory([FromQuery] GetPostersByCategoryRequest request)
         {
             var result = await _mediator.Send(request);
             return Ok(result);
         }
 
-        [HttpGet("categories")]
-        public async Task<IActionResult> GetCategories()
+        [HttpGet("by-subcategory")]
+        public async Task<IActionResult> GetPostersBySubcategory([FromQuery] GetPostersBySubcategoryRequest request)
         {
-            var result = await _mediator.Send(new GetCategoriesRequest());
+            var result = await _mediator.Send(request);
+            return Ok(result);
+        }
+
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategories(CategoryType type)
+        {
+            var result = await _mediator.Send(new GetCategoriesRequest() { type = type });
+            return Ok(result);
+        }
+
+        [HttpGet("subcategories")]
+        public async Task<IActionResult> GetSubcategories([FromQuery] GetSubcategoriesRequest request)
+        {
+            var result = await _mediator.Send(request);
             return Ok(result);
         }
 

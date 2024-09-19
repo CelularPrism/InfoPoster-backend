@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace InfoPoster_backend.Repos
 {
@@ -18,48 +19,72 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PosterModel>> GetListNoTracking() =>
             await _context.Posters.OrderBy(p => p.ReleaseDate).AsNoTracking().ToListAsync();
 
-        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end) =>
+        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, string lang = "en") =>
             await _context.Posters.Where(p => p.ReleaseDate.Date >= start.Date
                                             && p.ReleaseDate.Date <= end.Date)
                                   .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
-                                        (p, c) => new {p, c.Name})
+                                        (p, c) => p)
                                   .Join(_context.PostersMultilang,
-                                        p => p.p.Id,
+                                        p => p.Id,
                                         m => m.PosterId,
-                                        (p, m) => new PosterResponseModel(p.p, m) { CategoryName = p.Name })
+                                        (p, m) => new { p, m })
+                                  .Where(p => p.m.Lang == lang)
+                                  .Select(p => new PosterResponseModel(p.p, p.m))
                                   .OrderBy(p => p.ReleaseDate)
                                   .AsNoTracking()
                                   .ToListAsync();
 
-        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, Guid categoryId) =>
-            await _context.Posters.Where(p => p.ReleaseDate.Date >= start.Date 
-                                           && p.ReleaseDate.Date <= end.Date 
+        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, Guid categoryId, string lang = "en") =>
+            await _context.Posters.Where(p => p.ReleaseDate.Date >= start.Date
+                                           && p.ReleaseDate.Date <= end.Date
                                            && p.CategoryId == categoryId)
                                   .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
-                                        (p, c) => new { p, c.Name })
+                                        (p, c) => p)
                                   .Join(_context.PostersMultilang,
-                                        p => p.p.Id,
+                                        p => p.Id,
                                         m => m.PosterId,
-                                        (p, m) => new PosterResponseModel(p.p, m) { CategoryName = p.Name })
+                                        (p, m) => new { p, m })
+                                  .Where(p => p.m.Lang == lang)
+                                  .Select(p => new PosterResponseModel(p.p, p.m))
                                   .OrderBy(p => p.ReleaseDate)
                                   .AsNoTracking()
                                   .ToListAsync();
 
-        public async Task<PosterFullInfoResponseModel> GetFullInfo(Guid Id)
+        public async Task<List<PosterResponseModel>> GetListBySubcategoryNoTracking(DateTime start, DateTime end, Guid subcategoryId, string lang = "en") =>
+            await _context.Posters.Where(p => p.ReleaseDate.Date >= start.Date
+                                           && p.ReleaseDate.Date <= end.Date)
+                                  .Join(_context.PosterSubcategory,
+                                        p => p.Id,
+                                        c => c.PosterId,
+                                        (p, c) => new { p, c.SubcategoryId })
+                                  .Where(c => c.SubcategoryId == subcategoryId)
+                                  .Join(_context.PostersMultilang,
+                                        p => p.p.Id,
+                                        m => m.PosterId,
+                                        (p, m) => new { p, m })
+                                  .Where(p => p.m.Lang == lang)
+                                  .Select(p => new PosterResponseModel(p.p.p, p.m))
+                                  .OrderBy(p => p.ReleaseDate)
+                                  .AsNoTracking()
+                                  .ToListAsync();
+
+        public async Task<PosterFullInfoResponseModel> GetFullInfo(Guid Id, string lang = "en")
         {
             var poster = await _context.Posters.Where(p => p.Id == Id)
                                                .Join(_context.Categories,
                                                     p => p.CategoryId,
                                                     c => c.Id,
-                                                    (p, c) => new { p, c.Name })
+                                                    (p, c) => p)
                                                .Join(_context.PostersMultilang,
-                                                    p => p.p.Id,
+                                                    p => p.Id,
                                                     m => m.PosterId,
-                                                    (p, m) => new PosterFullInfoResponseModel(p.p, m) { CategoryName = p.Name })
+                                                    (p, m) => new { p, m })
+                                               .Where(p => p.m.Lang == lang)
+                                               .Select(p => new PosterFullInfoResponseModel(p.p, p.m))
                                                .OrderBy(p => p.ReleaseDate)
                                                .AsNoTracking()
                                                .FirstOrDefaultAsync();

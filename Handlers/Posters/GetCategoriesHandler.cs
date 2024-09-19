@@ -4,18 +4,23 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
 {
-    public class GetCategoriesRequest : IRequest<List<CategoryModel>> { }
+    public class GetCategoriesRequest : IRequest<List<CategoryResponseModel>>
+    {
+        public CategoryType type { get; set; }
+    }
 
-    public class GetCategoriesHandler : IRequestHandler<GetCategoriesRequest, List<CategoryModel>> 
+    public class GetCategoriesHandler : IRequestHandler<GetCategoriesRequest, List<CategoryResponseModel>>
     {
         private readonly CategoryRepository _repository;
-        
-        public GetCategoriesHandler(CategoryRepository repository)
+        private readonly string _lang;
+
+        public GetCategoriesHandler(CategoryRepository repository, IHttpContextAccessor accessor)
         {
             _repository = repository;
+            _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
-        public async Task<List<CategoryModel>> Handle(GetCategoriesRequest request, CancellationToken cancellationToken = default) =>
-            await _repository.GetCategoriesNoTracking();
+        public async Task<List<CategoryResponseModel>> Handle(GetCategoriesRequest request, CancellationToken cancellationToken = default) =>
+            await _repository.GetCategoriesNoTracking((int)request.type, _lang);
     }
 }
