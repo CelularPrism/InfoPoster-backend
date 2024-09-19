@@ -1,0 +1,31 @@
+﻿using InfoPoster_backend.Handlers.Account;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InfoPoster_backend.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AccountController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public AccountController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginRequestModel request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+            {
+                ModelState.AddModelError("Error", "Incorrect email or password");
+                return BadRequest(ModelState);
+            }    
+
+            return Ok(result);
+        }
+    }
+}
