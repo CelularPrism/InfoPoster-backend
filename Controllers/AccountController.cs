@@ -16,7 +16,7 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequestModel request)
+        public async Task<IActionResult> Login([FromForm] LoginRequestModel request)
         {
             var result = await _mediator.Send(request);
             if (result == null)
