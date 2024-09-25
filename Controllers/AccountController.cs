@@ -27,5 +27,12 @@ namespace InfoPoster_backend.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var result = await _mediator.Send(new LogoutRequest());
+            return Ok(result);
+        }
     }
 }

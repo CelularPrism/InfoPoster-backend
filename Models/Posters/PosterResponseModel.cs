@@ -6,7 +6,6 @@
         {
             Id = poster.Id;
             Name = !string.IsNullOrEmpty(multilang.Name) ? multilang.Name : poster.Name;
-            ReleaseDate = poster.ReleaseDate;
             CategoryId = poster.CategoryId;
             Place = poster.Place;
         }

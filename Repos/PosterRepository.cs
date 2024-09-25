@@ -17,12 +17,10 @@ namespace InfoPoster_backend.Repos
         }
 
         public async Task<List<PosterModel>> GetListNoTracking() =>
-            await _context.Posters.OrderBy(p => p.ReleaseDate).AsNoTracking().ToListAsync();
+            await _context.Posters.AsNoTracking().ToListAsync();
 
         public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, string lang = "en") =>
-            await _context.Posters.Where(p => p.ReleaseDate.Date >= start.Date
-                                            && p.ReleaseDate.Date <= end.Date)
-                                  .Join(_context.Categories,
+            await _context.Posters.Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
                                         (p, c) => p)
@@ -37,9 +35,7 @@ namespace InfoPoster_backend.Repos
                                   .ToListAsync();
 
         public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, Guid categoryId, string lang = "en") =>
-            await _context.Posters.Where(p => p.ReleaseDate.Date >= start.Date
-                                           && p.ReleaseDate.Date <= end.Date
-                                           && p.CategoryId == categoryId)
+            await _context.Posters.Where(p => p.CategoryId == categoryId)
                                   .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
@@ -55,9 +51,7 @@ namespace InfoPoster_backend.Repos
                                   .ToListAsync();
 
         public async Task<List<PosterResponseModel>> GetListBySubcategoryNoTracking(DateTime start, DateTime end, Guid subcategoryId, string lang = "en") =>
-            await _context.Posters.Where(p => p.ReleaseDate.Date >= start.Date
-                                           && p.ReleaseDate.Date <= end.Date)
-                                  .Join(_context.PosterSubcategory,
+            await _context.Posters.Join(_context.PosterSubcategory,
                                         p => p.Id,
                                         c => c.PosterId,
                                         (p, c) => new { p, c.SubcategoryId })
