@@ -2,14 +2,25 @@
 {
     public class PosterFullInfoResponseModel
     {
-        public PosterFullInfoResponseModel(PosterModel poster, PosterMultilangModel multilang)
+        public PosterFullInfoResponseModel(PosterFullInfoModel poster, PosterMultilangModel multilang)
         {
-            Id = poster.Id;
-            Name = !string.IsNullOrEmpty(multilang.Name) ? multilang.Name : poster.Name;
-            Description = !string.IsNullOrEmpty(multilang.Description) ? multilang.Description : poster.Description;
+            Id = poster.PosterId;
+            Name = multilang.Name;
+            Description = multilang.Description;
+            ReleaseDate = poster.Date;
             CategoryId = poster.CategoryId;
-            Place = poster.Place;
-            CategoryName = string.Empty;
+            Place = multilang.Place;
+            City = multilang.City;
+            TimeStart = poster.TimeStart;
+            Price = poster.Price;
+            Adress = multilang.Adress;
+            latitude = poster.Latitude;
+            longitude = poster.Longitude;
+            Parking = multilang.Parking;
+            ParkingPlace = multilang.ParkingPlace;
+            Phone = multilang.Phone;
+            SiteLink = multilang.SiteLink;
+            AgeRestriction = poster.AgeRestriction;
             GaleryUrls = new List<string>();
         }
 
@@ -20,6 +31,20 @@
         public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public string Place { get; set; }
+        public string City { get; set; }
+        public string TimeStart { get; set; }
+        public double Price { get; set; }
+        public string Adress { get; set; }
+        public string latitude { get; set; }
+        public string longitude { get; set; }
+        public string Parking { get; set; }
+        public string ParkingPlace { get; set; }
+        public string Tags { get; set; }
+        public string SocialLinks { get; set; }
+        public string Phone { get; set; }
+        public string SiteLink { get; set; }
+        public string AgeRestriction { get; set; }
         public List<string> GaleryUrls { get; set; }
+        public List<string> VideoUrls { get; set; }
     }
 }

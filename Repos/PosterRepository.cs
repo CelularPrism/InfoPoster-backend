@@ -87,5 +87,22 @@ namespace InfoPoster_backend.Repos
             poster.GaleryUrls.Add("https://freshmus.ru/wp-content/uploads/2023/09/Pervye-proby-v-muzyke-1-e1693768780577.jpg");
             return poster;
         }
+
+        public async Task AddPoster(PosterModel model)
+        {
+            await _context.Posters.AddAsync(model);
+            await _context.SaveChangesAsync();
+        }
+
+        //public async Task AddPosterFullInfo(PosterFullInfoModel model)
+        //{
+            
+        //}
+
+        public async Task AddPosterMultilang(PosterMultilangModel model)
+        {
+            await _context.PostersMultilang.AddAsync(model);
+            await _context.SaveChangesAsync();
+        }
     }
 }
