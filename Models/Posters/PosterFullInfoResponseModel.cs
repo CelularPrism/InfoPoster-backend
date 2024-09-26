@@ -2,25 +2,25 @@
 {
     public class PosterFullInfoResponseModel
     {
-        public PosterFullInfoResponseModel(PosterFullInfoModel poster, PosterMultilangModel multilang)
+        public PosterFullInfoResponseModel(PosterModel poster, PosterFullInfoModel fullInfo, PosterMultilangModel multilang)
         {
-            Id = poster.PosterId;
+            Id = fullInfo.PosterId;
             Name = multilang.Name;
             Description = multilang.Description;
-            ReleaseDate = poster.Date;
-            CategoryId = poster.CategoryId;
+            ReleaseDate = poster.ReleaseDate;
+            CategoryId = fullInfo.CategoryId;
             Place = multilang.Place;
             City = multilang.City;
-            TimeStart = poster.TimeStart;
-            Price = poster.Price;
+            TimeStart = fullInfo.TimeStart;
+            Price = fullInfo.Price;
             Adress = multilang.Adress;
-            latitude = poster.Latitude;
-            longitude = poster.Longitude;
+            latitude = fullInfo.Latitude;
+            longitude = fullInfo.Longitude;
             Parking = multilang.Parking;
             ParkingPlace = multilang.ParkingPlace;
             Phone = multilang.Phone;
             SiteLink = multilang.SiteLink;
-            AgeRestriction = poster.AgeRestriction;
+            AgeRestriction = fullInfo.AgeRestriction;
             GaleryUrls = new List<string>();
         }
 

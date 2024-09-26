@@ -98,13 +98,13 @@ namespace InfoPoster_backend.Repos
                                                .Join(_context.PostersFullInfo,
                                                      p => p.Id,
                                                      f => f.PosterId,
-                                                     (p, f) => f)
+                                                     (p, f) => new { p, f })
                                                .Join(_context.PostersMultilang,
-                                                    p => p.PosterId,
+                                                    p => p.f.PosterId,
                                                     m => m.PosterId,
                                                     (p, m) => new { p, m })
                                                .Where(p => p.m.Lang == lang)
-                                               .Select(p => new PosterFullInfoResponseModel(p.p, p.m))
+                                               .Select(p => new PosterFullInfoResponseModel(p.p.p, p.p.f, p.m))
                                                .OrderBy(p => p.ReleaseDate)
                                                .AsNoTracking()
                                                .FirstOrDefaultAsync();

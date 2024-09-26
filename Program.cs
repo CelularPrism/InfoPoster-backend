@@ -24,7 +24,7 @@ namespace InfoPoster_backend
 
             builder.Services.AddScoped<CategoryRepository>();
             builder.Services.AddScoped<AccountRepository>();
-            builder.Services.AddHttpClient<PosterRepository>();
+            builder.Services.AddScoped<PosterRepository>();
 
 
             builder.Services.AddSpaStaticFiles(configuration =>
@@ -50,8 +50,7 @@ namespace InfoPoster_backend
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddCertificate()
-            .AddJwtBearer(options =>
+            .AddJwtBearer("Asymmetric", options =>
             {
                 SecurityKey rsa = builder.Services.BuildServiceProvider().GetRequiredService<RsaSecurityKey>();
                 options.SaveToken = true;
@@ -60,6 +59,7 @@ namespace InfoPoster_backend
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
+                    RequireSignedTokens = true,
                     ValidAudience = builder.Configuration["Protection:JwtAudience"],
                     ValidIssuer = builder.Configuration["Protection:JwtIssuer"],
                     IssuerSigningKey = rsa
@@ -88,6 +88,18 @@ namespace InfoPoster_backend
                 app.UseSwaggerUI();
             }
             app.UseHttpsRedirection();
+
+            app.Use((context, next) =>
+            {
+                var token = context.Request.Cookies["AccessToken"];
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Request.Headers.Add("Authorization", "Bearer " + token);
+                }
+
+                return next();
+            });
+
             app.UseStaticFiles();
             app.UseRouting();
 

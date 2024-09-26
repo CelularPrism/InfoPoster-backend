@@ -7,7 +7,7 @@ namespace InfoPoster_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Asymmetric")]
     public class AdministrationController : ControllerBase
     {
         private readonly IMediator _mediator;
