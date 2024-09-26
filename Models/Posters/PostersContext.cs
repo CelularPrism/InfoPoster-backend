@@ -26,5 +26,6 @@ namespace InfoPoster_backend.Models.Posters
         public DbSet<SubcategoryModel> Subcategories { get; set; }
         public DbSet<SubcategoryMultilangModel> SubcategoriesMultilang { get; set; }
         public DbSet<PosterSubcategoryModel> PosterSubcategory { get; set; }
+        public DbSet<PosterViewLogModel> PosterViewLogs { get; set; }
     }
 }

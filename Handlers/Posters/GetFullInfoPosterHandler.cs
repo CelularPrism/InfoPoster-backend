@@ -23,6 +23,14 @@ namespace InfoPoster_backend.Handlers.Posters
         public async Task<PosterFullInfoResponseModel> Handle(GetFullInfoPosterRequest request, CancellationToken cancellationToken = default)
         {
             var result = await _repository.GetFullInfo(request.Id, _lang);
+            var viewLog = new PosterViewLogModel()
+            {
+                Id = Guid.NewGuid(),
+                PosterId = request.Id,
+                Date = DateTime.UtcNow
+            };
+
+            await _repository.AddViewLog(viewLog);
             return result;
         }
     }

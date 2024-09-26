@@ -1,0 +1,47 @@
+﻿using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
+using MediatR;
+
+namespace InfoPoster_backend.Handlers.Administration
+{
+    public class GetAllPostersRequest : IRequest<List<GetAllPostersResponse>> { } 
+
+    public class GetAllPostersResponse
+    {
+        public GetAllPostersResponse(PosterModel poster, PosterMultilangModel multilang, string userName)
+        {
+            Id = poster.Id;
+            Name = multilang.Name;
+            ReleaseDate = poster.ReleaseDate;
+            CategoryId = poster.CategoryId;
+            CreatedBy = userName;
+            Status = poster.Status;
+        }
+
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public DateTime ReleaseDate { get; set; }
+        public Guid CategoryId { get; set; }
+        public string CreatedBy { get; set; }
+        public int Status { get; set; }
+    }
+
+    public class GetAllPostersHandler : IRequestHandler<GetAllPostersRequest, List<GetAllPostersResponse>>
+    {
+        private readonly PosterRepository _repository;
+        private readonly string _lang;
+
+        public GetAllPostersHandler(PosterRepository repository, string lang)
+        {
+            _repository = repository;
+            _lang = lang;
+        }
+
+        public async Task<List<GetAllPostersResponse>> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
+        {
+            var posters = await _repository.GetListNoTracking(_lang);
+            return posters;
+        }
+    }
+}

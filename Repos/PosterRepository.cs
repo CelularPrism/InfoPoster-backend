@@ -1,4 +1,4 @@
-﻿using InfoPoster_backend.Handlers.Posters;
+﻿using InfoPoster_backend.Handlers.Administration;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
@@ -26,8 +26,28 @@ namespace InfoPoster_backend.Repos
         public async Task<PosterMultilangModel> GetMultilangPoster(Guid posterId, string lang) =>
             await _context.PostersMultilang.FirstOrDefaultAsync(x => x.PosterId == posterId && x.Lang == lang);
 
-        public async Task<List<AdministrationGetPostersResponse>> GetListNoTracking(string lang) =>
+        public async Task<List<GetAllPostersResponse>> GetListNoTracking(string lang) =>
             await _context.Posters.Join(_context.Categories,
+                                        p => p.CategoryId,
+                                        c => c.Id,
+                                        (p, c) => p)
+                                  .Join(_context.PostersMultilang,
+                                        p => p.Id,
+                                        m => m.PosterId,
+                                        (p, m) => new { p, m })
+                                  .Where(p => p.m.Lang == lang)
+                                  .Join(_context.Users,
+                                        p => p.p.UserId,
+                                        u => u.Id,
+                                        (p, u) => new { p, UserName = u.FirstName + " " + u.LastName })
+                                  .Select(p => new GetAllPostersResponse(p.p.p, p.p.m, p.UserName))
+                                  .OrderBy(p => p.ReleaseDate)
+                                  .AsNoTracking()
+                                  .ToListAsync();
+
+        public async Task<List<AdministrationGetPostersResponse>> GetListNoTracking(Guid userId, string lang) =>
+            await _context.Posters.Where(p => p.UserId == userId)
+                                  .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
                                         (p, c) => p)
@@ -129,6 +149,12 @@ namespace InfoPoster_backend.Repos
         public async Task AddPosterMultilang(PosterMultilangModel model)
         {
             await _context.PostersMultilang.AddAsync(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddViewLog(PosterViewLogModel model)
+        {
+            await _context.PosterViewLogs.AddAsync(model);
             await _context.SaveChangesAsync();
         }
 

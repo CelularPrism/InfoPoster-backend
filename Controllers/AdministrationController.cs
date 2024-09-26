@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Handlers.Posters;
+﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Posters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,10 +18,17 @@ namespace InfoPoster_backend.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetPosters([FromQuery] AdministrationGetPostersRequest request)
+        [HttpGet("posters/available")]
+        public async Task<IActionResult> GetAvailablePosters()
         {
-            var result = await _mediator.Send(request);
+            var result = await _mediator.Send(new AdministrationGetPostersRequest());
+            return Ok(result);
+        }
+
+        [HttpGet("posters/all")]
+        public async Task<IActionResult> GetAllPosters()
+        {
+            var result = await _mediator.Send(new GetAllPostersRequest());
             return Ok(result);
         }
 
