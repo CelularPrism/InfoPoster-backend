@@ -1,64 +1,48 @@
 ﻿using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
 {
-    public class AddFullInfoPosterRequest : IRequest<AddFullInfoPosterResponse>
-    {
-        public Guid PosterId { get; set; }
-        public string Lang { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public DateTime ReleaseDate { get; set; }
-        public Guid CategoryId { get; set; }
-        public string Place { get; set; }
-        public string City { get; set; }
-        public string TimeStart { get; set; }
-        public double Price { get; set; }
-        public string Adress { get; set; }
-        public string latitude { get; set; }
-        public string longitude { get; set; }
-        public string Parking { get; set; }
-        public string ParkingPlace { get; set; }
-        public string Tags { get; set; }
-        public string SocialLinks { get; set; }
-        public string Phone { get; set; }
-        public string SiteLink { get; set; }
-        public string AgeRestriction { get; set; }
-        public List<string> GaleryUrls { get; set; }
-        public List<string> VideoUrls { get; set; }
-    }
+    public class AddPosterRequest : IRequest<AddPosterResponse> { }
 
-    public class AddFullInfoPosterResponse
+    public class AddPosterResponse
     {
         public Guid Id { get; set; }
     }
 
-    public class AddFullInfoPosterHandler : IRequestHandler<AddFullInfoPosterRequest, AddFullInfoPosterResponse>
+    public class AddPosterHandler : IRequestHandler<AddPosterRequest, AddPosterResponse> 
     {
+        private readonly LoginService _loginService;
         private readonly PosterRepository _repository;
-        public AddFullInfoPosterHandler(PosterRepository repository)
+        public AddPosterHandler(LoginService loginService, PosterRepository repository)
         {
+            _loginService = loginService;
             _repository = repository;
         }
 
-        public async Task<AddFullInfoPosterResponse> Handle(AddFullInfoPosterRequest request, CancellationToken cancellationToken = default)
+        public async Task<AddPosterResponse> Handle(AddPosterRequest request, CancellationToken cancellationToken = default)
         {
-            var fullInfo = new PosterFullInfoModel()
+            var user = _loginService.GetUserId();
+            if (user == Guid.Empty)
+                return null;
+
+            var poster = new PosterModel()
             {
-                PosterId = request.PosterId,
-                AgeRestriction = request.AgeRestriction,
-                CategoryId = request.CategoryId,
-                Date = request.ReleaseDate,
-                Latitude = request.latitude,
-                Longitude = request.longitude,
-                Price = request.Price,
-                TimeStart = request.TimeStart
+                Id = Guid.NewGuid(),
+                CreatedAt = DateTime.UtcNow,
+                Status = (int)POSTER_STATUS.DISABLED,
+                UserId = user
             };
 
-            var multilang = new PosterMultilangModel(request);
-            
+            await _repository.AddPoster(poster);
+            var result = new AddPosterResponse()
+            {
+                Id = poster.Id
+            };
+
+            return result;
         }
     }
 }

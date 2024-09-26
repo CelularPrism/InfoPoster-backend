@@ -5,9 +5,9 @@
         public PosterResponseModel(PosterModel poster, PosterMultilangModel multilang)
         {
             Id = poster.Id;
-            Name = !string.IsNullOrEmpty(multilang.Name) ? multilang.Name : poster.Name;
+            Name = multilang.Name;
             CategoryId = poster.CategoryId;
-            Place = poster.Place;
+            Place = multilang.Place;
         }
 
         public Guid Id { get; set; }

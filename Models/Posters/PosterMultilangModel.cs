@@ -4,6 +4,23 @@ namespace InfoPoster_backend.Models.Posters
 {
     public class PosterMultilangModel
     {
+        public PosterMultilangModel() { }
+
+        public void Update(UpdateFullInfoPosterRequest fullInfo)
+        {
+            PosterId = fullInfo.PosterId;
+            Lang = fullInfo.Lang;
+            Place = fullInfo.Place;
+            City = fullInfo.City;
+            Name = fullInfo.Name;
+            Adress = fullInfo.Adress;
+            Description = fullInfo.Description;
+            Parking = fullInfo.Parking;
+            ParkingPlace = fullInfo.ParkingPlace;
+            Phone = fullInfo.Phone;
+            SiteLink = fullInfo.SiteLink;
+        }
+
         public PosterMultilangModel(AddFullInfoPosterRequest fullInfo) 
         {
             Id = Guid.NewGuid();

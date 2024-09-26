@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using InfoPoster_backend.Models.Account;
+using Microsoft.EntityFrameworkCore;
 
 namespace InfoPoster_backend.Models.Posters
 {
@@ -16,7 +17,9 @@ namespace InfoPoster_backend.Models.Posters
             }
         }
 
+        public DbSet<UserModel> Users { get; set; }
         public DbSet<PosterModel> Posters { get; set; }
+        public DbSet<PosterFullInfoModel> PostersFullInfo { get; set; }
         public DbSet<PosterMultilangModel> PostersMultilang { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
         public DbSet<CategoryMultilangModel> CategoriesMultilang { get; set; }
