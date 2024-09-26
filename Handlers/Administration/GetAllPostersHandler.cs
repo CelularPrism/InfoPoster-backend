@@ -32,10 +32,10 @@ namespace InfoPoster_backend.Handlers.Administration
         private readonly PosterRepository _repository;
         private readonly string _lang;
 
-        public GetAllPostersHandler(PosterRepository repository, string lang)
+        public GetAllPostersHandler(PosterRepository repository, IHttpContextAccessor accessor)
         {
             _repository = repository;
-            _lang = lang;
+            _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
         public async Task<List<GetAllPostersResponse>> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)

@@ -26,8 +26,9 @@ namespace InfoPoster_backend.Repos
         public async Task<PosterMultilangModel> GetMultilangPoster(Guid posterId, string lang) =>
             await _context.PostersMultilang.FirstOrDefaultAsync(x => x.PosterId == posterId && x.Lang == lang);
 
-        public async Task<List<GetAllPostersResponse>> GetListNoTracking(string lang) =>
-            await _context.Posters.Join(_context.Categories,
+        public async Task<List<GetAllPostersResponse>> GetListNoTracking(string lang)
+        {
+            var list = await _context.Posters.Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
                                         (p, c) => p)
@@ -40,13 +41,18 @@ namespace InfoPoster_backend.Repos
                                         p => p.p.UserId,
                                         u => u.Id,
                                         (p, u) => new { p, UserName = u.FirstName + " " + u.LastName })
-                                  .Select(p => new GetAllPostersResponse(p.p.p, p.p.m, p.UserName))
-                                  .OrderBy(p => p.ReleaseDate)
                                   .AsNoTracking()
                                   .ToListAsync();
 
-        public async Task<List<AdministrationGetPostersResponse>> GetListNoTracking(Guid userId, string lang) =>
-            await _context.Posters.Where(p => p.UserId == userId)
+            var result = list.Select(p => new GetAllPostersResponse(p.p.p, p.p.m, p.UserName))
+                             .OrderBy(p => p.ReleaseDate)
+                             .ToList();
+            return result;
+        }
+
+        public async Task<List<AdministrationGetPostersResponse>> GetListNoTracking(Guid userId, string lang)
+        {
+            var list = await _context.Posters.Where(p => p.UserId == userId)
                                   .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
@@ -59,14 +65,19 @@ namespace InfoPoster_backend.Repos
                                   .Join(_context.Users,
                                         p => p.p.UserId,
                                         u => u.Id,
-                                        (p, u) => new { p, UserName = u.FirstName + " " + u.LastName})
-                                  .Select(p => new AdministrationGetPostersResponse(p.p.p, p.p.m, p.UserName))
-                                  .OrderBy(p => p.ReleaseDate)
+                                        (p, u) => new { p, UserName = u.FirstName + " " + u.LastName })
                                   .AsNoTracking()
                                   .ToListAsync();
 
-        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, string lang = "en") =>
-            await _context.Posters.Join(_context.Categories,
+            var result = list.Select(p => new AdministrationGetPostersResponse(p.p.p, p.p.m, p.UserName))
+                             .OrderBy(p => p.ReleaseDate)
+                             .ToList();
+            return result;
+        }
+
+        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, string lang = "en")
+        {
+            var list = await _context.Posters.Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
                                         (p, c) => p)
@@ -75,13 +86,18 @@ namespace InfoPoster_backend.Repos
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
                                   .Where(p => p.m.Lang == lang)
-                                  .Select(p => new PosterResponseModel(p.p, p.m))
-                                  .OrderBy(p => p.ReleaseDate)
                                   .AsNoTracking()
                                   .ToListAsync();
 
-        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, Guid categoryId, string lang = "en") =>
-            await _context.Posters.Where(p => p.CategoryId == categoryId)
+            var result = list.Select(p => new PosterResponseModel(p.p, p.m))
+                             .OrderBy(p => p.ReleaseDate)
+                             .ToList();
+            return result;
+        }
+
+        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, Guid categoryId, string lang = "en")
+        {
+            var list = await _context.Posters.Where(p => p.CategoryId == categoryId)
                                   .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
@@ -91,13 +107,18 @@ namespace InfoPoster_backend.Repos
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
                                   .Where(p => p.m.Lang == lang)
-                                  .Select(p => new PosterResponseModel(p.p, p.m))
-                                  .OrderBy(p => p.ReleaseDate)
                                   .AsNoTracking()
                                   .ToListAsync();
 
-        public async Task<List<PosterResponseModel>> GetListBySubcategoryNoTracking(DateTime start, DateTime end, Guid subcategoryId, string lang = "en") =>
-            await _context.Posters.Join(_context.PosterSubcategory,
+            var result = list.Select(p => new PosterResponseModel(p.p, p.m))
+                             .OrderBy(p => p.ReleaseDate)
+                             .ToList();
+            return result;
+        }
+
+        public async Task<List<PosterResponseModel>> GetListBySubcategoryNoTracking(DateTime start, DateTime end, Guid subcategoryId, string lang = "en")
+        {
+            var list = await _context.Posters.Join(_context.PosterSubcategory,
                                         p => p.Id,
                                         c => c.PosterId,
                                         (p, c) => new { p, c.SubcategoryId })
@@ -107,14 +128,18 @@ namespace InfoPoster_backend.Repos
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
                                   .Where(p => p.m.Lang == lang)
-                                  .Select(p => new PosterResponseModel(p.p.p, p.m))
-                                  .OrderBy(p => p.ReleaseDate)
                                   .AsNoTracking()
                                   .ToListAsync();
 
+            var result = list.Select(p => new PosterResponseModel(p.p.p, p.m))
+                             .OrderBy(p => p.ReleaseDate)
+                             .ToList();
+            return result;
+        }
+
         public async Task<PosterFullInfoResponseModel> GetFullInfo(Guid Id, string lang = "en")
         {
-            var poster = await _context.Posters.Where(p => p.Id == Id)
+            var model = await _context.Posters.Where(p => p.Id == Id)
                                                .Join(_context.PostersFullInfo,
                                                      p => p.Id,
                                                      f => f.PosterId,
@@ -124,10 +149,15 @@ namespace InfoPoster_backend.Repos
                                                     m => m.PosterId,
                                                     (p, m) => new { p, m })
                                                .Where(p => p.m.Lang == lang)
-                                               .Select(p => new PosterFullInfoResponseModel(p.p.p, p.p.f, p.m))
-                                               .OrderBy(p => p.ReleaseDate)
+                                               .Select(p => new { Poster = p.p.p, FullInfo = p.p.f, Multilang = p.m })
                                                .AsNoTracking()
                                                .FirstOrDefaultAsync();
+
+            var poster = new PosterFullInfoResponseModel(model.Poster, model.FullInfo, model.Multilang);
+            poster.CategoryName = await _context.CategoriesMultilang.Where(c => c.CategoryId == poster.CategoryId)
+                                                                    .AsNoTracking()
+                                                                    .Select(c => c.Name)
+                                                                    .FirstOrDefaultAsync();
 
             poster.GaleryUrls.Add("https://a-a-ah-ru.s3.amazonaws.com/uploads/items/137024/280166/large_24_1024.jpg");
             poster.GaleryUrls.Add("https://freshmus.ru/wp-content/uploads/2023/09/Pervye-proby-v-muzyke-1-e1693768780577.jpg");
