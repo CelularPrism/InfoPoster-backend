@@ -18,14 +18,14 @@ namespace InfoPoster_backend.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("posters/available")]
+        [HttpGet("poster/available")]
         public async Task<IActionResult> GetAvailablePosters()
         {
             var result = await _mediator.Send(new AdministrationGetPostersRequest());
             return Ok(result);
         }
 
-        [HttpGet("posters/all")]
+        [HttpGet("poster/all")]
         public async Task<IActionResult> GetAllPosters()
         {
             var result = await _mediator.Send(new GetAllPostersRequest());
