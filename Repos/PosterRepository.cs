@@ -3,6 +3,7 @@ using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 using System.Linq;
 
 namespace InfoPoster_backend.Repos
@@ -222,6 +223,15 @@ namespace InfoPoster_backend.Repos
         public async Task UpdatePosterMultilang(PosterMultilangModel model)
         {
             _context.PostersMultilang.Update(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveFiles(List<FileURLModel> list, Guid posterId)
+        {
+            var old = await _context.FileUrls.Where(f => f.PosterId == posterId).ToListAsync();
+            if (old.Count > 0)
+                _context.FileUrls.RemoveRange(old);
+            await _context.FileUrls.AddRangeAsync(list);
             await _context.SaveChangesAsync();
         }
     }

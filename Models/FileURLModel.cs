@@ -8,6 +8,13 @@
 
     public class FileURLModel
     {
+        public FileURLModel(Guid posterId, string url, int category)
+        {
+            PosterId = posterId;
+            URL = url;
+            FileCategory = category;
+        }
+
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid PosterId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

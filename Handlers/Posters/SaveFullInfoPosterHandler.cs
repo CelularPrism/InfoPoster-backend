@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Posters;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using MediatR;
 
@@ -63,8 +64,6 @@ namespace InfoPoster_backend.Handlers.Posters
                     Price = request.Price,
                     TimeStart = request.TimeStart
                 };
-
-
                 await _repository.AddPosterFullInfo(fullInfo);
             }
             else 
@@ -102,6 +101,19 @@ namespace InfoPoster_backend.Handlers.Posters
                 contact.Update(multilang.Phone, request.FirstName);
                 await _repository.UpdateContact(contact);
             }
+
+            var files = new List<FileURLModel>();
+            foreach (var img in request.GaleryUrls)
+            {
+                files.Add(new FileURLModel(request.PosterId, img, (int)FILE_CATEGORIES.IMAGE));
+            }
+
+            foreach (var video in request.VideoUrls)
+            {
+                files.Add(new FileURLModel(request.PosterId, img, (int)FILE_CATEGORIES.VIDEO));
+            }
+
+            await _repository.SaveFiles(files, request.PosterId);
 
             if (string.IsNullOrEmpty(poster.Name))
                 poster.Name = request.Name;
