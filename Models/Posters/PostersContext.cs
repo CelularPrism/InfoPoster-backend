@@ -21,11 +21,13 @@ namespace InfoPoster_backend.Models.Posters
         public DbSet<PosterModel> Posters { get; set; }
         public DbSet<PosterFullInfoModel> PostersFullInfo { get; set; }
         public DbSet<PosterMultilangModel> PostersMultilang { get; set; }
+        public DbSet<PosterContactsModel> PostersContact { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
         public DbSet<CategoryMultilangModel> CategoriesMultilang { get; set; }
         public DbSet<SubcategoryModel> Subcategories { get; set; }
         public DbSet<SubcategoryMultilangModel> SubcategoriesMultilang { get; set; }
         public DbSet<PosterSubcategoryModel> PosterSubcategory { get; set; }
         public DbSet<PosterViewLogModel> PosterViewLogs { get; set; }
+        public DbSet<FileURLModel> FileUrls { get; set; }
     }
 }

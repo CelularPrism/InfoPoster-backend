@@ -1,4 +1,6 @@
-﻿using InfoPoster_backend.Repos;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Repos;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Administration
@@ -31,8 +33,9 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public List<string> GaleryUrls { get; set; }
-        public List<string> VideoUrls { get; set; }
+        public List<FileURLModel> GaleryUrls { get; set; }
+        public List<FileURLModel> VideoUrls { get; set; }
+        public PosterContactsModel Contact { get; set; }
     }
 
     public class AdministrationGetPosterByIdHandler : IRequestHandler<AdministrationGetPosterByIdRequest, AdministrationGetPosterByIdResponse>
@@ -49,6 +52,8 @@ namespace InfoPoster_backend.Handlers.Administration
             var poster = await _repository.GetPoster(request.Id);
             var fullInfo = await _repository.GetFullInfoPoster(request.Id);
             var ml = await _repository.GetMultilangPoster(request.Id, request.Lang);
+            var contact = await _repository.GetContact(request.Id);
+            var files = await _repository.GetFileUrls(request.Id);
 
             var result = new AdministrationGetPosterByIdResponse()
             {
@@ -69,7 +74,10 @@ namespace InfoPoster_backend.Handlers.Administration
                 PosterId = fullInfo.PosterId,
                 Price = fullInfo.Price,
                 ReleaseDate = poster.ReleaseDate,
-                SiteLink = ml.SiteLink
+                SiteLink = ml.SiteLink,
+                GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).ToList(),
+                VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).ToList(),
+                Contact = contact
             };
 
             return result;

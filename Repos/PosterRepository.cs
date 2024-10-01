@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,12 @@ namespace InfoPoster_backend.Repos
 
         public async Task<PosterMultilangModel> GetMultilangPoster(Guid posterId, string lang) =>
             await _context.PostersMultilang.FirstOrDefaultAsync(x => x.PosterId == posterId && x.Lang == lang);
+
+        public async Task<PosterContactsModel> GetContact(Guid posterId) =>
+            await _context.PostersContact.FirstOrDefaultAsync(c => c.PosterId == posterId);
+
+        public async Task<List<FileURLModel>> GetFileUrls(Guid posterId) =>
+            await _context.FileUrls.Where(f => f.PosterId == posterId).ToListAsync();
 
         public async Task<List<GetAllPostersResponse>> GetListNoTracking(string lang)
         {
@@ -170,6 +177,12 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddContact(PosterContactsModel model)
+        {
+            await _context.PostersContact.AddAsync(model);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task AddPosterFullInfo(PosterFullInfoModel model)
         {
             await _context.PostersFullInfo.AddAsync(model);
@@ -191,6 +204,12 @@ namespace InfoPoster_backend.Repos
         public async Task UpdatePoster(PosterModel model)
         {
             _context.Posters.Update(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateContact(PosterContactsModel model)
+        {
+            _context.PostersContact.Update(model);
             await _context.SaveChangesAsync();
         }
 

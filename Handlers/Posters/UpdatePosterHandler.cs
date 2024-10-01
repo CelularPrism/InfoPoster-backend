@@ -28,6 +28,7 @@ namespace InfoPoster_backend.Handlers.Posters
         public string AgeRestriction { get; set; }
         public List<string> GaleryUrls { get; set; }
         public List<string> VideoUrls { get; set; }
+        public string FirstName { get; set; }
     }
 
     public class SaveFullInfoPosterResponse
@@ -62,6 +63,8 @@ namespace InfoPoster_backend.Handlers.Posters
                     Price = request.Price,
                     TimeStart = request.TimeStart
                 };
+
+
                 await _repository.AddPosterFullInfo(fullInfo);
             }
             else 
@@ -86,6 +89,18 @@ namespace InfoPoster_backend.Handlers.Posters
             {
                 multilang.Update(request);
                 await _repository.UpdatePosterMultilang(multilang);
+            }
+
+            var contact = await _repository.GetContact(request.PosterId);
+
+            if (contact == null)
+            {
+                contact = new PosterContactsModel(fullInfo.PosterId, multilang.Phone, request.FirstName);
+                await _repository.AddContact(contact);
+            } else
+            {
+                contact.Update(multilang.Phone, request.FirstName);
+                await _repository.UpdateContact(contact);
             }
 
             if (string.IsNullOrEmpty(poster.Name))
