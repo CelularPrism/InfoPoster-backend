@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
 using InfoPoster_backend.Handlers.Posters;
+using InfoPoster_backend.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,20 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("poster/get")]
+        public async Task<IActionResult> GetPosterById([FromQuery] Guid id, [FromQuery] string lang)
+        {
+            var result = await _mediator.Send(new AdministrationGetPosterByIdRequest() { Id = id, Lang = lang });
+            return Ok(result);
+        }
+
+        [HttpGet("categories/get")]
+        public async Task<IActionResult> GetCategories(CategoryType type)
+        {
+            var result = await _mediator.Send(new GetCategoriesRequest() { type = type });
+            return Ok(result);
+        }
+
         [HttpGet("poster/all")]
         public async Task<IActionResult> GetAllPosters()
         {
@@ -45,21 +60,8 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [HttpPost("poster/full-info/create")]
-        public async Task<IActionResult> CreateFullInfoPoster([FromForm] AddFullInfoPosterRequest request)
-        {
-            var result = await _mediator.Send(request);
-            if (result == null)
-            {
-                ModelState.AddModelError("Error", "Can't find Poster with this Identifier");
-                return BadRequest(ModelState);
-            }
-
-            return Ok(result);
-        }
-
-        [HttpPut("poster/full-info/update")]
-        public async Task<IActionResult> UpdateFullInfoPoster([FromForm] UpdateFullInfoPosterRequest request)
+        [HttpPost("poster/full-info/save")]
+        public async Task<IActionResult> SaveFullInfoPoster([FromForm] SaveFullInfoPosterRequest request)
         {
             var result = await _mediator.Send(request);
             if (result == null)

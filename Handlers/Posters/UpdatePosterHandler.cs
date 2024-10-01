@@ -4,7 +4,7 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
 {
-    public class UpdateFullInfoPosterRequest : IRequest<UpdateFullInfoPosterResponse>
+    public class SaveFullInfoPosterRequest : IRequest<SaveFullInfoPosterResponse>
     {
         public Guid PosterId { get; set; }
         public string Lang { get; set; }
@@ -30,46 +30,74 @@ namespace InfoPoster_backend.Handlers.Posters
         public List<string> VideoUrls { get; set; }
     }
 
-    public class UpdateFullInfoPosterResponse
+    public class SaveFullInfoPosterResponse
     {
         public Guid Id { get; set; }
     }
 
-    public class UpdateFullInfoPosterHandler : IRequestHandler<UpdateFullInfoPosterRequest, UpdateFullInfoPosterResponse>
+    public class SaveFullInfoPosterHandler : IRequestHandler<SaveFullInfoPosterRequest, SaveFullInfoPosterResponse>
     {
         private readonly PosterRepository _repository;
-        public UpdateFullInfoPosterHandler(PosterRepository repository)
+        public SaveFullInfoPosterHandler(PosterRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<UpdateFullInfoPosterResponse> Handle(UpdateFullInfoPosterRequest request, CancellationToken cancellationToken = default)
+        public async Task<SaveFullInfoPosterResponse> Handle(SaveFullInfoPosterRequest request, CancellationToken cancellationToken = default)
         {
             var poster = await _repository.GetPoster(request.PosterId);
             if (poster == null)
                 return null;
 
             var fullInfo = await _repository.GetFullInfoPoster(request.PosterId);
-            fullInfo.PosterId = request.PosterId;
-            fullInfo.AgeRestriction = request.AgeRestriction;
-            fullInfo.CategoryId = request.CategoryId;
-            fullInfo.Latitude = request.latitude;
-            fullInfo.Longitude = request.longitude;
-            fullInfo.Price = request.Price;
-            fullInfo.TimeStart = request.TimeStart;
+            if (fullInfo == null)
+            {
+                fullInfo = new PosterFullInfoModel()
+                {
+                    PosterId = request.PosterId,
+                    AgeRestriction = request.AgeRestriction,
+                    CategoryId = request.CategoryId,
+                    Latitude = request.latitude,
+                    Longitude = request.longitude,
+                    Price = request.Price,
+                    TimeStart = request.TimeStart
+                };
+                await _repository.AddPosterFullInfo(fullInfo);
+            }
+            else 
+            { 
+                fullInfo.PosterId = request.PosterId;
+                fullInfo.AgeRestriction = request.AgeRestriction;
+                fullInfo.CategoryId = request.CategoryId;
+                fullInfo.Latitude = request.latitude;
+                fullInfo.Longitude = request.longitude;
+                fullInfo.Price = request.Price;
+                fullInfo.TimeStart = request.TimeStart;
+                await _repository.UpdatePosterFullInfo(fullInfo);
+            }
 
             var multilang = await _repository.GetMultilangPoster(request.PosterId, request.Lang);
-            multilang.Update(request);
+            if (multilang == null)
+            {
+                multilang = new PosterMultilangModel(request);
+                await _repository.AddPosterMultilang(multilang);
+            }
+            else
+            {
+                multilang.Update(request);
+                await _repository.UpdatePosterMultilang(multilang);
+            }
+
             if (string.IsNullOrEmpty(poster.Name))
                 poster.Name = request.Name;
 
+            poster.ReleaseDate = request.ReleaseDate;
+            poster.CategoryId = request.CategoryId;
             poster.UpdatedAt = DateTime.UtcNow;
 
             await _repository.UpdatePoster(poster);
-            await _repository.UpdatePosterFullInfo(fullInfo);
-            await _repository.UpdatePosterMultilang(multilang);
 
-            var result = new UpdateFullInfoPosterResponse()
+            var result = new SaveFullInfoPosterResponse()
             {
                 Id = poster.Id
             };

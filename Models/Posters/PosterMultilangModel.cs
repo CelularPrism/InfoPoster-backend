@@ -6,7 +6,7 @@ namespace InfoPoster_backend.Models.Posters
     {
         public PosterMultilangModel() { }
 
-        public void Update(UpdateFullInfoPosterRequest fullInfo)
+        public void Update(SaveFullInfoPosterRequest fullInfo)
         {
             PosterId = fullInfo.PosterId;
             Lang = fullInfo.Lang;
@@ -21,7 +21,7 @@ namespace InfoPoster_backend.Models.Posters
             SiteLink = fullInfo.SiteLink;
         }
 
-        public PosterMultilangModel(AddFullInfoPosterRequest fullInfo) 
+        public PosterMultilangModel(SaveFullInfoPosterRequest fullInfo) 
         {
             Id = Guid.NewGuid();
             PosterId = fullInfo.PosterId;

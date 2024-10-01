@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Handlers.Account;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InfoPoster_backend.Controllers
@@ -33,6 +34,14 @@ namespace InfoPoster_backend.Controllers
         {
             var result = await _mediator.Send(new LogoutRequest());
             return Ok(result);
+        }
+
+
+        [Authorize(AuthenticationSchemes = "Asymmetric"), HttpPost("user/update")]
+        public async Task<IActionResult> UpdateUser([FromForm] UpdateUserRequest request)
+        {
+            var result = await _mediator.Send(request);
+            return Ok();
         }
     }
 }
