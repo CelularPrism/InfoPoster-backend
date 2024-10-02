@@ -1,6 +1,5 @@
 using InfoPoster_backend.Middlewares;
-using InfoPoster_backend.Models.Account;
-using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

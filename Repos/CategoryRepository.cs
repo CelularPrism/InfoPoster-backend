@@ -1,5 +1,5 @@
 ﻿using InfoPoster_backend.Models;
-using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Models.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace InfoPoster_backend.Repos

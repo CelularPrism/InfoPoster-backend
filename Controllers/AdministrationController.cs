@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
 using MediatR;
@@ -19,6 +20,13 @@ namespace InfoPoster_backend.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet("categories/get")]
+        public async Task<IActionResult> GetCategories(CategoryType type)
+        {
+            var result = await _mediator.Send(new GetCategoriesRequest() { type = type });
+            return Ok(result);
+        }
+
         [HttpGet("poster/available")]
         public async Task<IActionResult> GetAvailablePosters()
         {
@@ -30,13 +38,6 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetPosterById([FromQuery] Guid id, [FromQuery] string lang)
         {
             var result = await _mediator.Send(new AdministrationGetPosterByIdRequest() { Id = id, Lang = lang });
-            return Ok(result);
-        }
-
-        [HttpGet("categories/get")]
-        public async Task<IActionResult> GetCategories(CategoryType type)
-        {
-            var result = await _mediator.Send(new GetCategoriesRequest() { type = type });
             return Ok(result);
         }
 
@@ -99,6 +100,46 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> ActivatePoster([FromForm] Guid posterId)
         {
             var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.ACTIVE });
+            return Ok(result);
+        }
+
+        [HttpGet("organization/get")]
+        public async Task<IActionResult> GetOrganizationById([FromQuery] Guid id, [FromQuery] string lang)
+        {
+            var result = await _mediator.Send(new GetOrganizationRequest() { Id = id, Lang = lang });
+            return Ok(result);
+        }
+
+        [HttpGet("organization/all")]
+        public async Task<IActionResult> GetAllOrganizations()
+        {
+            var result = await _mediator.Send(new GetOrganizationListRequest());
+            return Ok(result);
+        }
+
+        [HttpPost("organization/create")]
+        public async Task<IActionResult> CreateOrganization([FromForm] CreateOrganizationRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+            {
+                ModelState.AddModelError("Error", "Can't find user");
+                return BadRequest(ModelState);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost("organization/full-info/save")]
+        public async Task<IActionResult> SaveFullInfoOrganization([FromForm] SaveOrganizationRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+            {
+                ModelState.AddModelError("Error", "Can't find Organization with this Identifier");
+                return BadRequest(ModelState);
+            }
+
             return Ok(result);
         }
     }

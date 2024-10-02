@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Organizations\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
