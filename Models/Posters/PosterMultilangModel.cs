@@ -8,7 +8,6 @@ namespace InfoPoster_backend.Models.Posters
 
         public void Update(SaveFullInfoPosterRequest fullInfo)
         {
-            PosterId = fullInfo.PosterId;
             Lang = fullInfo.Lang;
             Place = fullInfo.Place;
             City = fullInfo.City;
@@ -19,6 +18,7 @@ namespace InfoPoster_backend.Models.Posters
             ParkingPlace = fullInfo.ParkingPlace;
             Phone = fullInfo.Phone;
             SiteLink = fullInfo.SiteLink;
+            SocialLinks = fullInfo.SocialLinks;
         }
 
         public PosterMultilangModel(SaveFullInfoPosterRequest fullInfo) 
@@ -35,6 +35,7 @@ namespace InfoPoster_backend.Models.Posters
             ParkingPlace = fullInfo.ParkingPlace;
             Phone = fullInfo.Phone;
             SiteLink = fullInfo.SiteLink;
+            SocialLinks = fullInfo.SocialLinks;
         }
 
         public Guid Id { get; set; }
@@ -49,5 +50,6 @@ namespace InfoPoster_backend.Models.Posters
         public string ParkingPlace { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
+        public string SocialLinks { get; set; }
     }
 }

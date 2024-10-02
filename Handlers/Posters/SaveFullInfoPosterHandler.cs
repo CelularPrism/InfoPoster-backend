@@ -86,8 +86,15 @@ namespace InfoPoster_backend.Handlers.Posters
             }
             else
             {
-                multilang.Update(request);
-                await _repository.UpdatePosterMultilang(multilang);
+                try
+                {
+                    multilang.Update(request);
+                    await _repository.UpdatePosterMultilang(multilang);
+                }
+                catch (Exception ex)
+                {
+                    var newEx = ex;
+                }
             }
 
             var contact = await _repository.GetContact(request.PosterId);
@@ -103,14 +110,19 @@ namespace InfoPoster_backend.Handlers.Posters
             }
 
             var files = new List<FileURLModel>();
-            foreach (var img in request.GaleryUrls)
+            if (request.GaleryUrls != null)
             {
-                files.Add(new FileURLModel(request.PosterId, img, (int)FILE_CATEGORIES.IMAGE));
+                foreach (var img in request.GaleryUrls)
+                {
+                    files.Add(new FileURLModel(request.PosterId, img, (int)FILE_CATEGORIES.IMAGE));
+                }
             }
-
-            foreach (var video in request.VideoUrls)
+            if (request.VideoUrls != null)
             {
-                files.Add(new FileURLModel(request.PosterId, video, (int)FILE_CATEGORIES.VIDEO));
+                foreach (var video in request.VideoUrls)
+                {
+                    files.Add(new FileURLModel(request.PosterId, video, (int)FILE_CATEGORIES.VIDEO));
+                }
             }
 
             await _repository.SaveFiles(files, request.PosterId);

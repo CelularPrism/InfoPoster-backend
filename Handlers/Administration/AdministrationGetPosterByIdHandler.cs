@@ -33,9 +33,9 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public List<FileURLModel> GaleryUrls { get; set; }
-        public List<FileURLModel> VideoUrls { get; set; }
-        public PosterContactsModel Contact { get; set; }
+        public List<string> GaleryUrls { get; set; }
+        public List<string> VideoUrls { get; set; }
+        public string FirstName { get; set; }
     }
 
     public class AdministrationGetPosterByIdHandler : IRequestHandler<AdministrationGetPosterByIdRequest, AdministrationGetPosterByIdResponse>
@@ -83,18 +83,23 @@ namespace InfoPoster_backend.Handlers.Administration
                 result.Phone = ml.Phone;
                 result.Place = ml.Place;
                 result.SiteLink = ml.SiteLink;
+                result.SocialLinks = ml.SocialLinks;
             } else
             {
                 result.Lang = request.Lang;
             }
 
             var contact = await _repository.GetContact(request.Id);
+            if (contact != null)
+            {
+                result.FirstName = contact.FirstName;
+            }
+            
             var files = await _repository.GetFileUrls(request.Id);
 
             result.ReleaseDate = poster.ReleaseDate;
-            result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).ToList();
-            result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).ToList();
-            result.Contact = contact;
+            result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
+            result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
 
             return result;
         }
