@@ -1,7 +1,8 @@
-﻿using InfoPoster_backend.Models.Posters;
+﻿using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Posters;
 using Microsoft.EntityFrameworkCore;
 
-namespace InfoPoster_backend.Models.Account
+namespace InfoPoster_backend.Models.Contexts
 {
     public class AccountContext : DbContext
     {
