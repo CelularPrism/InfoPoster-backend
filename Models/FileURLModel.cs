@@ -8,6 +8,7 @@
 
     public class FileURLModel
     {
+        public FileURLModel() { }
         public FileURLModel(Guid posterId, string url, int category)
         {
             PosterId = posterId;

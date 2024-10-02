@@ -50,35 +50,51 @@ namespace InfoPoster_backend.Handlers.Administration
         public async Task<AdministrationGetPosterByIdResponse> Handle(AdministrationGetPosterByIdRequest request, CancellationToken cancellationToken = default)
         {
             var poster = await _repository.GetPoster(request.Id);
+            if (poster == null)
+                return null;
+
+            var result = new AdministrationGetPosterByIdResponse();
+
             var fullInfo = await _repository.GetFullInfoPoster(request.Id);
+            if (fullInfo != null)
+            {
+                result.AgeRestriction = fullInfo.AgeRestriction;
+                result.CategoryId = fullInfo.CategoryId;
+                result.latitude = fullInfo.Latitude;
+                result.longitude = fullInfo.Longitude;
+                result.TimeStart = fullInfo.TimeStart;
+                result.PosterId = fullInfo.PosterId;
+                result.Price = fullInfo.Price;
+            } else
+            {
+                result.PosterId = poster.Id;
+            }
+
             var ml = await _repository.GetMultilangPoster(request.Id, request.Lang);
+            if (ml != null)
+            {
+                result.Adress = ml.Adress;
+                result.City = ml.City;
+                result.Lang = ml.Lang;
+                result.Description = ml.Description;
+                result.Name = ml.Name;
+                result.Parking = ml.Parking;
+                result.ParkingPlace = ml.ParkingPlace;
+                result.Phone = ml.Phone;
+                result.Place = ml.Place;
+                result.SiteLink = ml.SiteLink;
+            } else
+            {
+                result.Lang = request.Lang;
+            }
+
             var contact = await _repository.GetContact(request.Id);
             var files = await _repository.GetFileUrls(request.Id);
 
-            var result = new AdministrationGetPosterByIdResponse()
-            {
-                Adress = ml.Adress,
-                AgeRestriction = fullInfo.AgeRestriction,
-                CategoryId = fullInfo.CategoryId,
-                City = ml.City,
-                TimeStart = fullInfo.TimeStart,
-                Lang = ml.Lang,
-                Description = ml.Description,
-                latitude = fullInfo.Latitude,
-                longitude = fullInfo.Longitude,
-                Name = ml.Name,
-                Parking = ml.Parking,
-                ParkingPlace = ml.ParkingPlace,
-                Phone = ml.Phone,
-                Place = ml.Place,
-                PosterId = fullInfo.PosterId,
-                Price = fullInfo.Price,
-                ReleaseDate = poster.ReleaseDate,
-                SiteLink = ml.SiteLink,
-                GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).ToList(),
-                VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).ToList(),
-                Contact = contact
-            };
+            result.ReleaseDate = poster.ReleaseDate;
+            result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).ToList();
+            result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).ToList();
+            result.Contact = contact;
 
             return result;
         }

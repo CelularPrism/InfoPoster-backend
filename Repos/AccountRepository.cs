@@ -22,6 +22,9 @@ namespace InfoPoster_backend.Repos
         public async Task<List<Guid>> GetUserRoles(Guid userId) =>
             await _context.User_To_Roles.Where(ur => ur.UserId == userId).Select(ur => ur.RoleId).ToListAsync();
 
+        public async Task<Guid> GetUserRole(Guid userId) =>
+            await _context.User_To_Roles.Where(ur => ur.UserId == userId).Select(ur => ur.RoleId).FirstOrDefaultAsync();
+
         public async Task UpdateUser(UserModel user)
         {
             _context.Users.Update(user);

@@ -87,6 +87,7 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba")]
         [HttpPost("poster/enable")]
         public async Task<IActionResult> EnablePoster([FromForm] Guid posterId)
         {

@@ -16,10 +16,12 @@ namespace InfoPoster_backend.Handlers.Posters
     {
         private readonly LoginService _loginService;
         private readonly PosterRepository _repository;
-        public AddPosterHandler(LoginService loginService, PosterRepository repository)
+        private readonly string _lang;
+        public AddPosterHandler(LoginService loginService, PosterRepository repository, IHttpContextAccessor accessor)
         {
             _loginService = loginService;
             _repository = repository;
+            _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
         public async Task<AddPosterResponse> Handle(AddPosterRequest request, CancellationToken cancellationToken = default)
@@ -36,6 +38,14 @@ namespace InfoPoster_backend.Handlers.Posters
                 UserId = user
             };
 
+            var multilang = new PosterMultilangModel()
+            {
+                Id = Guid.NewGuid(),
+                Lang = _lang,
+                PosterId = poster.Id
+            };
+
+            await _repository.AddPosterMultilang(multilang);
             await _repository.AddPoster(poster);
             var result = new AddPosterResponse()
             {

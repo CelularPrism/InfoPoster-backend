@@ -2,6 +2,7 @@
 {
     public class PosterContactsModel
     {
+        public PosterContactsModel() { }
         public void Update(string phone, string firstName)
         {
             Phone = phone;

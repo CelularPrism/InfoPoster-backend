@@ -61,10 +61,6 @@ namespace InfoPoster_backend.Repos
         public async Task<List<AdministrationGetPostersResponse>> GetListNoTracking(Guid userId, string lang)
         {
             var list = await _context.Posters.Where(p => p.UserId == userId)
-                                  .Join(_context.Categories,
-                                        p => p.CategoryId,
-                                        c => c.Id,
-                                        (p, c) => p)
                                   .Join(_context.PostersMultilang,
                                         p => p.Id,
                                         m => m.PosterId,

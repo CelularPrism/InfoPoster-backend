@@ -110,7 +110,7 @@ namespace InfoPoster_backend.Handlers.Posters
 
             foreach (var video in request.VideoUrls)
             {
-                files.Add(new FileURLModel(request.PosterId, img, (int)FILE_CATEGORIES.VIDEO));
+                files.Add(new FileURLModel(request.PosterId, video, (int)FILE_CATEGORIES.VIDEO));
             }
 
             await _repository.SaveFiles(files, request.PosterId);

@@ -31,6 +31,7 @@ namespace InfoPoster_backend.Handlers.Account
         public string Phone { get; set; }
         public string ImageSrc { get; set; }
         public string Token { get; set; }
+        public Guid RoleId { get; set; }
     }
 
     public class LoginRequestHandler : IRequestHandler<LoginRequestModel, LoginResponseModel>
@@ -53,6 +54,7 @@ namespace InfoPoster_backend.Handlers.Account
             var token = await _login.Login(user, roles);
 
             var result = new LoginResponseModel(user, token);
+            result.RoleId = roles.FirstOrDefault();
             return result;
         }
     }
