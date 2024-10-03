@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
 using MediatR;
@@ -27,7 +28,8 @@ namespace InfoPoster_backend.Handlers.Organizations
             var userId = _loginService.GetUserId();
             var organization = new OrganizationModel()
             {
-                UserId = userId
+                UserId = userId,
+                Status = (int)POSTER_STATUS.DISABLED
             };
 
             await _repository.AddOrganization(organization);

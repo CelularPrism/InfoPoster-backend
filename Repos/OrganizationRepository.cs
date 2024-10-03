@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models;
+﻿using InfoPoster_backend.Handlers.Organizations;
+using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
 using Microsoft.EntityFrameworkCore;
@@ -19,8 +20,23 @@ namespace InfoPoster_backend.Repos
         public async Task<OrganizationModel> GetOrganization(Guid id) =>
             await _organization.Organizations.FirstOrDefaultAsync(o => o.Id == id);
 
+        public async Task<List<GetAllOrganizationResponse>> GetOrganizationList(string lang)
+        {
+            var organizations = await _organization.Organizations.Join(_organization.OrganizationsMultilang,
+                                                                       o => o.Id,
+                                                                       m => m.OrganizationId,
+                                                                       (o, m) => new { Organization = o, Multilang = m })
+                                                                 .Join(_organization.Users,
+                                                                       o => o.Organization.UserId,
+                                                                       user => user.Id,
+                                                                       (o, user) => new { o.Organization, o.Multilang, UserName = user.FirstName + " " + user.LastName })
+                                                                 .ToListAsync();
+            var result = organizations.Select(m => new GetAllOrganizationResponse(m.Organization, m.Multilang, m.UserName)).OrderByDescending(o => o.CreatedAt).ToList();
+            return result;
+        }
+
         public async Task<List<OrganizationModel>> GetOrganizationList(Guid userId) =>
-            await _organization.Organizations.Where(o => o.UserId == userId).ToListAsync();
+            await _organization.Organizations.Where(o => o.UserId == userId).OrderByDescending(o => o.CreatedAt).ToListAsync();
 
         public async Task<OrganizationFullInfoModel> GetOrganizationFullInfo(Guid organizationId) =>
             await _organization.OrganizationsFullInfo.FirstOrDefaultAsync(f => f.OrganizationId == organizationId);
