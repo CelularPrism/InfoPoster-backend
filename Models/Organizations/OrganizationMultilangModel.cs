@@ -15,6 +15,10 @@ namespace InfoPoster_backend.Models.Organizations
             ParkingPlace = model.ParkingPlace;
             Phone = model.Phone;
             ContactName = model.ContactName;
+            SocialLinks = model.SocialLinks;
+            SiteLink = model.SiteLink;
+            Adress = model.Adress;
+            City = model.City;
         }
 
         public void Update(SaveOrganizationRequest model)
@@ -26,12 +30,20 @@ namespace InfoPoster_backend.Models.Organizations
             ParkingPlace = model.ParkingPlace;
             Phone = model.Phone;
             ContactName = model.ContactName;
+            SocialLinks = model.SocialLinks;
+            SiteLink = model.SiteLink;
+            Adress = model.Adress;
+            City = model.City;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid OrganizationId { get; set; }
         public string Lang { get; set; }
         public string Name { get; set; }
+        public string City { get; set; }
+        public string Adress { get; set; }
+        public string SiteLink { get; set; }
+        public string SocialLinks { get; set; }
         public string Description { get; set; }
         public string ParkingInfo { get; set; }
         public string ParkingPlace { get; set; }

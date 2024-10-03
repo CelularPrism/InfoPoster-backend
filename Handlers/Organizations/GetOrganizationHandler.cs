@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Repos;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Repos;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -62,14 +63,10 @@ namespace InfoPoster_backend.Handlers.Organizations
             {
                 result.PriceLevel = fullInfo.PriceLevel;
                 result.Capacity = fullInfo.Capacity;
-                result.City = fullInfo.City;
                 result.WorkTime = fullInfo.WorkTime;
-                result.Adress = fullInfo.Adress;
                 result.latitude = fullInfo.latitude;
                 result.longitude = fullInfo.longitude;
-                result.SiteLink = fullInfo.SiteLink;
                 result.AgeRestriction = fullInfo.AgeRestriction;
-                result.SocialLinks = fullInfo.SocialLinks;
             }
 
             if (ml != null)
@@ -81,9 +78,21 @@ namespace InfoPoster_backend.Handlers.Organizations
                 result.ParkingPlace = ml.ParkingPlace;
                 result.Phone = ml.Phone;
                 result.ContactName = ml.ContactName;
+                result.City = ml.City;
+                result.Adress = ml.Adress;
+                result.SiteLink = ml.SiteLink;
+                result.SocialLinks = ml.SocialLinks;
             } else
             {
                 result.Lang = request.Lang;
+            }
+
+            var files = await _repository.GetFileUrls(request.Id);
+
+            if (files.Count > 0)
+            {
+                result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
+                result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
             }
 
             result.OrganizationId = organization.Id;
