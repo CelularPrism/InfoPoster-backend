@@ -20,11 +20,12 @@ namespace InfoPoster_backend
 
             builder.Services.AddDbContext<PostersContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
             builder.Services.AddDbContext<AccountContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
+            builder.Services.AddDbContext<OrganizationContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
 
             builder.Services.AddScoped<CategoryRepository>();
             builder.Services.AddScoped<AccountRepository>();
             builder.Services.AddScoped<PosterRepository>();
-
+            builder.Services.AddScoped<OrganizationRepository>();
 
             builder.Services.AddSpaStaticFiles(configuration =>
             {

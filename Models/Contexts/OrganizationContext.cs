@@ -20,5 +20,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<OrganizationModel> Organizations { get; set; }
         public DbSet<OrganizationFullInfoModel> OrganizationsFullInfo { get; set; }
         public DbSet<OrganizationMultilangModel> OrganizationsMultilang { get; set; }
+        public DbSet<OrganizationFileURLModel> OrganizationFileUrls { get; set; }
     }
 }
