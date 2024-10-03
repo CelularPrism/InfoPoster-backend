@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Organizations;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
 using MediatR;
@@ -68,7 +69,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 await _repository.UpdateFullInfo(fullInfo);
             }
 
-            var ml = await _repository.GetOrganizationMultilang(request.OrganizationId);
+            var ml = await _repository.GetOrganizationMultilang(request.OrganizationId, request.Lang);
             if (ml == null)
             {
                 ml = new OrganizationMultilangModel(request);
@@ -78,6 +79,24 @@ namespace InfoPoster_backend.Handlers.Organizations
                 ml.Update(request);
                 await _repository.UpdateMultilang(ml);
             }
+
+            var files = new List<OrganizationFileURLModel>();
+            if (request.GaleryUrls != null)
+            {
+                foreach (var img in request.GaleryUrls)
+                {
+                    files.Add(new OrganizationFileURLModel(request.OrganizationId, img, (int)FILE_CATEGORIES.IMAGE));
+                }
+            }
+            if (request.VideoUrls != null)
+            {
+                foreach (var video in request.VideoUrls)
+                {
+                    files.Add(new OrganizationFileURLModel(request.OrganizationId, video, (int)FILE_CATEGORIES.VIDEO));
+                }
+            }
+
+            await _repository.SaveFiles(files, request.OrganizationId);
 
             return new SaveOrganizationResponse();
 

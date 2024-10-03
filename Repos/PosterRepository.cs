@@ -163,9 +163,13 @@ namespace InfoPoster_backend.Repos
                                                                     .AsNoTracking()
                                                                     .Select(c => c.Name)
                                                                     .FirstOrDefaultAsync();
+            var files = await _context.FileUrls.Where(f => f.PosterId == Id)
+                                               .AsNoTracking()
+                                               .ToListAsync();
 
-            poster.GaleryUrls.Add("https://a-a-ah-ru.s3.amazonaws.com/uploads/items/137024/280166/large_24_1024.jpg");
-            poster.GaleryUrls.Add("https://freshmus.ru/wp-content/uploads/2023/09/Pervye-proby-v-muzyke-1-e1693768780577.jpg");
+            poster.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
+            poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
+
             return poster;
         }
 

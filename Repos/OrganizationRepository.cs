@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Contexts;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,8 @@ namespace InfoPoster_backend.Repos
 
         public async Task<OrganizationMultilangModel> GetOrganizationMultilang(Guid organizationId, string lang) =>
             await _organization.OrganizationsMultilang.FirstOrDefaultAsync(f => f.OrganizationId == organizationId && f.Lang == lang);
+        public async Task<List<OrganizationFileURLModel>> GetFileUrls(Guid organizationId) =>
+            await _organization.OrganizationFileUrls.Where(f => f.OrganizationId == organizationId).ToListAsync();
 
         public async Task AddOrganization(OrganizationModel model)
         {
@@ -42,6 +45,15 @@ namespace InfoPoster_backend.Repos
         public async Task AddMultilang(OrganizationMultilangModel model)
         {
             await _organization.OrganizationsMultilang.AddAsync(model);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task SaveFiles(List<OrganizationFileURLModel> list, Guid organizationId)
+        {
+            var old = await _organization.OrganizationFileUrls.Where(f => f.OrganizationId == organizationId).ToListAsync();
+            if (old.Count > 0)
+                _organization.OrganizationFileUrls.RemoveRange(old);
+            await _organization.OrganizationFileUrls.AddRangeAsync(list);
             await _organization.SaveChangesAsync();
         }
 
