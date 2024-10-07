@@ -11,11 +11,8 @@ namespace InfoPoster_backend.Models.Organizations
             Lang = model.Lang;
             Name = model.Name;
             Description = model.Description;
-            ParkingInfo = model.ParkingInfo;
-            ParkingPlace = model.ParkingPlace;
             Phone = model.Phone;
             ContactName = model.ContactName;
-            SocialLinks = model.SocialLinks;
             SiteLink = model.SiteLink;
             Adress = model.Adress;
             City = model.City;
@@ -26,11 +23,8 @@ namespace InfoPoster_backend.Models.Organizations
             Lang = model.Lang;
             Name = model.Name;
             Description = model.Description;
-            ParkingInfo = model.ParkingInfo;
-            ParkingPlace = model.ParkingPlace;
             Phone = model.Phone;
             ContactName = model.ContactName;
-            SocialLinks = model.SocialLinks;
             SiteLink = model.SiteLink;
             Adress = model.Adress;
             City = model.City;

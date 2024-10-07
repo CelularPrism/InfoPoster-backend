@@ -3,7 +3,8 @@
     public enum FILE_CATEGORIES
     {
         IMAGE,
-        VIDEO
+        VIDEO,
+        SOCIAL_LINKS
     }
 
     public class FileURLModel

@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Repos;
 using MediatR;
 
@@ -22,14 +23,12 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string City { get; set; }
         public string WorkTime { get; set; }
         public string Adress { get; set; }
-        public string latitude { get; set; }
-        public string longitude { get; set; }
+        public string PlaceLink { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public string SocialLinks { get; set; }
+        public List<string> SocialLinks { get; set; }
         public string Description { get; set; }
-        public string ParkingInfo { get; set; }
-        public string ParkingPlace { get; set; }
+        public List<PlaceModel> Parking { get; set; }
         public string Phone { get; set; }
         public string ContactName { get; set; }
         public List<string> GaleryUrls { get; set; }
@@ -64,8 +63,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 result.PriceLevel = fullInfo.PriceLevel;
                 result.Capacity = fullInfo.Capacity;
                 result.WorkTime = fullInfo.WorkTime;
-                result.latitude = fullInfo.latitude;
-                result.longitude = fullInfo.longitude;
+                result.PlaceLink = fullInfo.PlaceLink;
                 result.AgeRestriction = fullInfo.AgeRestriction;
             }
 
@@ -74,14 +72,11 @@ namespace InfoPoster_backend.Handlers.Organizations
                 result.Name = ml.Name;
                 result.Lang = ml.Lang;
                 result.Description = ml.Description;
-                result.ParkingInfo = ml.ParkingInfo;
-                result.ParkingPlace = ml.ParkingPlace;
                 result.Phone = ml.Phone;
                 result.ContactName = ml.ContactName;
                 result.City = ml.City;
                 result.Adress = ml.Adress;
                 result.SiteLink = ml.SiteLink;
-                result.SocialLinks = ml.SocialLinks;
             } else
             {
                 result.Lang = request.Lang;
@@ -93,6 +88,13 @@ namespace InfoPoster_backend.Handlers.Organizations
             {
                 result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
                 result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
+                result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
+            }
+
+            var places = await _repository.GetPlaces(request.Id);
+            if (places.Count > 0)
+            {
+                result.Parking = places;
             }
 
             result.OrganizationId = organization.Id;

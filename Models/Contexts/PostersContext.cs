@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Posters;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,5 +31,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<PosterSubcategoryModel> PosterSubcategory { get; set; }
         public DbSet<PosterViewLogModel> PosterViewLogs { get; set; }
         public DbSet<FileURLModel> FileUrls { get; set; }
+        public DbSet<PlaceModel> Places { get; set; }
     }
 }

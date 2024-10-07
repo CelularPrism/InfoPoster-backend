@@ -7,8 +7,7 @@
         public Guid CategoryId { get; set; }
         public string TimeStart { get; set; }
         public double Price { get; set; }
-        public string Longitude { get; set; }
-        public string Latitude { get; set; }
+        public string PlaceLink { get; set; }
         public string AgeRestriction { get; set; }
     }
 }

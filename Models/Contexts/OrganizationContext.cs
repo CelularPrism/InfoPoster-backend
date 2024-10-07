@@ -26,5 +26,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<UserModel> Users { get; set; }
         public DbSet<CityModel> Cities { get; set; }
         public DbSet<CityMultilangModel> CitiesMultilang { get; set; }
+        public DbSet<PlaceModel> Places { get; set; }
     }
 }

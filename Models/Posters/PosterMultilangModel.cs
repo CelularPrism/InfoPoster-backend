@@ -14,11 +14,8 @@ namespace InfoPoster_backend.Models.Posters
             Name = fullInfo.Name;
             Adress = fullInfo.Adress;
             Description = fullInfo.Description;
-            Parking = fullInfo.Parking;
-            ParkingPlace = fullInfo.ParkingPlace;
             Phone = fullInfo.Phone;
             SiteLink = fullInfo.SiteLink;
-            SocialLinks = fullInfo.SocialLinks;
         }
 
         public PosterMultilangModel(SaveFullInfoPosterRequest fullInfo) 
@@ -31,11 +28,8 @@ namespace InfoPoster_backend.Models.Posters
             Name = fullInfo.Name;
             Adress = fullInfo.Adress;
             Description = fullInfo.Description;
-            Parking = fullInfo.Parking;
-            ParkingPlace = fullInfo.ParkingPlace;
             Phone = fullInfo.Phone;
             SiteLink = fullInfo.SiteLink;
-            SocialLinks = fullInfo.SocialLinks;
         }
 
         public Guid Id { get; set; }

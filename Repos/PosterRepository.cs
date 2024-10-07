@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
 using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Tools;
@@ -170,6 +171,12 @@ namespace InfoPoster_backend.Repos
             poster.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
             poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
 
+            var places = await _context.Places.Where(p => p.ApplicationId == Id)
+                                              .AsNoTracking()
+                                              .ToListAsync();
+
+            poster.Parking = places;
+
             return poster;
         }
 
@@ -224,6 +231,15 @@ namespace InfoPoster_backend.Repos
         public async Task UpdatePosterMultilang(PosterMultilangModel model)
         {
             _context.PostersMultilang.Update(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SavePlaces(List<PlaceModel> places, Guid posterId)
+        {
+            var old = await _context.Places.Where(p => p.ApplicationId == posterId).ToListAsync();
+            if (old.Count > 0)
+                _context.Places.RemoveRange(old);
+            await _context.Places.AddRangeAsync(places);
             await _context.SaveChangesAsync();
         }
 

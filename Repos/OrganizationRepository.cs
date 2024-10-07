@@ -4,6 +4,7 @@ using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 
 namespace InfoPoster_backend.Repos
 {
@@ -47,6 +48,9 @@ namespace InfoPoster_backend.Repos
         public async Task<List<OrganizationFileURLModel>> GetFileUrls(Guid organizationId) =>
             await _organization.OrganizationFileUrls.Where(f => f.OrganizationId == organizationId).ToListAsync();
 
+        public async Task<List<PlaceModel>> GetPlaces(Guid organizationId) =>
+            await _organization.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
+
         public async Task<List<CityModel>> GetCities(string lang) =>
             await _organization.CitiesMultilang.Where(c => c.Lang == lang).Select(c => new CityModel() { Id = c.CityId, Name = c.Name }).ToListAsync();
 
@@ -65,6 +69,15 @@ namespace InfoPoster_backend.Repos
         public async Task AddMultilang(OrganizationMultilangModel model)
         {
             await _organization.OrganizationsMultilang.AddAsync(model);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task SavePlaces(List<PlaceModel> places, Guid organizationId)
+        {
+            var old = await _organization.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
+            if (old.Count > 0)
+                _organization.Places.RemoveRange(old);
+            await _organization.Places.AddRangeAsync(places);
             await _organization.SaveChangesAsync();
         }
 

@@ -24,12 +24,11 @@ namespace InfoPoster_backend.Handlers.Administration
         public string TimeStart { get; set; }
         public double Price { get; set; }
         public string Adress { get; set; }
-        public string latitude { get; set; }
-        public string longitude { get; set; }
+        public string PlaceLink { get; set; }
         public string Parking { get; set; }
         public string ParkingPlace { get; set; }
         public string Tags { get; set; }
-        public string SocialLinks { get; set; }
+        public List<string> SocialLinks { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
@@ -60,8 +59,7 @@ namespace InfoPoster_backend.Handlers.Administration
             {
                 result.AgeRestriction = fullInfo.AgeRestriction;
                 result.CategoryId = fullInfo.CategoryId;
-                result.latitude = fullInfo.Latitude;
-                result.longitude = fullInfo.Longitude;
+                result.PlaceLink = fullInfo.PlaceLink;
                 result.TimeStart = fullInfo.TimeStart;
                 result.PosterId = fullInfo.PosterId;
                 result.Price = fullInfo.Price;
@@ -83,7 +81,6 @@ namespace InfoPoster_backend.Handlers.Administration
                 result.Phone = ml.Phone;
                 result.Place = ml.Place;
                 result.SiteLink = ml.SiteLink;
-                result.SocialLinks = ml.SocialLinks;
             } else
             {
                 result.Lang = request.Lang;
@@ -100,6 +97,7 @@ namespace InfoPoster_backend.Handlers.Administration
             result.ReleaseDate = poster.ReleaseDate;
             result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
             result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
+            result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
 
             return result;
         }

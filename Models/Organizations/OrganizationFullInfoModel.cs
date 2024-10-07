@@ -12,8 +12,7 @@ namespace InfoPoster_backend.Models.Organizations
             PriceLevel = model.PriceLevel;
             Capacity = model.Capacity;
             WorkTime = model.WorkTime;
-            latitude = model.latitude;
-            longitude = model.longitude;
+            PlaceLink = model.PlaceLink;
             AgeRestriction = model.AgeRestriction;
         }
         public void Update(SaveOrganizationRequest model)
@@ -21,8 +20,7 @@ namespace InfoPoster_backend.Models.Organizations
             PriceLevel = model.PriceLevel;
             Capacity = model.Capacity;
             WorkTime = model.WorkTime;
-            latitude = model.latitude;
-            longitude = model.longitude;
+            PlaceLink = model.PlaceLink;
             AgeRestriction = model.AgeRestriction;
         }
 
@@ -31,8 +29,7 @@ namespace InfoPoster_backend.Models.Organizations
         public string PriceLevel { get; set; }
         public string Capacity { get; set; }
         public string WorkTime { get; set; }
-        public string latitude { get; set; }
-        public string longitude { get; set; }
+        public string PlaceLink { get; set; }
         public string AgeRestriction { get; set; }
     }
 }

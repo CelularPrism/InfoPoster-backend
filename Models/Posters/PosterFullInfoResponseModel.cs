@@ -1,4 +1,6 @@
-﻿namespace InfoPoster_backend.Models.Posters
+﻿using InfoPoster_backend.Models.Cities;
+
+namespace InfoPoster_backend.Models.Posters
 {
     public class PosterFullInfoResponseModel
     {
@@ -14,10 +16,7 @@
             TimeStart = fullInfo.TimeStart;
             Price = fullInfo.Price;
             Adress = multilang.Adress;
-            latitude = fullInfo.Latitude;
-            longitude = fullInfo.Longitude;
-            Parking = multilang.Parking;
-            ParkingPlace = multilang.ParkingPlace;
+            PlaceLink = fullInfo.PlaceLink;
             Phone = multilang.Phone;
             SiteLink = multilang.SiteLink;
             AgeRestriction = fullInfo.AgeRestriction;
@@ -35,10 +34,8 @@
         public string TimeStart { get; set; }
         public double Price { get; set; }
         public string Adress { get; set; }
-        public string latitude { get; set; }
-        public string longitude { get; set; }
-        public string Parking { get; set; }
-        public string ParkingPlace { get; set; }
+        public string PlaceLink { get; set; }
+        public List<PlaceModel> Parking { get; set; }
         public string Tags { get; set; }
         public string SocialLinks { get; set; }
         public string Phone { get; set; }

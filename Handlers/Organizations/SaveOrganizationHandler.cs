@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
@@ -18,14 +19,12 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string City { get; set; }
         public string WorkTime { get; set; }
         public string Adress { get; set; }
-        public string latitude { get; set; }
-        public string longitude { get; set; }
+        public string PlaceLink { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public string SocialLinks { get; set; }
+        public List<string> SocialLinks { get; set; }
         public string Description { get; set; }
-        public string ParkingInfo { get; set; }
-        public string ParkingPlace { get; set; }
+        public List<PlaceRequestModel> Parking { get; set; }
         public string Phone { get; set; }
         public string ContactName { get; set; }
         public List<string> GaleryUrls { get; set; }
@@ -95,8 +94,21 @@ namespace InfoPoster_backend.Handlers.Organizations
                     files.Add(new OrganizationFileURLModel(request.OrganizationId, video, (int)FILE_CATEGORIES.VIDEO));
                 }
             }
+            if (request.SocialLinks != null)
+            {
+                foreach (var social in request.SocialLinks)
+                {
+                    files.Add(new OrganizationFileURLModel(request.OrganizationId, social, (int)FILE_CATEGORIES.SOCIAL_LINKS));
+                }
+            }
 
             await _repository.SaveFiles(files, request.OrganizationId);
+
+            if (request.Parking != null && request.Parking.Count > 0)
+            {
+                var places = request.Parking.Select(p => new PlaceModel(p, request.OrganizationId)).ToList();
+                await _repository.SavePlaces(places, request.OrganizationId);
+            }
 
             if (string.IsNullOrEmpty(organization.Name))
                 organization.Name = request.Name;

@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using MediatR;
@@ -18,12 +19,10 @@ namespace InfoPoster_backend.Handlers.Posters
         public string TimeStart { get; set; }
         public double Price { get; set; }
         public string Adress { get; set; }
-        public string latitude { get; set; }
-        public string longitude { get; set; }
-        public string Parking { get; set; }
-        public string ParkingPlace { get; set; }
+        public string PlaceLink { get; set; }
+        public List<PlaceRequestModel> Parking { get; set; }
         public string Tags { get; set; }
-        public string SocialLinks { get; set; }
+        public List<string> SocialLinks { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
@@ -59,8 +58,7 @@ namespace InfoPoster_backend.Handlers.Posters
                     PosterId = request.PosterId,
                     AgeRestriction = request.AgeRestriction,
                     CategoryId = request.CategoryId,
-                    Latitude = request.latitude,
-                    Longitude = request.longitude,
+                    PlaceLink = request.PlaceLink,
                     Price = request.Price,
                     TimeStart = request.TimeStart
                 };
@@ -71,8 +69,7 @@ namespace InfoPoster_backend.Handlers.Posters
                 fullInfo.PosterId = request.PosterId;
                 fullInfo.AgeRestriction = request.AgeRestriction;
                 fullInfo.CategoryId = request.CategoryId;
-                fullInfo.Latitude = request.latitude;
-                fullInfo.Longitude = request.longitude;
+                fullInfo.PlaceLink = request.PlaceLink;
                 fullInfo.Price = request.Price;
                 fullInfo.TimeStart = request.TimeStart;
                 await _repository.UpdatePosterFullInfo(fullInfo);
@@ -124,8 +121,21 @@ namespace InfoPoster_backend.Handlers.Posters
                     files.Add(new FileURLModel(request.PosterId, video, (int)FILE_CATEGORIES.VIDEO));
                 }
             }
+            if (request.SocialLinks != null)
+            {
+                foreach (var social in request.SocialLinks)
+                {
+                    files.Add(new FileURLModel(request.PosterId, social, (int)FILE_CATEGORIES.SOCIAL_LINKS));
+                }
+            }
 
             await _repository.SaveFiles(files, request.PosterId);
+
+            if (request.Parking != null && request.Parking.Count > 0)
+            {
+                var places = request.Parking.Select(p => new PlaceModel(p, request.PosterId)).ToList();
+                await _repository.SavePlaces(places, request.PosterId);
+            }
 
             if (string.IsNullOrEmpty(poster.Name))
                 poster.Name = request.Name;
