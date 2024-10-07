@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,5 +24,7 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<OrganizationMultilangModel> OrganizationsMultilang { get; set; }
         public DbSet<OrganizationFileURLModel> OrganizationFileUrls { get; set; }
         public DbSet<UserModel> Users { get; set; }
+        public DbSet<CityModel> Cities { get; set; }
+        public DbSet<CityMultilangModel> CitiesMultilang { get; set; }
     }
 }

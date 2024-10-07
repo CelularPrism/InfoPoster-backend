@@ -98,6 +98,14 @@ namespace InfoPoster_backend.Handlers.Organizations
 
             await _repository.SaveFiles(files, request.OrganizationId);
 
+            if (string.IsNullOrEmpty(organization.Name))
+                organization.Name = request.Name;
+
+            organization.CategoryId = request.CategoryId;
+            organization.SubcategoryId = request.SubcategoryId;
+
+            await _repository.UpdateOrganization(organization);
+
             return new SaveOrganizationResponse();
 
         }

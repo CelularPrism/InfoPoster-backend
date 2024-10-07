@@ -27,6 +27,13 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("cities/get")]
+        public async Task<IActionResult> GetCities()
+        {
+            var result = await _mediator.Send(new GetCitiesRequest());
+            return Ok(result);
+        }
+
         [HttpGet("subcategories/get")]
         public async Task<IActionResult> GetSubcategories([FromQuery] GetSubcategoriesRequest request)
         {

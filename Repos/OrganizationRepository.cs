@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,9 @@ namespace InfoPoster_backend.Repos
             await _organization.OrganizationsMultilang.FirstOrDefaultAsync(f => f.OrganizationId == organizationId && f.Lang == lang);
         public async Task<List<OrganizationFileURLModel>> GetFileUrls(Guid organizationId) =>
             await _organization.OrganizationFileUrls.Where(f => f.OrganizationId == organizationId).ToListAsync();
+
+        public async Task<List<CityModel>> GetCities(string lang) =>
+            await _organization.CitiesMultilang.Where(c => c.Lang == lang).Select(c => new CityModel() { Id = c.CityId, Name = c.Name }).ToListAsync();
 
         public async Task AddOrganization(OrganizationModel model)
         {
