@@ -192,5 +192,26 @@ namespace InfoPoster_backend.Controllers
             var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.ACTIVE });
             return Ok(result);
         }
+
+        [HttpPost("file/upload")]
+        public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
+        {
+            var result = await _mediator.Send(request);
+            return Ok(result);
+        }
+
+        [HttpGet("file/get")]
+        public async Task<IActionResult> GetFiles([FromQuery] Guid applicationId)
+        {
+            var result = await _mediator.Send(new GetFileRequest() { ApplicationId = applicationId });
+            return Ok(result);
+        }
+
+        [HttpDelete("file/delete")]
+        public async Task<IActionResult> DeleteFile([FromQuery] Guid fileId, Guid applicationId)
+        {
+            var result = await _mediator.Send(new DeleteFileRequest() { FileId = fileId, ApplicationId = applicationId });
+            return Ok(result);
+        }
     }
 }

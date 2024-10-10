@@ -3,6 +3,7 @@ using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
@@ -35,6 +36,17 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<FileURLModel>> GetFileUrls(Guid posterId) =>
             await _context.FileUrls.Where(f => f.PosterId == posterId).ToListAsync();
+
+        public async Task<List<PlaceModel>> GetPlaces(Guid organizationId) =>
+            await _context.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
+
+        public async Task<SelectelFileURLModel> GetSelectelFile(Guid organizationId) =>
+            await _context.FileToApplication.Where(f => f.ApplicationId == organizationId)
+                                                 .Join(_context.SelectelFileURLs,
+                                                       f => f.FileId,
+                                                       s => s.Id,
+                                                       (f, s) => s)
+                                                 .FirstOrDefaultAsync();
 
         public async Task<List<GetAllPostersResponse>> GetListNoTracking(string lang)
         {
@@ -249,6 +261,18 @@ namespace InfoPoster_backend.Repos
             if (old.Count > 0)
                 _context.FileUrls.RemoveRange(old);
             await _context.FileUrls.AddRangeAsync(list);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddFilePoster(FileToApplication file)
+        {
+            await _context.FileToApplication.AddAsync(file);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddSelectelFile(SelectelFileURLModel file)
+        {
+            await _context.SelectelFileURLs.AddAsync(file);
             await _context.SaveChangesAsync();
         }
     }

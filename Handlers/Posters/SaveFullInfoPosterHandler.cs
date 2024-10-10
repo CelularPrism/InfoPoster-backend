@@ -1,7 +1,9 @@
 ﻿using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Selectel_API;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
@@ -26,7 +28,6 @@ namespace InfoPoster_backend.Handlers.Posters
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public List<string> GaleryUrls { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
     }
@@ -39,9 +40,11 @@ namespace InfoPoster_backend.Handlers.Posters
     public class SaveFullInfoPosterHandler : IRequestHandler<SaveFullInfoPosterRequest, SaveFullInfoPosterResponse>
     {
         private readonly PosterRepository _repository;
-        public SaveFullInfoPosterHandler(PosterRepository repository)
+        private readonly SelectelAuthService _selectelAuthService;
+        public SaveFullInfoPosterHandler(PosterRepository repository, SelectelAuthService selectelAuthService)
         {
             _repository = repository;
+            _selectelAuthService = selectelAuthService;
         }
 
         public async Task<SaveFullInfoPosterResponse> Handle(SaveFullInfoPosterRequest request, CancellationToken cancellationToken = default)
@@ -107,13 +110,7 @@ namespace InfoPoster_backend.Handlers.Posters
             }
 
             var files = new List<FileURLModel>();
-            if (request.GaleryUrls != null)
-            {
-                foreach (var img in request.GaleryUrls)
-                {
-                    files.Add(new FileURLModel(request.PosterId, img, (int)FILE_CATEGORIES.IMAGE));
-                }
-            }
+
             if (request.VideoUrls != null)
             {
                 foreach (var video in request.VideoUrls)
@@ -152,6 +149,29 @@ namespace InfoPoster_backend.Handlers.Posters
             };
 
             return result;
+        }
+
+        private async Task SaveBase64(string base64, string type, Guid posterId)
+        {
+            var loggedIn = await _selectelAuthService.Login();
+            if (loggedIn)
+            {
+
+                var file = new SelectelFileURLModel()
+                {
+                    Type = type
+                };
+                
+                var app = new FileToApplication()
+                {
+                    ApplicationId = posterId,
+                    FileId = file.Id
+                };
+
+                await _repository.AddSelectelFile(file);
+                await _repository.AddFilePoster(app);
+                await _selectelAuthService.UploadObject(Convert.FromBase64String(base64), file.Id);
+            }
         }
     }
 }

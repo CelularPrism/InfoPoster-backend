@@ -3,6 +3,7 @@ using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Selectel;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
 
@@ -53,6 +54,14 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<CityModel>> GetCities(string lang) =>
             await _organization.CitiesMultilang.Where(c => c.Lang == lang).Select(c => new CityModel() { Id = c.CityId, Name = c.Name }).ToListAsync();
+
+        public async Task<SelectelFileURLModel> GetSelectelFile(Guid organizationId) =>
+            await _organization.FileToApplication.Where(f => f.ApplicationId == organizationId)
+                                                 .Join(_organization.SelectelFileURLs,
+                                                       f => f.FileId,
+                                                       s => s.Id,
+                                                       (f, s) => s)
+                                                 .FirstOrDefaultAsync();
 
         public async Task AddOrganization(OrganizationModel model)
         {
@@ -105,6 +114,18 @@ namespace InfoPoster_backend.Repos
         public async Task UpdateMultilang(OrganizationMultilangModel model)
         {
             _organization.OrganizationsMultilang.Update(model);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddFilePoster(FileToApplication file)
+        {
+            await _organization.FileToApplication.AddAsync(file);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddSelectelFile(SelectelFileURLModel file)
+        {
+            await _organization.SelectelFileURLs.AddAsync(file);
             await _organization.SaveChangesAsync();
         }
     }

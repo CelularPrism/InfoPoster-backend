@@ -2,6 +2,7 @@ using InfoPoster_backend.Middlewares;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Services.Selectel_API;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,6 +18,7 @@ namespace InfoPoster_backend
             var connection = builder.Configuration["ConnectionStrings:DefaultConnection"];
             builder.Services.AddScoped<IJWTService, JWTService>();
             builder.Services.AddScoped<LoginService>();
+            builder.Services.AddHttpClient<SelectelAuthService>();
 
             builder.Services.AddDbContext<PostersContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
             builder.Services.AddDbContext<AccountContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
@@ -26,6 +28,7 @@ namespace InfoPoster_backend
             builder.Services.AddScoped<AccountRepository>();
             builder.Services.AddScoped<PosterRepository>();
             builder.Services.AddScoped<OrganizationRepository>();
+            builder.Services.AddScoped<FileRepository>();
 
             builder.Services.AddSpaStaticFiles(configuration =>
             {
