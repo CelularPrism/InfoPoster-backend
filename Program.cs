@@ -1,6 +1,7 @@
 using InfoPoster_backend.Middlewares;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services;
 using InfoPoster_backend.Services.Login;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ namespace InfoPoster_backend
             var connection = builder.Configuration["ConnectionStrings:DefaultConnection"];
             builder.Services.AddScoped<IJWTService, JWTService>();
             builder.Services.AddScoped<LoginService>();
+            builder.Services.AddScoped<EmailService>();
 
             builder.Services.AddDbContext<PostersContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
             builder.Services.AddDbContext<AccountContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));

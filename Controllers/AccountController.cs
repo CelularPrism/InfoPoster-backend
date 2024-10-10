@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Account;
+using InfoPoster_backend.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,12 @@ namespace InfoPoster_backend.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly EmailService _email;
 
-        public AccountController(IMediator mediator)
+        public AccountController(IMediator mediator, EmailService email)
         {
             _mediator = mediator;
+            _email = email;
         }
 
         [HttpPost("login")]
@@ -41,6 +44,21 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> UpdateUser([FromForm] UpdateUserRequest request)
         {
             var result = await _mediator.Send(request);
+            return Ok();
+        }
+
+        [HttpPost("email/send")]
+        public async Task<IActionResult> SendEmail([FromForm] string firstName, [FromForm] string email, [FromForm] string phone, [FromForm] string message)
+        {
+            message = string.Concat("Firstname: ", firstName, "\nEmail: ", email, "\nPhone: ", phone, "\nMessage: ", message);
+            try
+            {
+                await _email.Send(message, "jack@cityguide.vn", "jack@cityguide.vn", "Email from " + firstName);
+            } catch (Exception ex)
+            {
+                return BadRequest();
+            }
+            
             return Ok();
         }
     }
