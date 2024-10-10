@@ -1,8 +1,10 @@
 ﻿using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Services.Selectel_API;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -27,7 +29,6 @@ namespace InfoPoster_backend.Handlers.Organizations
         public List<PlaceRequestModel> Parking { get; set; }
         public string Phone { get; set; }
         public string ContactName { get; set; }
-        public List<string> GaleryUrls { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
         public string Zalo { get; set; }
@@ -44,11 +45,13 @@ namespace InfoPoster_backend.Handlers.Organizations
     {
         private readonly LoginService _loginService;
         private readonly OrganizationRepository _repository;
+        private readonly SelectelAuthService _selectelAuthService;
 
-        public SaveOrganizationHandler(LoginService loginService, OrganizationRepository repository)
+        public SaveOrganizationHandler(LoginService loginService, OrganizationRepository repository, SelectelAuthService selectelAuthService)
         {
             _loginService = loginService;
             _repository = repository;
+            _selectelAuthService = selectelAuthService;
         }
 
         public async Task<SaveOrganizationResponse> Handle(SaveOrganizationRequest request, CancellationToken cancellationToken = default)
@@ -80,13 +83,6 @@ namespace InfoPoster_backend.Handlers.Organizations
             }
 
             var files = new List<OrganizationFileURLModel>();
-            if (request.GaleryUrls != null)
-            {
-                foreach (var img in request.GaleryUrls)
-                {
-                    files.Add(new OrganizationFileURLModel(request.OrganizationId, img, (int)FILE_CATEGORIES.IMAGE));
-                }
-            }
             if (request.VideoUrls != null)
             {
                 foreach (var video in request.VideoUrls)
@@ -103,6 +99,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             }
 
             await _repository.SaveFiles(files, request.OrganizationId);
+            //await SaveBase64(request.FileBase64, request.FileType, request.OrganizationId);
 
             if (request.Parking != null && request.Parking.Count > 0)
             {
@@ -119,7 +116,29 @@ namespace InfoPoster_backend.Handlers.Organizations
             await _repository.UpdateOrganization(organization);
 
             return new SaveOrganizationResponse();
+        }
 
+        private async Task SaveBase64(string base64, string type, Guid organizationId)
+        {
+            var loggedIn = await _selectelAuthService.Login();
+            if (loggedIn)
+            {
+
+                var file = new SelectelFileURLModel()
+                {
+                    Type = type
+                };
+
+                var app = new FileToApplication()
+                {
+                    ApplicationId = organizationId,
+                    FileId = file.Id
+                };
+
+                await _repository.AddSelectelFile(file);
+                await _repository.AddFilePoster(app);
+                await _selectelAuthService.UploadObject(Convert.FromBase64String(base64), file.Id);
+            }
         }
     }
 }

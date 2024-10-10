@@ -1,6 +1,8 @@
 ﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Selectel_API;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Administration
@@ -25,14 +27,12 @@ namespace InfoPoster_backend.Handlers.Administration
         public double Price { get; set; }
         public string Adress { get; set; }
         public string PlaceLink { get; set; }
-        public string Parking { get; set; }
-        public string ParkingPlace { get; set; }
+        public List<PlaceModel> Parking { get; set; }
         public string Tags { get; set; }
         public List<string> SocialLinks { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public List<string> GaleryUrls { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
     }
@@ -76,8 +76,6 @@ namespace InfoPoster_backend.Handlers.Administration
                 result.Lang = ml.Lang;
                 result.Description = ml.Description;
                 result.Name = ml.Name;
-                result.Parking = ml.Parking;
-                result.ParkingPlace = ml.ParkingPlace;
                 result.Phone = ml.Phone;
                 result.Place = ml.Place;
                 result.SiteLink = ml.SiteLink;
@@ -95,9 +93,15 @@ namespace InfoPoster_backend.Handlers.Administration
             var files = await _repository.GetFileUrls(request.Id);
 
             result.ReleaseDate = poster.ReleaseDate;
-            result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
+            //result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
             result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
             result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
+
+            var places = await _repository.GetPlaces(request.Id);
+            if (places.Count > 0)
+            {
+                result.Parking = places;
+            }
 
             return result;
         }

@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Models.Account;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Selectel;
 using Microsoft.EntityFrameworkCore;
 
 namespace InfoPoster_backend.Models.Contexts
@@ -27,5 +28,7 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<CityModel> Cities { get; set; }
         public DbSet<CityMultilangModel> CitiesMultilang { get; set; }
         public DbSet<PlaceModel> Places { get; set; }
+        public DbSet<SelectelFileURLModel> SelectelFileURLs { get; set; }
+        public DbSet<FileToApplication> FileToApplication { get; set; }
     }
 }

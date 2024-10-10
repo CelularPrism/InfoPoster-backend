@@ -31,7 +31,6 @@ namespace InfoPoster_backend.Handlers.Organizations
         public List<PlaceModel> Parking { get; set; }
         public string Phone { get; set; }
         public string ContactName { get; set; }
-        public List<string> GaleryUrls { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
         public string Zalo { get; set; }
@@ -86,7 +85,6 @@ namespace InfoPoster_backend.Handlers.Organizations
 
             if (files.Count > 0)
             {
-                result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
                 result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
                 result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
             }
