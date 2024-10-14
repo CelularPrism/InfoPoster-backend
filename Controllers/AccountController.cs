@@ -50,7 +50,7 @@ namespace InfoPoster_backend.Controllers
         [HttpPost("email/send")]
         public async Task<IActionResult> SendEmail([FromForm] string firstName, [FromForm] string email, [FromForm] string phone, [FromForm] string message)
         {
-            message = string.Concat("Firstname: ", firstName, "\nEmail: ", email, "\nPhone: ", phone, "\nMessage: ", message);
+            message = string.Concat("Firstname: ", firstName, "\\nEmail: ", email, "\\nPhone: ", phone, "\\nMessage: ", message);
             try
             {
                 await _email.Send(message, "jack@cityguide.vn", "jack@cityguide.vn", "Email from " + firstName);
