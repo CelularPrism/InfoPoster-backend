@@ -7,7 +7,7 @@ namespace InfoPoster_backend.Models.Posters
         ACTIVE,
         DISABLED,
         DELETED,
-        ARCHIVED
+        VERIFIED
     }
 
     public class PosterModel

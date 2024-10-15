@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
@@ -57,7 +58,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public async Task<SaveOrganizationResponse> Handle(SaveOrganizationRequest request, CancellationToken cancellationToken = default)
         {
             var organization = await _repository.GetOrganization(request.OrganizationId);
-            if (organization == null)
+            if (organization == null || organization.Status == (int)POSTER_STATUS.ACTIVE || organization.Status == (int)POSTER_STATUS.VERIFIED)
                 return null;
 
             var fullInfo = await _repository.GetOrganizationFullInfo(request.OrganizationId);

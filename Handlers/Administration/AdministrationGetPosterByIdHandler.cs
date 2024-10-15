@@ -35,6 +35,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public string AgeRestriction { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
+        public int Status { get; set; }
     }
 
     public class AdministrationGetPosterByIdHandler : IRequestHandler<AdministrationGetPosterByIdRequest, AdministrationGetPosterByIdResponse>
@@ -53,6 +54,7 @@ namespace InfoPoster_backend.Handlers.Administration
                 return null;
 
             var result = new AdministrationGetPosterByIdResponse();
+            result.Status = poster.Status;
 
             var fullInfo = await _repository.GetFullInfoPoster(request.Id);
             if (fullInfo != null)

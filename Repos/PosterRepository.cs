@@ -50,7 +50,8 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<GetAllPostersResponse>> GetListNoTracking(string lang)
         {
-            var list = await _context.Posters.Join(_context.Categories,
+            var list = await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.ACTIVE || p.Status == (int)POSTER_STATUS.VERIFIED)
+                                  .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
                                         (p, c) => p)
@@ -58,7 +59,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == lang)
+                                  .Where(p => p.m.Lang == "en")
                                   .Join(_context.Users,
                                         p => p.p.UserId,
                                         u => u.Id,

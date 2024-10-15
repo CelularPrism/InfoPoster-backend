@@ -3,6 +3,7 @@ using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
@@ -25,10 +26,12 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<GetAllOrganizationResponse>> GetOrganizationList(string lang)
         {
-            var organizations = await _organization.Organizations.Join(_organization.OrganizationsMultilang,
+            var organizations = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.ACTIVE || o.Status == (int)POSTER_STATUS.VERIFIED)
+                                                                 .Join(_organization.OrganizationsMultilang,
                                                                        o => o.Id,
                                                                        m => m.OrganizationId,
                                                                        (o, m) => new { Organization = o, Multilang = m })
+                                                                 .Where(m => m.Multilang.Lang == "en")
                                                                  .Join(_organization.Users,
                                                                        o => o.Organization.UserId,
                                                                        user => user.Id,

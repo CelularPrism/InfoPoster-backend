@@ -21,7 +21,7 @@ namespace InfoPoster_backend.Handlers.Posters
         {
             _loginService = loginService;
             _repository = repository;
-            _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
+            _lang = "en";
         }
 
         public async Task<AddPosterResponse> Handle(AddPosterRequest request, CancellationToken cancellationToken = default)

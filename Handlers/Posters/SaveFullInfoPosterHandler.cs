@@ -50,7 +50,7 @@ namespace InfoPoster_backend.Handlers.Posters
         public async Task<SaveFullInfoPosterResponse> Handle(SaveFullInfoPosterRequest request, CancellationToken cancellationToken = default)
         {
             var poster = await _repository.GetPoster(request.PosterId);
-            if (poster == null)
+            if (poster == null || poster.Status == (int)POSTER_STATUS.ACTIVE || poster.Status == (int)POSTER_STATUS.VERIFIED)
                 return null;
 
             var fullInfo = await _repository.GetFullInfoPoster(request.PosterId);

@@ -36,6 +36,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string Zalo { get; set; }
         public string Email { get; set; }
         public string ContactDescription { get; set; }
+        public int Status { get; set; }
     }
 
     public class GetOrganizationHandler : IRequestHandler<GetOrganizationRequest, GetOrganizationResponse>
@@ -53,6 +54,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 return null;
 
             var result = new GetOrganizationResponse();
+            result.Status = organization.Status;
 
             var fullInfo = await _repository.GetOrganizationFullInfo(request.Id);
             var ml = await _repository.GetOrganizationMultilang(request.Id, request.Lang);

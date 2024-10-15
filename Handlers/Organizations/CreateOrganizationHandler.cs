@@ -32,7 +32,16 @@ namespace InfoPoster_backend.Handlers.Organizations
                 Status = (int)POSTER_STATUS.DISABLED
             };
 
+            var multilang = new OrganizationMultilangModel()
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = organization.Id,
+                Lang = "en"
+            };
+
             await _repository.AddOrganization(organization);
+            await _repository.AddMultilang(multilang);
+
             var result = new CreateOrganizationResponse()
             {
                 Id = organization.Id
