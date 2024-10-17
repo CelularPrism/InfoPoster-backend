@@ -14,8 +14,8 @@ namespace InfoPoster_backend.Repos
             _context = context;
         }
 
-        public async Task<List<SelectelFileURLModel>> GetSelectelFiles(Guid applicationId) =>
-            await _context.FileToApplication.Where(f => f.ApplicationId == applicationId)
+        public async Task<List<SelectelFileURLModel>> GetSelectelFiles(Guid applicationId, int place) =>
+            await _context.FileToApplication.Where(f => f.ApplicationId == applicationId && f.Place == place)
                                             .Join(_context.SelectelFileURLs,
                                                        f => f.FileId,
                                                        s => s.Id,

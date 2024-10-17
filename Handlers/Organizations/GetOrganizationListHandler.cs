@@ -11,6 +11,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid Id { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Name { get; set; }
+        public int Status { get; set; }
     }
 
     public class GetOrganizationListHandler : IRequestHandler<GetOrganizationListRequest, List<GetOrganizationListResponse>>
@@ -32,7 +33,8 @@ namespace InfoPoster_backend.Handlers.Organizations
             {
                 Id = o.Id,
                 CreatedAt = o.CreatedAt,
-                Name = o.Name
+                Name = o.Name,
+                Status = o.Status
             }).ToList();
 
             return result;

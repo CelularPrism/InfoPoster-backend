@@ -7,6 +7,7 @@ namespace InfoPoster_backend.Handlers.Administration
     public class GetFileRequest : IRequest<List<GetFileResponse>>
     {
         public Guid ApplicationId { get; set; }
+        public int Place { get; set; }
     }
 
     public class GetFileResponse
@@ -29,7 +30,7 @@ namespace InfoPoster_backend.Handlers.Administration
 
         public async Task<List<GetFileResponse>> Handle(GetFileRequest request, CancellationToken cancellationToken = default)
         {
-            var files = await _repository.GetSelectelFiles(request.ApplicationId);
+            var files = await _repository.GetSelectelFiles(request.ApplicationId, request.Place);
             var loggedIn = await _selectelAuthService.Login();
 
             var result = new List<GetFileResponse>();

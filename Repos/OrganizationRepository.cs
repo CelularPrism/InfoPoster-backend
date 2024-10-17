@@ -3,10 +3,12 @@ using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Organizations.Menu;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
+using System.Collections.Generic;
 
 namespace InfoPoster_backend.Repos
 {
@@ -42,7 +44,22 @@ namespace InfoPoster_backend.Repos
         }
 
         public async Task<List<OrganizationModel>> GetOrganizationList(Guid userId) =>
-            await _organization.Organizations.Where(o => o.UserId == userId).OrderByDescending(o => o.CreatedAt).ToListAsync();
+            await _organization.Organizations.Where(o => o.UserId == userId)
+                                             .Join(_organization.OrganizationsMultilang,
+                                                   o => o.Id,
+                                                   m => m.OrganizationId,
+                                                   (o, m) => new { Organization = o, Multilang = m })
+                                             .Where(m => m.Multilang.Lang == "en")
+                                             .Select(o => new OrganizationModel() {
+                                                 Id = o.Organization.Id,
+                                                 Name = o.Multilang.Name,
+                                                 CategoryId = o.Organization.CategoryId,
+                                                 CreatedAt = o.Organization.CreatedAt,
+                                                 Status = o.Organization.Status,
+                                                 SubcategoryId = o.Organization.SubcategoryId,
+                                                 UserId = o.Organization.UserId
+                                             })
+                                             .OrderByDescending(o => o.CreatedAt).ToListAsync();
 
         public async Task<OrganizationFullInfoModel> GetOrganizationFullInfo(Guid organizationId) =>
             await _organization.OrganizationsFullInfo.FirstOrDefaultAsync(f => f.OrganizationId == organizationId);
@@ -65,6 +82,29 @@ namespace InfoPoster_backend.Repos
                                                        s => s.Id,
                                                        (f, s) => s)
                                                  .FirstOrDefaultAsync();
+
+        public async Task<List<MenuModel>> GetMenuList(string lang) =>
+            await _organization.MenusMultilang.Where(m => m.Lang == lang)
+                                              .OrderBy(m => m.Name)
+                                              .Select(m => new MenuModel()
+                                              {
+                                                  Id = m.MenuId,
+                                                  Name = m.Name
+                                              }).ToListAsync();
+
+        public async Task<List<MenuModel>> GetMenuList(Guid organizationId, string lang) =>
+            await _organization.MenusToOrganization.Where(org => org.OrganizationId == organizationId)
+                                                   .Join(_organization.MenusMultilang,
+                                                         org => org.MenuId,
+                                                         menu => menu.MenuId,
+                                                         (org, menu) => menu)
+                                                   .Where(m => m.Lang == lang)
+                                                   .OrderBy(m => m.Name)
+                                                   .Select(m => new MenuModel()
+                                                   {
+                                                        Id = m.MenuId,
+                                                        Name = m.Name
+                                                   }).ToListAsync();
 
         public async Task AddOrganization(OrganizationModel model)
         {
@@ -89,7 +129,9 @@ namespace InfoPoster_backend.Repos
             var old = await _organization.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
             if (old.Count > 0)
                 _organization.Places.RemoveRange(old);
-            await _organization.Places.AddRangeAsync(places);
+
+            if (places.Count > 0)
+                await _organization.Places.AddRangeAsync(places);
             await _organization.SaveChangesAsync();
         }
 
@@ -98,7 +140,20 @@ namespace InfoPoster_backend.Repos
             var old = await _organization.OrganizationFileUrls.Where(f => f.OrganizationId == organizationId).ToListAsync();
             if (old.Count > 0)
                 _organization.OrganizationFileUrls.RemoveRange(old);
-            await _organization.OrganizationFileUrls.AddRangeAsync(list);
+
+            if (list.Count > 0)
+                await _organization.OrganizationFileUrls.AddRangeAsync(list);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task SaveMenus(List<MenuToOrganizationModel> list, Guid organizationId)
+        {
+            var old = await _organization.MenusToOrganization.Where(f => f.OrganizationId == organizationId).ToListAsync();
+            if (old.Count > 0)
+                _organization.MenusToOrganization.RemoveRange(old);
+
+            if (list.Count > 0)
+                await _organization.MenusToOrganization.AddRangeAsync(list);
             await _organization.SaveChangesAsync();
         }
 

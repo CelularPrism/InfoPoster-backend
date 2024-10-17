@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
+using InfoPoster_backend.Models.Organizations.Menu;
 using InfoPoster_backend.Repos;
 using MediatR;
 
@@ -37,14 +38,18 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string Email { get; set; }
         public string ContactDescription { get; set; }
         public int Status { get; set; }
+        public List<MenuModel> MenuCategories { get; set; }
     }
 
     public class GetOrganizationHandler : IRequestHandler<GetOrganizationRequest, GetOrganizationResponse>
     {
         private readonly OrganizationRepository _repository;
-        public GetOrganizationHandler(OrganizationRepository repository)
+        private readonly string _lang;
+
+        public GetOrganizationHandler(OrganizationRepository repository, IHttpContextAccessor accessor)
         {
             _repository = repository;
+            _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
         public async Task<GetOrganizationResponse> Handle(GetOrganizationRequest request, CancellationToken cancellationToken = default)
@@ -96,6 +101,8 @@ namespace InfoPoster_backend.Handlers.Organizations
             {
                 result.Parking = places;
             }
+
+            result.MenuCategories = await _repository.GetMenuList(request.Id, _lang);
 
             result.OrganizationId = organization.Id;
             result.CategoryId = organization.CategoryId;

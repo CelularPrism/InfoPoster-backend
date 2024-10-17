@@ -117,6 +117,13 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("menu")]
+        public async Task<IActionResult> GetMenuList()
+        {
+            var result = await _mediator.Send(new GetMenusRequest());
+            return Ok(result);
+        }
+
         [HttpGet("organization/get")]
         public async Task<IActionResult> GetOrganizationById([FromQuery] Guid id, [FromQuery] string lang)
         {
@@ -201,9 +208,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("file/get")]
-        public async Task<IActionResult> GetFiles([FromQuery] Guid applicationId)
+        public async Task<IActionResult> GetFiles([FromQuery] Guid applicationId, [FromQuery] int place)
         {
-            var result = await _mediator.Send(new GetFileRequest() { ApplicationId = applicationId });
+            var result = await _mediator.Send(new GetFileRequest() { ApplicationId = applicationId, Place = place });
             return Ok(result);
         }
 

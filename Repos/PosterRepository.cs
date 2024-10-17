@@ -80,7 +80,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == lang)
+                                  .Where(p => p.m.Lang == "en")
                                   .Join(_context.Users,
                                         p => p.p.UserId,
                                         u => u.Id,

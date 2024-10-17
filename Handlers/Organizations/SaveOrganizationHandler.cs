@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Organizations.Menu;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Repos;
@@ -35,6 +36,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string Zalo { get; set; }
         public string Email { get; set; }
         public string ContactDescription { get; set; }
+        public List<Guid> MenuCategories { get; set; }
     }
 
     public class SaveOrganizationResponse
@@ -99,7 +101,15 @@ namespace InfoPoster_backend.Handlers.Organizations
                 }
             }
 
+            var menus = request.MenuCategories.Select(m => new MenuToOrganizationModel()
+            {
+                Id = Guid.NewGuid(),
+                MenuId = m,
+                OrganizationId = request.OrganizationId
+            }).ToList();
+
             await _repository.SaveFiles(files, request.OrganizationId);
+            await _repository.SaveMenus(menus, request.OrganizationId);
             //await SaveBase64(request.FileBase64, request.FileType, request.OrganizationId);
 
             if (request.Parking != null && request.Parking.Count > 0)

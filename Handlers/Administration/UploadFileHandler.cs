@@ -12,6 +12,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public Guid ApplicationId { get; set; }
         public string Base64 { get; set; }
         public string Type { get; set; }
+        public int Place { get; set; }
     }
 
     public class UploadFileResponse { }
@@ -41,7 +42,8 @@ namespace InfoPoster_backend.Handlers.Administration
                 var app = new FileToApplication()
                 {
                     ApplicationId = request.ApplicationId,
-                    FileId = file.Id
+                    FileId = file.Id,
+                    Place = request.Place,
                 };
 
                 await _repository.AddSelectelFile(file);
