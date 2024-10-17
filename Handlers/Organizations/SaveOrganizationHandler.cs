@@ -33,6 +33,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string ContactName { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
+        public string ContactPhone { get; set; }
         public string Zalo { get; set; }
         public string Email { get; set; }
         public string ContactDescription { get; set; }
@@ -83,6 +84,22 @@ namespace InfoPoster_backend.Handlers.Organizations
             {
                 ml.Update(request);
                 await _repository.UpdateMultilang(ml);
+            }
+
+            var contact = await _repository.GetContact(request.OrganizationId);
+            if (contact == null)
+            {
+                contact = new OrganizationContactModel()
+                {
+                    Id = Guid.NewGuid(),
+                    OrganizationId = request.OrganizationId
+                };
+                contact.Update(request);
+                await _repository.AddContact(contact);
+            } else
+            {
+                contact.Update(request);
+                await _repository.UpdateContact(contact);
             }
 
             var files = new List<OrganizationFileURLModel>();

@@ -34,6 +34,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string ContactName { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
+        public string ContactPhone { get; set; }
         public string Zalo { get; set; }
         public string Email { get; set; }
         public string ContactDescription { get; set; }
@@ -63,6 +64,7 @@ namespace InfoPoster_backend.Handlers.Organizations
 
             var fullInfo = await _repository.GetOrganizationFullInfo(request.Id);
             var ml = await _repository.GetOrganizationMultilang(request.Id, request.Lang);
+            var contact = await _repository.GetContact(request.Id);
 
             if (fullInfo != null)
             {
@@ -86,6 +88,15 @@ namespace InfoPoster_backend.Handlers.Organizations
             } else
             {
                 result.Lang = request.Lang;
+            }
+
+            if (contact != null)
+            {
+                result.FirstName = contact.Name;
+                result.ContactPhone = contact.Phone;
+                result.Zalo = contact.Zalo;
+                result.Email = contact.Email;
+                result.ContactDescription = contact.Comment;
             }
 
             var files = await _repository.GetFileUrls(request.Id);

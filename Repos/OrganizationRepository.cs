@@ -106,6 +106,9 @@ namespace InfoPoster_backend.Repos
                                                         Name = m.Name
                                                    }).ToListAsync();
 
+        public async Task<OrganizationContactModel> GetContact(Guid organizationId) =>
+            await _organization.OrganizationContacts.FirstOrDefaultAsync(o => o.OrganizationId == organizationId);
+
         public async Task AddOrganization(OrganizationModel model)
         {
             await _organization.Organizations.AddAsync(model);
@@ -184,6 +187,18 @@ namespace InfoPoster_backend.Repos
         public async Task AddSelectelFile(SelectelFileURLModel file)
         {
             await _organization.SelectelFileURLs.AddAsync(file);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddContact(OrganizationContactModel contact)
+        {
+            await _organization.OrganizationContacts.AddAsync(contact);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task UpdateContact(OrganizationContactModel contact)
+        {
+            _organization.OrganizationContacts.Update(contact);
             await _organization.SaveChangesAsync();
         }
     }
