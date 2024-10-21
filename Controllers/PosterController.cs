@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Handlers.Posters;
+﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -55,6 +56,13 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetFullInfoPoster([FromQuery] GetFullInfoPosterRequest request)
         {
             var result = await _mediator.Send(request);
+            return Ok(result);
+        }
+
+        [HttpGet("cities/get")]
+        public async Task<IActionResult> GetCities()
+        {
+            var result = await _mediator.Send(new GetCitiesRequest());
             return Ok(result);
         }
     }

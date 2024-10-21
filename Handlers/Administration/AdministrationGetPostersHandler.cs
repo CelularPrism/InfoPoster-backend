@@ -1,7 +1,9 @@
 ﻿using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Tools;
 using MediatR;
+using System.Text.Json.Serialization;
 
 namespace InfoPoster_backend.Handlers.Administration
 {
@@ -21,6 +23,7 @@ namespace InfoPoster_backend.Handlers.Administration
 
         public Guid Id { get; set; }
         public string Name { get; set; }
+        [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string CreatedBy { get; set; }

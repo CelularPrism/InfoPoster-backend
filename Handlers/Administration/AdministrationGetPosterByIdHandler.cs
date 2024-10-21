@@ -3,7 +3,9 @@ using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
+using InfoPoster_backend.Tools;
 using MediatR;
+using System.Text.Json.Serialization;
 
 namespace InfoPoster_backend.Handlers.Administration
 {
@@ -19,6 +21,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Lang { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string Place { get; set; } = string.Empty;
@@ -112,7 +115,7 @@ namespace InfoPoster_backend.Handlers.Administration
             {
                 result.Parking = places;
             }
-
+            
             return result;
         }
     }
