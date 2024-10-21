@@ -1,10 +1,20 @@
 ﻿using InfoPoster_backend.Handlers.Organizations;
+using InfoPoster_backend.Handlers.Posters;
 
-namespace InfoPoster_backend.Models.Organizations
+namespace InfoPoster_backend.Models
 {
-    public class OrganizationContactModel
+    public class ContactModel
     {
-        public void Update(SaveOrganizationRequest request) 
+        public void Update(SaveOrganizationRequest request)
+        {
+            Name = request.FirstName;
+            Phone = request.ContactPhone;
+            Email = request.Email;
+            Zalo = request.Zalo;
+            Comment = request.ContactDescription;
+        }
+
+        public void Update(SaveFullInfoPosterRequest request)
         {
             Name = request.FirstName;
             Phone = request.ContactPhone;
@@ -14,7 +24,7 @@ namespace InfoPoster_backend.Models.Organizations
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid OrganizationId { get; set; }
+        public Guid ApplicationId { get; set; }
         public string Name { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }

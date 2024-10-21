@@ -34,6 +34,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<MenuModel> Menus { get; set; }
         public DbSet<MenuToOrganizationModel> MenusToOrganization { get; set; }
         public DbSet<MenuMultilangModel> MenusMultilang { get; set; }
-        public DbSet<OrganizationContactModel> OrganizationContacts { get; set; }
+        public DbSet<ContactModel> Contacts { get; set; }
     }
 }

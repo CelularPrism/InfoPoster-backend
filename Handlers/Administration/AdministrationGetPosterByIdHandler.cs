@@ -16,25 +16,29 @@ namespace InfoPoster_backend.Handlers.Administration
     public class AdministrationGetPosterByIdResponse
     {
         public Guid PosterId { get; set; }
-        public string Lang { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Lang { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public DateTime ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
-        public string Place { get; set; }
-        public string City { get; set; }
-        public string TimeStart { get; set; }
+        public string Place { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string TimeStart { get; set; } = string.Empty;
         public double Price { get; set; }
-        public string Adress { get; set; }
-        public string PlaceLink { get; set; }
+        public string Adress { get; set; } = string.Empty;
+        public string PlaceLink { get; set; } = string.Empty;
         public List<PlaceModel> Parking { get; set; }
-        public string Tags { get; set; }
+        public string Tags { get; set; } = string.Empty;
         public List<string> SocialLinks { get; set; }
-        public string Phone { get; set; }
-        public string SiteLink { get; set; }
-        public string AgeRestriction { get; set; }
+        public string Phone { get; set; } = string.Empty;
+        public string SiteLink { get; set; } = string.Empty;
+        public string AgeRestriction { get; set; } = string.Empty;
         public List<string> VideoUrls { get; set; }
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string ContactPhone { get; set; } = string.Empty;
+        public string Zalo { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string ContactDescription { get; set; } = string.Empty;
         public int Status { get; set; }
     }
 
@@ -59,10 +63,10 @@ namespace InfoPoster_backend.Handlers.Administration
             var fullInfo = await _repository.GetFullInfoPoster(request.Id);
             if (fullInfo != null)
             {
-                result.AgeRestriction = fullInfo.AgeRestriction;
+                result.AgeRestriction = !string.IsNullOrEmpty(fullInfo.AgeRestriction) ? fullInfo.AgeRestriction : string.Empty;
                 result.CategoryId = fullInfo.CategoryId;
-                result.PlaceLink = fullInfo.PlaceLink;
-                result.TimeStart = fullInfo.TimeStart;
+                result.PlaceLink = !string.IsNullOrEmpty(fullInfo.PlaceLink) ? fullInfo.PlaceLink : string.Empty;
+                result.TimeStart = !string.IsNullOrEmpty(fullInfo.TimeStart) ? fullInfo.TimeStart : string.Empty;
                 result.PosterId = fullInfo.PosterId;
                 result.Price = fullInfo.Price;
             } else
@@ -73,14 +77,14 @@ namespace InfoPoster_backend.Handlers.Administration
             var ml = await _repository.GetMultilangPoster(request.Id, request.Lang);
             if (ml != null)
             {
-                result.Adress = ml.Adress;
-                result.City = ml.City;
-                result.Lang = ml.Lang;
-                result.Description = ml.Description;
-                result.Name = ml.Name;
-                result.Phone = ml.Phone;
-                result.Place = ml.Place;
-                result.SiteLink = ml.SiteLink;
+                result.Adress = !string.IsNullOrEmpty(ml.Adress) ? ml.Adress : string.Empty;
+                result.City = !string.IsNullOrEmpty(ml.City) ? ml.City : string.Empty;
+                result.Lang = !string.IsNullOrEmpty(ml.Lang) ? ml.Lang : string.Empty;
+                result.Description = !string.IsNullOrEmpty(ml.Description) ? ml.Description : string.Empty;
+                result.Name = !string.IsNullOrEmpty(ml.Name) ? ml.Name : string.Empty;
+                result.Phone = !string.IsNullOrEmpty(ml.Phone) ? ml.Phone : string.Empty;
+                result.Place = !string.IsNullOrEmpty(ml.Place) ? ml.Place : string.Empty;
+                result.SiteLink = !string.IsNullOrEmpty(ml.SiteLink) ? ml.SiteLink : string.Empty;
             } else
             {
                 result.Lang = request.Lang;
@@ -89,7 +93,11 @@ namespace InfoPoster_backend.Handlers.Administration
             var contact = await _repository.GetContact(request.Id);
             if (contact != null)
             {
-                result.FirstName = contact.FirstName;
+                result.FirstName = !string.IsNullOrEmpty(contact.Name) ? contact.Name : string.Empty;
+                result.ContactPhone = !string.IsNullOrEmpty(contact.Phone) ? contact.Phone : string.Empty;
+                result.Zalo = !string.IsNullOrEmpty(contact.Zalo) ? contact.Zalo : string.Empty;
+                result.Email = !string.IsNullOrEmpty(contact.Email) ? contact.Email : string.Empty;
+                result.ContactDescription = !string.IsNullOrEmpty(contact.Comment) ? contact.Comment : string.Empty;
             }
             
             var files = await _repository.GetFileUrls(request.Id);

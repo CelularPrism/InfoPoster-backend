@@ -92,7 +92,7 @@ namespace InfoPoster_backend.Repos
                                                   Name = m.Name
                                               }).ToListAsync();
 
-        public async Task<List<MenuModel>> GetMenuList(Guid organizationId, string lang) =>
+        public async Task<List<Guid>> GetMenuList(Guid organizationId, string lang) =>
             await _organization.MenusToOrganization.Where(org => org.OrganizationId == organizationId)
                                                    .Join(_organization.MenusMultilang,
                                                          org => org.MenuId,
@@ -100,14 +100,10 @@ namespace InfoPoster_backend.Repos
                                                          (org, menu) => menu)
                                                    .Where(m => m.Lang == lang)
                                                    .OrderBy(m => m.Name)
-                                                   .Select(m => new MenuModel()
-                                                   {
-                                                        Id = m.MenuId,
-                                                        Name = m.Name
-                                                   }).ToListAsync();
+                                                   .Select(m => m.MenuId).ToListAsync();
 
-        public async Task<OrganizationContactModel> GetContact(Guid organizationId) =>
-            await _organization.OrganizationContacts.FirstOrDefaultAsync(o => o.OrganizationId == organizationId);
+        public async Task<ContactModel> GetContact(Guid organizationId) =>
+            await _organization.Contacts.FirstOrDefaultAsync(o => o.ApplicationId == organizationId);
 
         public async Task AddOrganization(OrganizationModel model)
         {
@@ -190,15 +186,15 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
-        public async Task AddContact(OrganizationContactModel contact)
+        public async Task AddContact(ContactModel contact)
         {
-            await _organization.OrganizationContacts.AddAsync(contact);
+            await _organization.Contacts.AddAsync(contact);
             await _organization.SaveChangesAsync();
         }
 
-        public async Task UpdateContact(OrganizationContactModel contact)
+        public async Task UpdateContact(ContactModel contact)
         {
-            _organization.OrganizationContacts.Update(contact);
+            _organization.Contacts.Update(contact);
             await _organization.SaveChangesAsync();
         }
     }

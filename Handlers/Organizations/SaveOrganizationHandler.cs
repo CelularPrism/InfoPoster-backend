@@ -89,10 +89,9 @@ namespace InfoPoster_backend.Handlers.Organizations
             var contact = await _repository.GetContact(request.OrganizationId);
             if (contact == null)
             {
-                contact = new OrganizationContactModel()
+                contact = new ContactModel()
                 {
-                    Id = Guid.NewGuid(),
-                    OrganizationId = request.OrganizationId
+                    ApplicationId = request.OrganizationId
                 };
                 contact.Update(request);
                 await _repository.AddContact(contact);
@@ -127,7 +126,6 @@ namespace InfoPoster_backend.Handlers.Organizations
 
             await _repository.SaveFiles(files, request.OrganizationId);
             await _repository.SaveMenus(menus, request.OrganizationId);
-            //await SaveBase64(request.FileBase64, request.FileType, request.OrganizationId);
 
             if (request.Parking != null && request.Parking.Count > 0)
             {

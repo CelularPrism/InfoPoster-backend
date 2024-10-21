@@ -24,7 +24,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<PosterModel> Posters { get; set; }
         public DbSet<PosterFullInfoModel> PostersFullInfo { get; set; }
         public DbSet<PosterMultilangModel> PostersMultilang { get; set; }
-        public DbSet<PosterContactsModel> PostersContact { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
         public DbSet<CategoryMultilangModel> CategoriesMultilang { get; set; }
         public DbSet<SubcategoryModel> Subcategories { get; set; }
@@ -35,5 +34,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<PlaceModel> Places { get; set; }
         public DbSet<SelectelFileURLModel> SelectelFileURLs { get; set; }
         public DbSet<FileToApplication> FileToApplication { get; set; }
+        public DbSet<ContactModel> Contacts { get; set; }
     }
 }

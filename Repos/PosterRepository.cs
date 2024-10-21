@@ -31,8 +31,8 @@ namespace InfoPoster_backend.Repos
         public async Task<PosterMultilangModel> GetMultilangPoster(Guid posterId, string lang) =>
             await _context.PostersMultilang.FirstOrDefaultAsync(x => x.PosterId == posterId && x.Lang == lang);
 
-        public async Task<PosterContactsModel> GetContact(Guid posterId) =>
-            await _context.PostersContact.FirstOrDefaultAsync(c => c.PosterId == posterId);
+        public async Task<ContactModel> GetContact(Guid posterId) =>
+            await _context.Contacts.FirstOrDefaultAsync(c => c.ApplicationId == posterId);
 
         public async Task<List<FileURLModel>> GetFileUrls(Guid posterId) =>
             await _context.FileUrls.Where(f => f.PosterId == posterId).ToListAsync();
@@ -199,9 +199,9 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddContact(PosterContactsModel model)
+        public async Task AddContact(ContactModel model)
         {
-            await _context.PostersContact.AddAsync(model);
+            await _context.Contacts.AddAsync(model);
             await _context.SaveChangesAsync();
         }
 
@@ -229,9 +229,9 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateContact(PosterContactsModel model)
+        public async Task UpdateContact(ContactModel model)
         {
-            _context.PostersContact.Update(model);
+            _context.Contacts.Update(model);
             await _context.SaveChangesAsync();
         }
 
