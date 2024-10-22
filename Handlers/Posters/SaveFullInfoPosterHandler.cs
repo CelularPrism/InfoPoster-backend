@@ -24,7 +24,7 @@ namespace InfoPoster_backend.Handlers.Posters
         public string PlaceLink { get; set; }
         public List<PlaceRequestModel> Parking { get; set; }
         public string Tags { get; set; }
-        public List<string> SocialLinks { get; set; }
+        public string SocialLinks { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
@@ -126,9 +126,10 @@ namespace InfoPoster_backend.Handlers.Posters
                     files.Add(new FileURLModel(request.PosterId, video, (int)FILE_CATEGORIES.VIDEO));
                 }
             }
-            if (request.SocialLinks != null)
+            if (!string.IsNullOrEmpty(request.SocialLinks))
             {
-                foreach (var social in request.SocialLinks)
+                var links = request.SocialLinks.Split(' ');
+                foreach (var social in links)
                 {
                     files.Add(new FileURLModel(request.PosterId, social, (int)FILE_CATEGORIES.SOCIAL_LINKS));
                 }
@@ -138,6 +139,12 @@ namespace InfoPoster_backend.Handlers.Posters
 
             if (request.Parking != null && request.Parking.Count > 0)
             {
+                request.Parking = request.Parking.Select(p => new PlaceRequestModel()
+                {
+                    Info = p.Info,
+                    Lang = request.Lang,
+                    PlaceLink = p.PlaceLink,
+                }).ToList();
                 var places = request.Parking.Select(p => new PlaceModel(p, request.PosterId)).ToList();
                 await _repository.SavePlaces(places, request.PosterId);
             }
