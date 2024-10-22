@@ -38,7 +38,7 @@ namespace InfoPoster_backend.Repos
                                                             .AsNoTracking()
                                                             .ToListAsync();
 
-            var categoryName = await _context.CategoriesMultilang.Where(c => c.Id == categoryId && c.lang == lang).Select(c => c.Name).AsNoTracking().FirstOrDefaultAsync();
+            var categoryName = await _context.CategoriesMultilang.Where(c => c.CategoryId == categoryId && c.lang == lang).Select(c => c.Name).AsNoTracking().FirstOrDefaultAsync();
             var result = new SubcategoryResponseModel()
             {
                 CategoryName = categoryName,

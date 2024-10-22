@@ -8,6 +8,8 @@ namespace InfoPoster_backend.Handlers.Organizations
 
     public class GetAllOrganizationResponse
     {
+        public GetAllOrganizationResponse() { }
+
         public GetAllOrganizationResponse(OrganizationModel organization, OrganizationMultilangModel multilang, string userName)
         {
             Id = organization.Id;

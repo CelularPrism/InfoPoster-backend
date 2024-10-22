@@ -10,7 +10,6 @@ namespace InfoPoster_backend.Models.Posters
         {
             Lang = fullInfo.Lang;
             Place = fullInfo.Place;
-            City = fullInfo.City;
             Name = fullInfo.Name;
             Adress = fullInfo.Adress;
             Description = fullInfo.Description;
@@ -24,7 +23,6 @@ namespace InfoPoster_backend.Models.Posters
             PosterId = fullInfo.PosterId;
             Lang = fullInfo.Lang;
             Place = fullInfo.Place;
-            City = fullInfo.City;
             Name = fullInfo.Name;
             Adress = fullInfo.Adress;
             Description = fullInfo.Description;
@@ -36,7 +34,6 @@ namespace InfoPoster_backend.Models.Posters
         public Guid PosterId { get; set; }
         public string Lang { get; set; }
         public string Place { get; set; }
-        public string City { get; set; }
         public string Name { get; set; }
         public string Adress { get; set; }
         public string Description { get; set; }

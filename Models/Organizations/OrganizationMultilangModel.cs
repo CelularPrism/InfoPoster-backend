@@ -15,7 +15,6 @@ namespace InfoPoster_backend.Models.Organizations
             ContactName = model.ContactName;
             SiteLink = model.SiteLink;
             Adress = model.Adress;
-            City = model.City;
         }
 
         public void Update(SaveOrganizationRequest model)
@@ -27,14 +26,12 @@ namespace InfoPoster_backend.Models.Organizations
             ContactName = model.ContactName;
             SiteLink = model.SiteLink;
             Adress = model.Adress;
-            City = model.City;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid OrganizationId { get; set; }
         public string Lang { get; set; }
         public string Name { get; set; }
-        public string City { get; set; }
         public string Adress { get; set; }
         public string SiteLink { get; set; }
         public string SocialLinks { get; set; }

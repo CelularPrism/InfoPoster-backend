@@ -14,6 +14,7 @@ namespace InfoPoster_backend.Models.Organizations
             WorkTime = model.WorkTime;
             PlaceLink = model.PlaceLink;
             AgeRestriction = model.AgeRestriction;
+            City = model.City;
         }
         public void Update(SaveOrganizationRequest model)
         {
@@ -22,10 +23,12 @@ namespace InfoPoster_backend.Models.Organizations
             WorkTime = model.WorkTime;
             PlaceLink = model.PlaceLink;
             AgeRestriction = model.AgeRestriction;
+            City = model.City;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid OrganizationId { get; set; }
+        public Guid City { get; set; }
         public string PriceLevel { get; set; }
         public string Capacity { get; set; }
         public string WorkTime { get; set; }

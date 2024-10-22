@@ -20,7 +20,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid SubcategoryId { get; set; }
         public string PriceLevel { get; set; }
         public string Capacity { get; set; }
-        public string City { get; set; }
+        public Guid City { get; set; }
         public string WorkTime { get; set; }
         public string Adress { get; set; }
         public string PlaceLink { get; set; }
@@ -28,7 +28,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string AgeRestriction { get; set; }
         public string SocialLinks { get; set; }
         public string Description { get; set; }
-        public List<PlaceRequestModel> Parking { get; set; }
+        public List<PlaceRequestModel> ParkingOrg { get; set; }
         public string Phone { get; set; }
         public string ContactName { get; set; }
         public List<string> VideoUrls { get; set; }
@@ -128,15 +128,15 @@ namespace InfoPoster_backend.Handlers.Organizations
             await _repository.SaveFiles(files, request.OrganizationId);
             await _repository.SaveMenus(menus, request.OrganizationId);
 
-            if (request.Parking != null && request.Parking.Count > 0)
+            if (request.ParkingOrg != null && request.ParkingOrg.Count > 0)
             {
-                request.Parking = request.Parking.Select(p => new PlaceRequestModel()
+                request.ParkingOrg = request.ParkingOrg.Select(p => new PlaceRequestModel()
                 {
                     Info = p.Info,
                     Lang = request.Lang,
                     PlaceLink = p.PlaceLink,
                 }).ToList();
-                var places = request.Parking.Select(p => new PlaceModel(p, request.OrganizationId)).ToList();
+                var places = request.ParkingOrg.Select(p => new PlaceModel(p, request.OrganizationId)).ToList();
                 await _repository.SavePlaces(places, request.OrganizationId);
             }
 

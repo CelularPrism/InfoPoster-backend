@@ -25,12 +25,12 @@ namespace InfoPoster_backend.Handlers.Administration
         public DateTime ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string Place { get; set; } = string.Empty;
-        public string City { get; set; } = string.Empty;
+        public Guid City { get; set; }
         public string TimeStart { get; set; } = string.Empty;
         public double Price { get; set; }
         public string Adress { get; set; } = string.Empty;
         public string PlaceLink { get; set; } = string.Empty;
-        public List<PlaceModel> Parking { get; set; }
+        public List<PlaceModel> Parking { get; set; } = new List<PlaceModel>();
         public string Tags { get; set; } = string.Empty;
         public List<string> SocialLinks { get; set; }
         public string Phone { get; set; } = string.Empty;
@@ -72,6 +72,7 @@ namespace InfoPoster_backend.Handlers.Administration
                 result.TimeStart = !string.IsNullOrEmpty(fullInfo.TimeStart) ? fullInfo.TimeStart : string.Empty;
                 result.PosterId = fullInfo.PosterId;
                 result.Price = fullInfo.Price;
+                result.City = fullInfo.City;
             } else
             {
                 result.PosterId = poster.Id;
@@ -81,7 +82,6 @@ namespace InfoPoster_backend.Handlers.Administration
             if (ml != null)
             {
                 result.Adress = !string.IsNullOrEmpty(ml.Adress) ? ml.Adress : string.Empty;
-                result.City = !string.IsNullOrEmpty(ml.City) ? ml.City : string.Empty;
                 result.Lang = !string.IsNullOrEmpty(ml.Lang) ? ml.Lang : string.Empty;
                 result.Description = !string.IsNullOrEmpty(ml.Description) ? ml.Description : string.Empty;
                 result.Name = !string.IsNullOrEmpty(ml.Name) ? ml.Name : string.Empty;

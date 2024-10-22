@@ -17,7 +17,7 @@ namespace InfoPoster_backend.Handlers.Posters
         public DateTime ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string Place { get; set; }
-        public string City { get; set; }
+        public Guid City { get; set; }
         public string TimeStart { get; set; }
         public double Price { get; set; }
         public string Adress { get; set; }

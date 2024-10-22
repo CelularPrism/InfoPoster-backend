@@ -21,7 +21,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid SubcategoryId { get; set; }
         public string PriceLevel { get; set; } = string.Empty;
         public string Capacity { get; set; } = string.Empty;
-        public string City { get; set; } = string.Empty;
+        public Guid City { get; set; }
         public string WorkTime { get; set; } = string.Empty;
         public string Adress { get; set; } = string.Empty;
         public string PlaceLink { get; set; } = string.Empty;
@@ -29,7 +29,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string AgeRestriction { get; set; } = string.Empty;
         public List<string> SocialLinks { get; set; }
         public string Description { get; set; } = string.Empty;
-        public List<PlaceModel> Parking { get; set; }
+        public List<PlaceModel> Parking { get; set; } = new List<PlaceModel>();
         public string Phone { get; set; } = string.Empty;
         public string ContactName { get; set; } = string.Empty;
         public List<string> VideoUrls { get; set; }
@@ -73,6 +73,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 result.WorkTime = !string.IsNullOrEmpty(fullInfo.WorkTime) ? fullInfo.WorkTime : string.Empty;
                 result.PlaceLink = !string.IsNullOrEmpty(fullInfo.PlaceLink) ? fullInfo.PlaceLink : string.Empty;
                 result.AgeRestriction = !string.IsNullOrEmpty(fullInfo.AgeRestriction) ? fullInfo.AgeRestriction : string.Empty;
+                result.City = fullInfo.City;
             }
 
             if (ml != null)
@@ -82,7 +83,6 @@ namespace InfoPoster_backend.Handlers.Organizations
                 result.Description = !string.IsNullOrEmpty(ml.Description) ? ml.Description : string.Empty;
                 result.Phone = !string.IsNullOrEmpty(ml.Phone) ? ml.Phone : string.Empty;
                 result.ContactName = !string.IsNullOrEmpty(ml.ContactName) ? ml.ContactName : string.Empty;
-                result.City = !string.IsNullOrEmpty(ml.City) ? ml.City : string.Empty;
                 result.Adress = !string.IsNullOrEmpty(ml.Adress) ? ml.Adress : string.Empty;
                 result.SiteLink = !string.IsNullOrEmpty(ml.SiteLink) ? ml.SiteLink : string.Empty;
             } else

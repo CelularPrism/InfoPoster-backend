@@ -6,9 +6,8 @@ using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Organizations.Menu;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
+using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
-using System.Collections.Generic;
 
 namespace InfoPoster_backend.Repos
 {
@@ -16,15 +15,87 @@ namespace InfoPoster_backend.Repos
     {
         private readonly AccountContext _account;
         private readonly OrganizationContext _organization;
+        private readonly string _lang;
+        private readonly Guid _city;
 
-        public OrganizationRepository(AccountContext account, OrganizationContext organization)
+        public OrganizationRepository(AccountContext account, OrganizationContext organization, IHttpContextAccessor accessor)
         {
             _account = account;
             _organization = organization;
+            _lang = accessor.HttpContext.Items[Constants.HTTP_ITEM_ClientLang].ToString();
+            _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
         public async Task<OrganizationModel> GetOrganization(Guid id) =>
             await _organization.Organizations.FirstOrDefaultAsync(o => o.Id == id);
+
+        public async Task<List<CategoryModel>> GetCategories() => await _organization.Categories.Join(_organization.CategoriesMultilang,
+                                                                                                      c => c.Id,
+                                                                                                      m => m.CategoryId,
+                                                                                                      (c, m) => new { Category = c, Multilang = m })
+                                                                                                .Where(c => c.Multilang.lang == _lang && c.Category.Type == (int)CategoryType.PLACE)
+                                                                                                .Select(c => new CategoryModel()
+                                                                                                {
+                                                                                                    Id = c.Category.Id,
+                                                                                                    Name = c.Multilang.Name,
+                                                                                                    ImageSrc = c.Category.ImageSrc,
+                                                                                                    Type = c.Category.Type,
+                                                                                                }).ToListAsync();
+
+        public async Task<CategoryModel> GetCategory(Guid categoryId) => await _organization.Categories.Join(_organization.CategoriesMultilang,
+                                                                                                      c => c.Id,
+                                                                                                      m => m.CategoryId,
+                                                                                                      (c, m) => new { Category = c, Multilang = m })
+                                                                                                .Where(c => c.Multilang.lang == _lang && c.Category.Id == categoryId)
+                                                                                                .Select(c => new CategoryModel()
+                                                                                                {
+                                                                                                    Id = c.Category.Id,
+                                                                                                    Name = c.Multilang.Name,
+                                                                                                    ImageSrc = c.Category.ImageSrc,
+                                                                                                    Type = c.Category.Type,
+                                                                                                }).FirstOrDefaultAsync();
+
+        public async Task<List<SubcategoryModel>> GetSubcategories() => await _organization.Subcategories.Join(_organization.SubcategoriesMultilang,
+                                                                                                      c => c.Id,
+                                                                                                      m => m.SubcategoryId,
+                                                                                                      (c, m) => new { Subcategory = c, Multilang = m })
+                                                                                                .Where(c => c.Multilang.lang == _lang)
+                                                                                                .Select(c => new SubcategoryModel()
+                                                                                                {
+                                                                                                    Id = c.Subcategory.Id,
+                                                                                                    Name = c.Multilang.Name,
+                                                                                                    ImageSrc = c.Subcategory.ImageSrc
+                                                                                                }).ToListAsync();
+
+        public async Task<SubcategoryModel> GetSubcategory(Guid subcategoryId) => await _organization.Subcategories.Join(_organization.SubcategoriesMultilang,
+                                                                                                      c => c.Id,
+                                                                                                      m => m.SubcategoryId,
+                                                                                                      (c, m) => new { Subcategory = c, Multilang = m })
+                                                                                                .Where(c => c.Multilang.lang == _lang && c.Subcategory.Id == subcategoryId)
+                                                                                                .Select(c => new SubcategoryModel()
+                                                                                                {
+                                                                                                    Id = c.Subcategory.Id,
+                                                                                                    Name = c.Multilang.Name,
+                                                                                                    ImageSrc = c.Subcategory.ImageSrc,
+                                                                                                    CategoryId = c.Subcategory.CategoryId
+                                                                                                }).FirstOrDefaultAsync();
+
+        public async Task<List<OrganizationModel>> GetOrganizationList() => await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.VERIFIED)
+                                                                 .Join(_organization.OrganizationsMultilang,
+                                                                       o => o.Id,
+                                                                       m => m.OrganizationId,
+                                                                       (o, m) => new { Organization = o, Multilang = m })
+                                                                 .Where(m => m.Multilang.Lang == _lang)
+                                                                 .Select(o => new OrganizationModel()
+                                                                 {
+                                                                     Id = o.Organization.Id,
+                                                                     CategoryId = o.Organization.CategoryId,
+                                                                     CreatedAt = o.Organization.CreatedAt,
+                                                                     Name = o.Multilang.Name,
+                                                                     Status = o.Organization.Status,
+                                                                     SubcategoryId = o.Organization.SubcategoryId,
+                                                                     UserId = o.Organization.UserId
+                                                                 }).ToListAsync();
 
         public async Task<List<GetAllOrganizationResponse>> GetOrganizationList(string lang)
         {
@@ -104,6 +175,63 @@ namespace InfoPoster_backend.Repos
 
         public async Task<ContactModel> GetContact(Guid organizationId) =>
             await _organization.Contacts.FirstOrDefaultAsync(o => o.ApplicationId == organizationId);
+
+        public async Task<GetFullInfoOrganizationResponse> GetFullInfo(Guid id)
+        {
+            var model = await _organization.Organizations.Where(o => o.Id == id)
+                                               .Join(_organization.OrganizationsFullInfo,
+                                                     o => o.Id,
+                                                     f => f.OrganizationId,
+                                                     (o, f) => new { o, f })
+                                               .Join(_organization.OrganizationsMultilang,
+                                                    o => o.f.OrganizationId,
+                                                    m => m.OrganizationId,
+                                                    (o, m) => new { o, m })
+                                               .Where(o => o.m.Lang == _lang)
+                                               .Select(o => new { Organization = o.o.o, FullInfo = o.o.f, Multilang = o.m })
+                                               .AsNoTracking()
+                                               .FirstOrDefaultAsync();
+
+            var poster = new GetFullInfoOrganizationResponse(model.Organization, model.FullInfo, model.Multilang);
+            poster.CategoryName = await _organization.CategoriesMultilang.Where(c => c.CategoryId == poster.CategoryId && c.lang == _lang)
+                                                                    .AsNoTracking()
+                                                                    .Select(c => c.Name)
+                                                                    .FirstOrDefaultAsync();
+
+            poster.SubcategoryName = await _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == poster.SubcategoryId && c.lang == _lang)
+                                                                    .AsNoTracking()
+                                                                    .Select(c => c.Name)
+                                                                    .FirstOrDefaultAsync();
+
+            poster.City = await _organization.CitiesMultilang.Where(c => c.CityId == poster.CityId && c.Lang == _lang)
+                                                                    .AsNoTracking()
+                                                                    .Select(c => c.Name)
+                                                                    .FirstOrDefaultAsync();
+
+            var files = await _organization.FileUrls.Where(f => f.PosterId == id)
+                                               .AsNoTracking()
+                                               .ToListAsync();
+
+            poster.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
+            poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
+
+            var places = await _organization.Places.Where(p => p.ApplicationId == id)
+                                              .AsNoTracking()
+                                              .ToListAsync();
+
+            poster.Parking = places;
+            poster.Lang = _lang;
+
+            poster.MenuCategories = await _organization.MenusToOrganization.Where(m => m.OrganizationId == id)
+                                                                           .Join(_organization.MenusMultilang,
+                                                                                 org => org.MenuId,
+                                                                                 ml => ml.MenuId,
+                                                                                 (org, ml) => ml)
+                                                                           .Where(ml => ml.Lang == _lang)
+                                                                           .Select(ml => ml.Name)
+                                                                           .ToListAsync();
+            return poster;
+        }
 
         public async Task AddOrganization(OrganizationModel model)
         {

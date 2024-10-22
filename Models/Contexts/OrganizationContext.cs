@@ -35,5 +35,10 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<MenuToOrganizationModel> MenusToOrganization { get; set; }
         public DbSet<MenuMultilangModel> MenusMultilang { get; set; }
         public DbSet<ContactModel> Contacts { get; set; }
+        public DbSet<CategoryModel> Categories { get; set; }
+        public DbSet<SubcategoryModel> Subcategories { get; set; }
+        public DbSet<CategoryMultilangModel> CategoriesMultilang { get; set; }
+        public DbSet<SubcategoryMultilangModel> SubcategoriesMultilang { get; set; }
+        public DbSet<FileURLModel> FileUrls { get; set; }
     }
 }

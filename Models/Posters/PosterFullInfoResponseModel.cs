@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Cities;
+﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Models.Cities;
 
 namespace InfoPoster_backend.Models.Posters
 {
@@ -12,7 +13,7 @@ namespace InfoPoster_backend.Models.Posters
             ReleaseDate = poster.ReleaseDate;
             CategoryId = fullInfo.CategoryId;
             Place = multilang.Place;
-            City = multilang.City;
+            City = fullInfo.City;
             TimeStart = fullInfo.TimeStart;
             Price = fullInfo.Price;
             Adress = multilang.Adress;
@@ -20,7 +21,6 @@ namespace InfoPoster_backend.Models.Posters
             Phone = multilang.Phone;
             SiteLink = multilang.SiteLink;
             AgeRestriction = fullInfo.AgeRestriction;
-            GaleryUrls = new List<string>();
         }
 
         public Guid Id { get; set; }
@@ -30,18 +30,18 @@ namespace InfoPoster_backend.Models.Posters
         public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public string Place { get; set; }
-        public string City { get; set; }
+        public Guid City { get; set; }
         public string TimeStart { get; set; }
         public double Price { get; set; }
         public string Adress { get; set; }
         public string PlaceLink { get; set; }
         public List<PlaceModel> Parking { get; set; }
         public string Tags { get; set; }
-        public string SocialLinks { get; set; }
+        public List<string> SocialLinks { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public List<string> GaleryUrls { get; set; }
+        public List<GetFileResponse> GaleryUrls { get; set; }
         public List<string> VideoUrls { get; set; }
     }
 }
