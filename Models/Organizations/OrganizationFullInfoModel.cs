@@ -28,7 +28,7 @@ namespace InfoPoster_backend.Models.Organizations
 
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid OrganizationId { get; set; }
-        public Guid City { get; set; }
+        public Guid? City { get; set; }
         public string PriceLevel { get; set; }
         public string Capacity { get; set; }
         public string WorkTime { get; set; }

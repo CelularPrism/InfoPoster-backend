@@ -25,7 +25,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public DateTime ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string Place { get; set; } = string.Empty;
-        public Guid City { get; set; }
+        public Guid? City { get; set; }
         public string TimeStart { get; set; } = string.Empty;
         public double Price { get; set; }
         public string Adress { get; set; } = string.Empty;

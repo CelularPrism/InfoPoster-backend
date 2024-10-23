@@ -174,14 +174,14 @@ namespace InfoPoster_backend.Controllers
         [HttpPost("organization/delete")]
         public async Task<IActionResult> DeleteOrganization([FromForm] Guid organizationId)
         {
-            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.DELETED });
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.DELETED });
             return Ok(result);
         }
 
         [HttpPost("organization/disable")]
         public async Task<IActionResult> DisableOrganization([FromForm] Guid organizationId)
         {
-            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.DISABLED });
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.DISABLED });
             return Ok(result);
         }
 
@@ -189,14 +189,14 @@ namespace InfoPoster_backend.Controllers
         [HttpPost("organization/enable")]
         public async Task<IActionResult> EnableOrganization([FromForm] Guid organizationId)
         {
-            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.VERIFIED });
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.VERIFIED });
             return Ok(result);
         }
 
         [HttpPost("organization/active")]
         public async Task<IActionResult> ActivateOrganization([FromForm] Guid organizationId)
         {
-            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.ACTIVE });
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.ACTIVE });
             return Ok(result);
         }
 

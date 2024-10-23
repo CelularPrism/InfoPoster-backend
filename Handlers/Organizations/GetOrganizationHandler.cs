@@ -21,7 +21,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid SubcategoryId { get; set; }
         public string PriceLevel { get; set; } = string.Empty;
         public string Capacity { get; set; } = string.Empty;
-        public Guid City { get; set; }
+        public Guid? City { get; set; }
         public string WorkTime { get; set; } = string.Empty;
         public string Adress { get; set; } = string.Empty;
         public string PlaceLink { get; set; } = string.Empty;
