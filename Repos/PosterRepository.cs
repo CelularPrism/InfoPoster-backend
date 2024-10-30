@@ -55,7 +55,7 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<GetAllPostersResponse>> GetListNoTracking(string lang)
         {
-            var list = await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.ACTIVE || p.Status == (int)POSTER_STATUS.VERIFIED)
+            var list = await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING || p.Status == (int)POSTER_STATUS.PUBLISHED)
                                   .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
@@ -111,7 +111,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.VERIFIED)
+                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED)
                                   .AsNoTracking()
                                   .ToListAsync();
 
@@ -133,7 +133,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.VERIFIED)
+                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED)
                                   .AsNoTracking()
                                   .ToListAsync();
 
@@ -156,7 +156,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.VERIFIED)
+                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED)
                                   .AsNoTracking()
                                   .ToListAsync();
 

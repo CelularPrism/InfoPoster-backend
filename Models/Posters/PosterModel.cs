@@ -4,10 +4,10 @@ namespace InfoPoster_backend.Models.Posters
 {
     public enum POSTER_STATUS
     {
-        ACTIVE,
-        DISABLED,
+        PENDING,
+        DRAFT,
         DELETED,
-        VERIFIED
+        PUBLISHED
     }
 
     public class PosterModel

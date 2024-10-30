@@ -80,7 +80,7 @@ namespace InfoPoster_backend.Repos
                                                                                                     CategoryId = c.Subcategory.CategoryId
                                                                                                 }).FirstOrDefaultAsync();
 
-        public async Task<List<OrganizationModel>> GetOrganizationList() => await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.VERIFIED)
+        public async Task<List<OrganizationModel>> GetOrganizationList() => await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED)
                                                                  .Join(_organization.OrganizationsMultilang,
                                                                        o => o.Id,
                                                                        m => m.OrganizationId,
@@ -99,7 +99,7 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<GetAllOrganizationResponse>> GetOrganizationList(string lang)
         {
-            var organizations = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.ACTIVE || o.Status == (int)POSTER_STATUS.VERIFIED)
+            var organizations = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING || o.Status == (int)POSTER_STATUS.PUBLISHED)
                                                                  .Join(_organization.OrganizationsMultilang,
                                                                        o => o.Id,
                                                                        m => m.OrganizationId,

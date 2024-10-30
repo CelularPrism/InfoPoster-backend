@@ -30,7 +30,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             var organization = new OrganizationModel()
             {
                 UserId = userId,
-                Status = (int)POSTER_STATUS.DISABLED
+                Status = (int)POSTER_STATUS.DRAFT
             };
 
             var multilang = new List<OrganizationMultilangModel>(); ;

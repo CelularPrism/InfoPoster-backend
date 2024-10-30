@@ -62,7 +62,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public async Task<SaveOrganizationResponse> Handle(SaveOrganizationRequest request, CancellationToken cancellationToken = default)
         {
             var organization = await _repository.GetOrganization(request.OrganizationId);
-            if (organization == null || organization.Status == (int)POSTER_STATUS.ACTIVE || organization.Status == (int)POSTER_STATUS.VERIFIED)
+            if (organization == null || organization.Status == (int)POSTER_STATUS.PENDING || organization.Status == (int)POSTER_STATUS.PUBLISHED)
                 return null;
 
             var fullInfo = await _repository.GetOrganizationFullInfo(request.OrganizationId);

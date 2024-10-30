@@ -33,7 +33,7 @@ namespace InfoPoster_backend.Handlers.Posters
             {
                 Id = Guid.NewGuid(),
                 CreatedAt = DateTime.UtcNow,
-                Status = (int)POSTER_STATUS.DISABLED,
+                Status = (int)POSTER_STATUS.DRAFT,
                 UserId = user
             };
 
