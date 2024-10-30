@@ -2,6 +2,7 @@
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -32,12 +33,16 @@ namespace InfoPoster_backend.Handlers.Organizations
                 Status = (int)POSTER_STATUS.DISABLED
             };
 
-            var multilang = new OrganizationMultilangModel()
+            var multilang = new List<OrganizationMultilangModel>(); ;
+            foreach (var lang in Constants.SystemLangs)
             {
-                Id = Guid.NewGuid(),
-                OrganizationId = organization.Id,
-                Lang = "en"
-            };
+                multilang.Add(new OrganizationMultilangModel()
+                {
+                    Id = Guid.NewGuid(),
+                    OrganizationId = organization.Id,
+                    Lang = lang
+                });
+            }
 
             await _repository.AddOrganization(organization);
             await _repository.AddMultilang(multilang);

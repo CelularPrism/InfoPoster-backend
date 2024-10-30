@@ -24,7 +24,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public Guid Id { get; set; }
         public string Name { get; set; }
         [JsonConverter(typeof(OnlyDateConverter))]
-        public DateTime ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string CreatedBy { get; set; }
         public int Status { get; set; }

@@ -4,6 +4,7 @@ using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
@@ -14,7 +15,7 @@ namespace InfoPoster_backend.Handlers.Posters
         public string Lang { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public DateTime ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string Place { get; set; }
         public Guid City { get; set; }
@@ -67,7 +68,8 @@ namespace InfoPoster_backend.Handlers.Posters
                     CategoryId = request.CategoryId,
                     PlaceLink = request.PlaceLink,
                     Price = request.Price,
-                    TimeStart = request.TimeStart
+                    TimeStart = request.TimeStart,
+                    City = request.City,
                 };
                 await _repository.AddPosterFullInfo(fullInfo);
             }
@@ -82,17 +84,23 @@ namespace InfoPoster_backend.Handlers.Posters
                 await _repository.UpdatePosterFullInfo(fullInfo);
             }
 
-            var multilang = await _repository.GetMultilangPoster(request.PosterId, request.Lang);
-            if (multilang == null)
+            var multilang = await _repository.GetMultilangPosterList(request.PosterId);
+            if (multilang == null || multilang.Count == 0)
             {
-                multilang = new PosterMultilangModel(request);
+                foreach (var lang in Constants.SystemLangs) 
+                {
+                    multilang.Add(new PosterMultilangModel(request, lang));
+                }
                 await _repository.AddPosterMultilang(multilang);
             }
             else
             {
                 try
                 {
-                    multilang.Update(request);
+                    foreach (var ml in multilang)
+                    {
+                        ml.Update(request);
+                    }
                     await _repository.UpdatePosterMultilang(multilang);
                 }
                 catch (Exception ex)
@@ -139,14 +147,23 @@ namespace InfoPoster_backend.Handlers.Posters
 
             if (request.Parking != null && request.Parking.Count > 0)
             {
-                request.Parking = request.Parking.Select(p => new PlaceRequestModel()
+                var places = await _repository.GetPlaceList(request.PosterId);
+                if (places != null || places.Count > 0)
                 {
-                    Info = p.Info,
-                    Lang = request.Lang,
-                    PlaceLink = p.PlaceLink,
-                }).ToList();
-                var places = request.Parking.Select(p => new PlaceModel(p, request.PosterId)).ToList();
-                await _repository.SavePlaces(places, request.PosterId);
+                    await _repository.RemovePlaceList(places);
+                }
+                places = new List<PlaceModel>();
+                foreach (var lang in Constants.SystemLangs)
+                {
+                    request.Parking = request.Parking.Select(p => new PlaceRequestModel()
+                    {
+                        Info = p.Info,
+                        Lang = lang,
+                        PlaceLink = p.PlaceLink,
+                    }).ToList();
+                    places.AddRange(request.Parking.Select(p => new PlaceModel(p, request.PosterId)).ToList());
+                }
+                await _repository.AddPlaces(places);
             }
 
             if (string.IsNullOrEmpty(poster.Name))

@@ -5,10 +5,10 @@ namespace InfoPoster_backend.Models.Organizations
     public class OrganizationMultilangModel
     {
         public OrganizationMultilangModel() { }
-        public OrganizationMultilangModel(SaveOrganizationRequest model)
+        public OrganizationMultilangModel(SaveOrganizationRequest model, string lang)
         {
             OrganizationId = model.OrganizationId;
-            Lang = model.Lang;
+            Lang = lang;
             Name = model.Name;
             Description = model.Description;
             Phone = model.Phone;
@@ -19,13 +19,23 @@ namespace InfoPoster_backend.Models.Organizations
 
         public void Update(SaveOrganizationRequest model)
         {
-            Lang = model.Lang;
-            Name = model.Name;
-            Description = model.Description;
-            Phone = model.Phone;
-            ContactName = model.ContactName;
-            SiteLink = model.SiteLink;
-            Adress = model.Adress;
+            if (string.IsNullOrEmpty(model.Name) || model.Lang == Lang)
+                Name = model.Name;
+
+            if (string.IsNullOrEmpty(model.Description) || model.Lang == Lang)
+                Description = model.Description;
+
+            if (string.IsNullOrEmpty(model.Phone) || model.Lang == Lang)
+                Phone = model.Phone;
+
+            if (string.IsNullOrEmpty(model.ContactName) || model.Lang == Lang)
+                ContactName = model.ContactName;
+
+            if (string.IsNullOrEmpty(model.SiteLink) || model.Lang == Lang)
+                SiteLink = model.SiteLink;
+
+            if (string.IsNullOrEmpty(model.Adress) || model.Lang == Lang)
+                Adress = model.Adress;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();

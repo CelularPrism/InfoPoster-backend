@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
@@ -16,12 +17,10 @@ namespace InfoPoster_backend.Handlers.Posters
     {
         private readonly LoginService _loginService;
         private readonly PosterRepository _repository;
-        private readonly string _lang;
-        public AddPosterHandler(LoginService loginService, PosterRepository repository, IHttpContextAccessor accessor)
+        public AddPosterHandler(LoginService loginService, PosterRepository repository)
         {
             _loginService = loginService;
             _repository = repository;
-            _lang = "en";
         }
 
         public async Task<AddPosterResponse> Handle(AddPosterRequest request, CancellationToken cancellationToken = default)
@@ -38,12 +37,18 @@ namespace InfoPoster_backend.Handlers.Posters
                 UserId = user
             };
 
-            var multilang = new PosterMultilangModel()
+            
+            var multilang = new List<PosterMultilangModel>();
+
+            foreach (var lang in Constants.SystemLangs)
             {
-                Id = Guid.NewGuid(),
-                Lang = _lang,
-                PosterId = poster.Id
-            };
+                multilang.Add(new PosterMultilangModel()
+                {
+                    Id = Guid.NewGuid(),
+                    Lang = lang,
+                    PosterId = poster.Id
+                });
+            }
 
             await _repository.AddPosterMultilang(multilang);
             await _repository.AddPoster(poster);

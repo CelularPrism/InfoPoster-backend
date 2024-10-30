@@ -22,7 +22,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         [JsonConverter(typeof(OnlyDateConverter))]
-        public DateTime ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string Place { get; set; } = string.Empty;
         public Guid? City { get; set; }

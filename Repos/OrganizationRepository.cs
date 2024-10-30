@@ -137,6 +137,10 @@ namespace InfoPoster_backend.Repos
 
         public async Task<OrganizationMultilangModel> GetOrganizationMultilang(Guid organizationId, string lang) =>
             await _organization.OrganizationsMultilang.FirstOrDefaultAsync(f => f.OrganizationId == organizationId && f.Lang == lang);
+
+        public async Task<List<OrganizationMultilangModel>> GetOrganizationMultilangList(Guid organizationId) =>
+            await _organization.OrganizationsMultilang.Where(f => f.OrganizationId == organizationId).ToListAsync();
+
         public async Task<List<OrganizationFileURLModel>> GetFileUrls(Guid organizationId) =>
             await _organization.OrganizationFileUrls.Where(f => f.OrganizationId == organizationId).ToListAsync();
 
@@ -233,6 +237,9 @@ namespace InfoPoster_backend.Repos
             return poster;
         }
 
+        public async Task<List<PlaceModel>> GetPlaceList(Guid organizationId) =>
+            await _organization.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
+
         public async Task AddOrganization(OrganizationModel model)
         {
             await _organization.Organizations.AddAsync(model);
@@ -245,20 +252,15 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
-        public async Task AddMultilang(OrganizationMultilangModel model)
+        public async Task AddMultilang(List<OrganizationMultilangModel> model)
         {
-            await _organization.OrganizationsMultilang.AddAsync(model);
+            await _organization.OrganizationsMultilang.AddRangeAsync(model);
             await _organization.SaveChangesAsync();
         }
 
-        public async Task SavePlaces(List<PlaceModel> places, Guid organizationId)
+        public async Task AddPlaces(List<PlaceModel> places)
         {
-            var old = await _organization.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
-            if (old.Count > 0)
-                _organization.Places.RemoveRange(old);
-
-            if (places.Count > 0)
-                await _organization.Places.AddRangeAsync(places);
+            await _organization.Places.AddRangeAsync(places);
             await _organization.SaveChangesAsync();
         }
 
@@ -296,9 +298,9 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
-        public async Task UpdateMultilang(OrganizationMultilangModel model)
+        public async Task UpdateMultilang(List<OrganizationMultilangModel> model)
         {
-            _organization.OrganizationsMultilang.Update(model);
+            _organization.OrganizationsMultilang.UpdateRange(model);
             await _organization.SaveChangesAsync();
         }
 
@@ -323,6 +325,12 @@ namespace InfoPoster_backend.Repos
         public async Task UpdateContact(ContactModel contact)
         {
             _organization.Contacts.Update(contact);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task RemovePlaceList(List<PlaceModel> model)
+        {
+            _organization.Places.RemoveRange(model);
             await _organization.SaveChangesAsync();
         }
     }

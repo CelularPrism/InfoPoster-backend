@@ -33,6 +33,9 @@ namespace InfoPoster_backend.Repos
         public async Task<PosterMultilangModel> GetMultilangPoster(Guid posterId, string lang) =>
             await _context.PostersMultilang.FirstOrDefaultAsync(x => x.PosterId == posterId && x.Lang == lang);
 
+        public async Task<List<PosterMultilangModel>> GetMultilangPosterList(Guid posterId) =>
+            await _context.PostersMultilang.Where(x => x.PosterId == posterId).ToListAsync();
+
         public async Task<ContactModel> GetContact(Guid posterId) =>
             await _context.Contacts.FirstOrDefaultAsync(c => c.ApplicationId == posterId);
 
@@ -40,7 +43,7 @@ namespace InfoPoster_backend.Repos
             await _context.FileUrls.Where(f => f.PosterId == posterId).ToListAsync();
 
         public async Task<List<PlaceModel>> GetPlaces(Guid organizationId) =>
-            await _context.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
+            await _context.Places.Where(p => p.ApplicationId == organizationId && p.Lang == _lang).ToListAsync();
 
         public async Task<SelectelFileURLModel> GetSelectelFile(Guid organizationId) =>
             await _context.FileToApplication.Where(f => f.ApplicationId == organizationId)
@@ -200,6 +203,9 @@ namespace InfoPoster_backend.Repos
             return poster;
         }
 
+        public async Task<List<PlaceModel>> GetPlaceList(Guid organizationId) =>
+            await _context.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
+
         public async Task AddPoster(PosterModel model)
         {
             await _context.Posters.AddAsync(model);
@@ -218,9 +224,9 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddPosterMultilang(PosterMultilangModel model)
+        public async Task AddPosterMultilang(List<PosterMultilangModel> model)
         {
-            await _context.PostersMultilang.AddAsync(model);
+            await _context.PostersMultilang.AddRangeAsync(model);
             await _context.SaveChangesAsync();
         }
 
@@ -248,17 +254,14 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdatePosterMultilang(PosterMultilangModel model)
+        public async Task UpdatePosterMultilang(List<PosterMultilangModel> model)
         {
-            _context.PostersMultilang.Update(model);
+            _context.PostersMultilang.UpdateRange(model);
             await _context.SaveChangesAsync();
         }
 
-        public async Task SavePlaces(List<PlaceModel> places, Guid posterId)
+        public async Task AddPlaces(List<PlaceModel> places)
         {
-            var old = await _context.Places.Where(p => p.ApplicationId == posterId).ToListAsync();
-            if (old.Count > 0)
-                _context.Places.RemoveRange(old);
             await _context.Places.AddRangeAsync(places);
             await _context.SaveChangesAsync();
         }
@@ -281,6 +284,12 @@ namespace InfoPoster_backend.Repos
         public async Task AddSelectelFile(SelectelFileURLModel file)
         {
             await _context.SelectelFileURLs.AddAsync(file);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemovePlaceList(List<PlaceModel> model)
+        {
+            _context.Places.RemoveRange(model);
             await _context.SaveChangesAsync();
         }
     }

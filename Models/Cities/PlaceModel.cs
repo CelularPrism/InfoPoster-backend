@@ -19,6 +19,15 @@
             PlaceLink = request.PlaceLink;
         }
 
+        public void Update(PlaceRequestModel request, Guid applicationId)
+        {
+            ApplicationId = applicationId;
+            PlaceLink = request.PlaceLink;
+
+            if (string.IsNullOrEmpty(Info) || request.Lang == Lang)
+                Info = request.Info;
+        }
+
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid ApplicationId { get; set; }
         public string Info { get; set; }

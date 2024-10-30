@@ -78,14 +78,21 @@ namespace InfoPoster_backend.Controllers
         [HttpPost("poster/full-info/save")]
         public async Task<IActionResult> SaveFullInfoPoster([FromForm] SaveFullInfoPosterRequest request)
         {
-            var result = await _mediator.Send(request);
-            if (result == null)
+            try
             {
-                ModelState.AddModelError("Error", "Can't find Poster with this Identifier");
+                var result = await _mediator.Send(request);
+                if (result == null)
+                {
+                    ModelState.AddModelError("Error", "Can't find Poster with this Identifier");
+                    return BadRequest(ModelState);
+                }
+
+                return Ok(result);
+            } catch (Exception ex)
+            {
+                ModelState.AddModelError("Error", ex.InnerException == null ? ex.Message : ex.InnerException.Message);
                 return BadRequest(ModelState);
             }
-
-            return Ok(result);
         }
 
         [HttpPost("poster/delete")]

@@ -7,6 +7,7 @@ using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Services.Selectel_API;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -75,14 +76,21 @@ namespace InfoPoster_backend.Handlers.Organizations
                 await _repository.UpdateFullInfo(fullInfo);
             }
 
-            var ml = await _repository.GetOrganizationMultilang(request.OrganizationId, request.Lang);
-            if (ml == null)
+            var ml = await _repository.GetOrganizationMultilangList(request.OrganizationId);
+            if (ml == null || ml.Count == 0)
             {
-                ml = new OrganizationMultilangModel(request);
+                ml = new List<OrganizationMultilangModel>();
+                foreach (var lang in Constants.SystemLangs)
+                {
+                    ml.Add(new OrganizationMultilangModel(request, lang));
+                }
                 await _repository.AddMultilang(ml);
             } else
             {
-                ml.Update(request);
+                foreach (var multilang in ml)
+                {
+                    multilang.Update(request);
+                }
                 await _repository.UpdateMultilang(ml);
             }
 
@@ -130,14 +138,23 @@ namespace InfoPoster_backend.Handlers.Organizations
 
             if (request.ParkingOrg != null && request.ParkingOrg.Count > 0)
             {
-                request.ParkingOrg = request.ParkingOrg.Select(p => new PlaceRequestModel()
+                var places = await _repository.GetPlaceList(request.OrganizationId);
+                if (places != null || places.Count > 0)
                 {
-                    Info = p.Info,
-                    Lang = request.Lang,
-                    PlaceLink = p.PlaceLink,
-                }).ToList();
-                var places = request.ParkingOrg.Select(p => new PlaceModel(p, request.OrganizationId)).ToList();
-                await _repository.SavePlaces(places, request.OrganizationId);
+                    await _repository.RemovePlaceList(places);
+                }
+                places = new List<PlaceModel>();
+                foreach (var lang in Constants.SystemLangs)
+                {
+                    request.ParkingOrg = request.ParkingOrg.Select(p => new PlaceRequestModel()
+                    {
+                        Info = p.Info,
+                        Lang = lang,
+                        PlaceLink = p.PlaceLink,
+                    }).ToList();
+                    places.AddRange(request.ParkingOrg.Select(p => new PlaceModel(p, request.OrganizationId)).ToList());
+                }
+                await _repository.AddPlaces(places);               
             }
 
             if (string.IsNullOrEmpty(organization.Name))

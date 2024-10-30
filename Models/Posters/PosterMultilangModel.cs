@@ -8,20 +8,30 @@ namespace InfoPoster_backend.Models.Posters
 
         public void Update(SaveFullInfoPosterRequest fullInfo)
         {
-            Lang = fullInfo.Lang;
-            Place = fullInfo.Place;
-            Name = fullInfo.Name;
-            Adress = fullInfo.Adress;
-            Description = fullInfo.Description;
-            Phone = fullInfo.Phone;
-            SiteLink = fullInfo.SiteLink;
+            if (string.IsNullOrEmpty(Place) || fullInfo.Lang == Lang)
+                Place = fullInfo.Place;
+
+            if (string.IsNullOrEmpty(Name) || fullInfo.Lang == Lang)
+                Name = fullInfo.Name;
+
+            if (string.IsNullOrEmpty(Adress) || fullInfo.Lang == Lang)
+                Adress = fullInfo.Adress;
+
+            if (string.IsNullOrEmpty(Description) || fullInfo.Lang == Lang)
+                Description = fullInfo.Description;
+
+            if (string.IsNullOrEmpty(Phone) || fullInfo.Lang == Lang)
+                Phone = fullInfo.Phone;
+
+            if (string.IsNullOrEmpty(SiteLink) || fullInfo.Lang == Lang)
+                SiteLink = fullInfo.SiteLink;
         }
 
-        public PosterMultilangModel(SaveFullInfoPosterRequest fullInfo) 
+        public PosterMultilangModel(SaveFullInfoPosterRequest fullInfo, string lang) 
         {
             Id = Guid.NewGuid();
             PosterId = fullInfo.PosterId;
-            Lang = fullInfo.Lang;
+            Lang = lang;
             Place = fullInfo.Place;
             Name = fullInfo.Name;
             Adress = fullInfo.Adress;
