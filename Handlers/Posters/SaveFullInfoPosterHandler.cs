@@ -182,28 +182,5 @@ namespace InfoPoster_backend.Handlers.Posters
 
             return result;
         }
-
-        private async Task SaveBase64(string base64, string type, Guid posterId)
-        {
-            var loggedIn = await _selectelAuthService.Login();
-            if (loggedIn)
-            {
-
-                var file = new SelectelFileURLModel()
-                {
-                    Type = type
-                };
-                
-                var app = new FileToApplication()
-                {
-                    ApplicationId = posterId,
-                    FileId = file.Id
-                };
-
-                await _repository.AddSelectelFile(file);
-                await _repository.AddFilePoster(app);
-                await _selectelAuthService.UploadObject(Convert.FromBase64String(base64), file.Id);
-            }
-        }
     }
 }

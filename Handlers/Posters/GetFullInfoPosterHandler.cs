@@ -31,6 +31,7 @@ namespace InfoPoster_backend.Handlers.Posters
         {
             var result = await _repository.GetFullInfo(request.Id, _lang);
             var files = await _fileRepository.GetSelectelFiles(request.Id, (int)FILE_PLACES.GALLERY);
+            var primaryFile = await _fileRepository.GetPrimaryFile(request.Id, (int)FILE_PLACES.GALLERY);
 
             var loggedIn = await _selectelAuthService.Login();
 
@@ -47,10 +48,12 @@ namespace InfoPoster_backend.Handlers.Posters
                     {
                         Id = file.Id,
                         Type = file.Type,
-                        URL = imageSrc
+                        URL = imageSrc,
+                        IsPrimary = primaryFile != null && primaryFile.FileId == file.Id ? true : false,
                     };
                     result.GaleryUrls.Add(response);
                 }
+                result.GaleryUrls = result.GaleryUrls.OrderByDescending(f => f.IsPrimary).ToList();
             }
 
             var viewLog = new PosterViewLogModel()

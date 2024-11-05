@@ -78,7 +78,9 @@ namespace InfoPoster_backend.Handlers.Organizations
         {
             var result = await _repository.GetFullInfo(request.Id);
             var files = await _fileRepository.GetSelectelFiles(request.Id, (int)FILE_PLACES.GALLERY);
+            var primaryFile = await _fileRepository.GetPrimaryFile(request.Id, (int)FILE_PLACES.GALLERY);
             var menu = await _fileRepository.GetSelectelFiles(request.Id, (int)FILE_PLACES.ORGANIZATION_MENU);
+            var primaryMenu = await _fileRepository.GetPrimaryFile(request.Id, (int)FILE_PLACES.ORGANIZATION_MENU);
 
             var loggedIn = await _selectelAuthService.Login();
 
@@ -96,10 +98,12 @@ namespace InfoPoster_backend.Handlers.Organizations
                     {
                         Id = file.Id,
                         Type = file.Type,
-                        URL = imageSrc
+                        URL = imageSrc,
+                        IsPrimary = primaryFile != null && primaryFile.FileId == file.Id ? true : false,
                     };
                     result.GaleryUrls.Add(response);
                 }
+                result.GaleryUrls = result.GaleryUrls.OrderByDescending(f => f.IsPrimary).ToList();
 
                 foreach (var file in menu)
                 {
@@ -108,10 +112,12 @@ namespace InfoPoster_backend.Handlers.Organizations
                     {
                         Id = file.Id,
                         Type = file.Type,
-                        URL = imageSrc
+                        URL = imageSrc,
+                        IsPrimary = primaryMenu != null && primaryMenu.FileId == file.Id ? true : false,
                     };
                     result.MenuUrls.Add(response);
                 }
+                result.MenuUrls = result.MenuUrls.OrderByDescending(f => f.IsPrimary).ToList();
             }
             return result;
         }

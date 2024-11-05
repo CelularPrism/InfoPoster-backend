@@ -22,6 +22,9 @@ namespace InfoPoster_backend.Repos
                                                        (f, s) => s)
                                             .ToListAsync();
 
+        public async Task<FileToApplication> GetPrimaryFile(Guid applicationId, int place) =>
+            await _context.FileToApplication.Where(f => f.ApplicationId == applicationId && f.Place == place && f.IsPrimary == true).FirstOrDefaultAsync();
+
         public async Task RemoveFile(Guid fileId, Guid applicationId)
         {
             var file = await _context.FileToApplication.FirstOrDefaultAsync(f => f.FileId == fileId && f.ApplicationId == applicationId);

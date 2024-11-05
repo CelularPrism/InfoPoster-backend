@@ -13,6 +13,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Base64 { get; set; }
         public string Type { get; set; }
         public int Place { get; set; }
+        public bool IsPrimary { get; set; }
     }
 
     public class UploadFileResponse { }
@@ -44,6 +45,7 @@ namespace InfoPoster_backend.Handlers.Administration
                     ApplicationId = request.ApplicationId,
                     FileId = file.Id,
                     Place = request.Place,
+                    IsPrimary = request.IsPrimary,
                 };
 
                 await _repository.AddSelectelFile(file);

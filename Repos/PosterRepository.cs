@@ -139,7 +139,11 @@ namespace InfoPoster_backend.Repos
 
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == lang).ToListAsync();
 
-            var result = list.Select(p => new PosterResponseModel(p.p.p, p.m) { CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault() })
+            var result = list.Select(p => new PosterResponseModel(p.p.p, p.m) 
+                                            { 
+                                                CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(), 
+                                                FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault(),
+                                            })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
             return result;
