@@ -210,8 +210,29 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PlaceModel>> GetPlaceList(Guid organizationId) =>
             await _context.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
 
-        public async Task AddPoster(PosterModel model)
+        public async Task<List<ApplicationHistoryResponse>> GetHistoryList(Guid organizationId) =>
+            await _context.ApplicationHistory.Where(h => h.ApplicationId == organizationId)
+                                             .Join(_context.Users,
+                                                   h => h.UserId,
+                                                   u => u.Id,
+                                                   (h, u) => new ApplicationHistoryResponse()
+                                                   {
+                                                        ApplicationId = h.ApplicationId,
+                                                        Id = h.Id,
+                                                        UpdatedAt = h.UpdatedAt,
+                                                        UserId = h.UserId,
+                                                        UserName = u.FirstName + " " + u.LastName,
+                                                   }).ToListAsync();
+
+        public async Task AddPoster(PosterModel model, Guid userId)
         {
+            var history = new ApplicationHistoryModel()
+            {
+                ApplicationId = model.Id,
+                UserId = userId
+            };
+
+            await _context.ApplicationHistory.AddAsync(history);
             await _context.Posters.AddAsync(model);
             await _context.SaveChangesAsync();
         }
@@ -240,9 +261,16 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdatePoster(PosterModel model)
+        public async Task UpdatePoster(PosterModel model, Guid userId)
         {
+            var history = new ApplicationHistoryModel()
+            {
+                ApplicationId = model.Id,
+                UserId = userId,
+            };
+
             _context.Posters.Update(model);
+            await _context.ApplicationHistory.AddAsync(history);
             await _context.SaveChangesAsync();
         }
 

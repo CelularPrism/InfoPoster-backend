@@ -240,8 +240,29 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PlaceModel>> GetPlaceList(Guid organizationId) =>
             await _organization.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
 
-        public async Task AddOrganization(OrganizationModel model)
+        public async Task<List<ApplicationHistoryResponse>> GetHistoryList(Guid organizationId) =>
+            await _organization.ApplicationHistory.Where(h => h.ApplicationId == organizationId)
+                                                  .Join(_organization.Users,
+                                                        h => h.UserId,
+                                                        u => u.Id,
+                                                        (h, u) => new ApplicationHistoryResponse()
+                                                        {
+                                                            ApplicationId = h.ApplicationId,
+                                                            Id = h.Id,
+                                                            UpdatedAt = h.UpdatedAt,
+                                                            UserId = h.UserId,
+                                                            UserName = u.FirstName + " " + u.LastName,
+                                                        }).ToListAsync();
+
+        public async Task AddOrganization(OrganizationModel model, Guid userId)
         {
+            var history = new ApplicationHistoryModel()
+            {
+                ApplicationId = model.Id,
+                UserId = userId
+            };
+
+            await _organization.ApplicationHistory.AddAsync(history);
             await _organization.Organizations.AddAsync(model);
             await _organization.SaveChangesAsync();
         }
@@ -286,9 +307,16 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
-        public async Task UpdateOrganization(OrganizationModel model)
+        public async Task UpdateOrganization(OrganizationModel model, Guid userId)
         {
+            var history = new ApplicationHistoryModel()
+            {
+                ApplicationId = model.Id,
+                UserId = userId
+            };
+
             _organization.Organizations.Update(model);
+            await _organization.ApplicationHistory.AddAsync(history);
             await _organization.SaveChangesAsync();
         }
 

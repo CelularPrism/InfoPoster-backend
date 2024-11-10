@@ -3,6 +3,7 @@ using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Services.Selectel_API;
 using InfoPoster_backend.Tools;
 using MediatR;
@@ -46,10 +47,13 @@ namespace InfoPoster_backend.Handlers.Posters
     {
         private readonly PosterRepository _repository;
         private readonly SelectelAuthService _selectelAuthService;
-        public SaveFullInfoPosterHandler(PosterRepository repository, SelectelAuthService selectelAuthService)
+        private readonly Guid _user;
+
+        public SaveFullInfoPosterHandler(PosterRepository repository, SelectelAuthService selectelAuthService, LoginService loginService)
         {
             _repository = repository;
             _selectelAuthService = selectelAuthService;
+            _user = loginService.GetUserId();
         }
 
         public async Task<SaveFullInfoPosterResponse> Handle(SaveFullInfoPosterRequest request, CancellationToken cancellationToken = default)
@@ -173,7 +177,7 @@ namespace InfoPoster_backend.Handlers.Posters
             poster.CategoryId = request.CategoryId;
             poster.UpdatedAt = DateTime.UtcNow;
 
-            await _repository.UpdatePoster(poster);
+            await _repository.UpdatePoster(poster, _user);
 
             var result = new SaveFullInfoPosterResponse()
             {

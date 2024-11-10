@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -15,9 +16,12 @@ namespace InfoPoster_backend.Handlers.Organizations
     public class ChangeOrganizationStatusHandler : IRequestHandler<ChangeOrganizationStatusRequest, ChangeOrganizationStatusResponse>
     {
         private readonly OrganizationRepository _repository;
-        public ChangeOrganizationStatusHandler(OrganizationRepository repository)
+        private readonly Guid _user;
+
+        public ChangeOrganizationStatusHandler(OrganizationRepository repository, LoginService loginService)
         {
             _repository = repository;
+            _user = loginService.GetUserId();
         }
 
         public async Task<ChangeOrganizationStatusResponse> Handle(ChangeOrganizationStatusRequest request, CancellationToken cancellationToken = default)
@@ -27,7 +31,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 return null;
 
             organization.Status = (int)request.Status;
-            await _repository.UpdateOrganization(organization);
+            await _repository.UpdateOrganization(organization, _user);
             return new ChangeOrganizationStatusResponse();
         }
     }

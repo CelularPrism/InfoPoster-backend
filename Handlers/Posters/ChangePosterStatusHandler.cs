@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
@@ -15,9 +16,12 @@ namespace InfoPoster_backend.Handlers.Posters
     public class ChangePosterStatusHandler : IRequestHandler<ChangePosterStatusRequest, ChangePosterStatusResponse>
     {
         private readonly PosterRepository _repository;
-        public ChangePosterStatusHandler(PosterRepository repository)
+        private readonly Guid _user;
+
+        public ChangePosterStatusHandler(PosterRepository repository, LoginService loginService)
         {
             _repository = repository;
+            _user = loginService.GetUserId();
         }
 
         public async Task<ChangePosterStatusResponse> Handle(ChangePosterStatusRequest request, CancellationToken cancellationToken = default)
@@ -27,7 +31,7 @@ namespace InfoPoster_backend.Handlers.Posters
                 return null;
 
             poster.Status = (int)request.Status;
-            await _repository.UpdatePoster(poster);
+            await _repository.UpdatePoster(poster, _user);
 
             return new ChangePosterStatusResponse();
         }

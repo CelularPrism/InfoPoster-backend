@@ -35,8 +35,6 @@ namespace InfoPoster_backend.Handlers.Organizations
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string ContactPhone { get; set; } = string.Empty;
-        public string Zalo { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
         public string ContactDescription { get; set; } = string.Empty;
         public int Status { get; set; }
         public List<Guid> MenuCategories { get; set; }
@@ -94,8 +92,6 @@ namespace InfoPoster_backend.Handlers.Organizations
             {
                 result.FirstName = !string.IsNullOrEmpty(contact.Name) ? contact.Name : string.Empty;
                 result.ContactPhone = !string.IsNullOrEmpty(contact.Phone) ? contact.Phone : string.Empty;
-                result.Zalo = !string.IsNullOrEmpty(contact.Zalo) ? contact.Zalo : string.Empty;
-                result.Email = !string.IsNullOrEmpty(contact.Email) ? contact.Email : string.Empty;
                 result.ContactDescription = !string.IsNullOrEmpty(contact.Comment) ? contact.Comment : string.Empty;
             }
 

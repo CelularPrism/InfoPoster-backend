@@ -44,7 +44,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 });
             }
 
-            await _repository.AddOrganization(organization);
+            await _repository.AddOrganization(organization, userId);
             await _repository.AddMultilang(multilang);
 
             var result = new CreateOrganizationResponse()

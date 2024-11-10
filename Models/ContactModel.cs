@@ -9,8 +9,6 @@ namespace InfoPoster_backend.Models
         {
             Name = request.FirstName;
             Phone = request.ContactPhone;
-            Email = request.Email;
-            Zalo = request.Zalo;
             Comment = request.ContactDescription;
         }
 

@@ -35,8 +35,6 @@ namespace InfoPoster_backend.Handlers.Organizations
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
         public string ContactPhone { get; set; }
-        public string Zalo { get; set; }
-        public string Email { get; set; }
         public string ContactDescription { get; set; }
         public List<Guid> MenuCategories { get; set; }
     }
@@ -48,15 +46,13 @@ namespace InfoPoster_backend.Handlers.Organizations
 
     public class SaveOrganizationHandler : IRequestHandler<SaveOrganizationRequest, SaveOrganizationResponse>
     {
-        private readonly LoginService _loginService;
         private readonly OrganizationRepository _repository;
-        private readonly SelectelAuthService _selectelAuthService;
+        private readonly Guid _user;
 
-        public SaveOrganizationHandler(LoginService loginService, OrganizationRepository repository, SelectelAuthService selectelAuthService)
+        public SaveOrganizationHandler(LoginService loginService, OrganizationRepository repository)
         {
-            _loginService = loginService;
+            _user = loginService.GetUserId();
             _repository = repository;
-            _selectelAuthService = selectelAuthService;
         }
 
         public async Task<SaveOrganizationResponse> Handle(SaveOrganizationRequest request, CancellationToken cancellationToken = default)
@@ -163,7 +159,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             organization.CategoryId = request.CategoryId;
             organization.SubcategoryId = request.SubcategoryId;
 
-            await _repository.UpdateOrganization(organization);
+            await _repository.UpdateOrganization(organization, _user);
 
             return new SaveOrganizationResponse();
         }

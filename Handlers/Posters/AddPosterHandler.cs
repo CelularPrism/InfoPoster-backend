@@ -51,7 +51,7 @@ namespace InfoPoster_backend.Handlers.Posters
             }
 
             await _repository.AddPosterMultilang(multilang);
-            await _repository.AddPoster(poster);
+            await _repository.AddPoster(poster, user);
             var result = new AddPosterResponse()
             {
                 Id = poster.Id
