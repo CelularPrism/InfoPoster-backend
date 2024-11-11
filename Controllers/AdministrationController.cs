@@ -148,6 +148,13 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("organization/search")]
+        public async Task<IActionResult> SearchOrganizations([FromQuery] string searchText, [FromQuery] Guid cityId)
+        {
+            var result = await _mediator.Send(new SearchOrganizationRequest() { SearchText = searchText, CityId = cityId });
+            return Ok(result);
+        }
+
         [HttpGet("organization/all")]
         public async Task<IActionResult> GetOrganizationPosters()
         {
@@ -222,7 +229,7 @@ namespace InfoPoster_backend.Controllers
         {
             var result = await _mediator.Send(new GetOrganizationHistoryRequest() { Id = organizationId });
             if (result == null)
-                return NoContent();
+                return NotFound();
 
             return Ok(result);
         }
@@ -231,6 +238,15 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
         {
             var result = await _mediator.Send(request);
+            return Ok(result);
+        }
+
+        [HttpPost("file/primary/set")]
+        public async Task<IActionResult> FileSetPrimary([FromForm] FileSetPrimaryRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+                return NotFound();
             return Ok(result);
         }
 

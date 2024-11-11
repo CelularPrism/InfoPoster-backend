@@ -25,6 +25,9 @@ namespace InfoPoster_backend.Repos
         public async Task<FileToApplication> GetPrimaryFile(Guid applicationId, int place) =>
             await _context.FileToApplication.Where(f => f.ApplicationId == applicationId && f.Place == place && f.IsPrimary == true).FirstOrDefaultAsync();
 
+        public async Task<FileToApplication> GetApplicationFile(Guid id) =>
+            await _context.FileToApplication.Where(f => f.FileId == id).FirstOrDefaultAsync();
+
         public async Task RemoveFile(Guid fileId, Guid applicationId)
         {
             var file = await _context.FileToApplication.FirstOrDefaultAsync(f => f.FileId == fileId && f.ApplicationId == applicationId);
@@ -37,7 +40,39 @@ namespace InfoPoster_backend.Repos
 
         public async Task AddFileToApplication(FileToApplication file)
         {
+            if (file.IsPrimary == true)
+            {
+                var listPrimary = await _context.FileToApplication.Where(f => f.ApplicationId == file.ApplicationId && f.IsPrimary).ToListAsync();
+                if (listPrimary.Count > 0)
+                {
+                    foreach (var item in listPrimary)
+                    {
+                        item.IsPrimary = false;
+                    }
+                    _context.FileToApplication.UpdateRange(listPrimary);
+                }
+            }
+
             await _context.FileToApplication.AddAsync(file);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateFileToApplication(FileToApplication file)
+        {
+            if (file.IsPrimary == true)
+            {
+                var listPrimary = await _context.FileToApplication.Where(f => f.ApplicationId == file.ApplicationId && f.IsPrimary).ToListAsync();
+                if (listPrimary.Count > 0)
+                {
+                    foreach (var item in listPrimary)
+                    {
+                        item.IsPrimary = false;
+                    }
+                    _context.FileToApplication.UpdateRange(listPrimary);
+                }
+            }
+
+            _context.FileToApplication.Update(file);
             await _context.SaveChangesAsync();
         }
 

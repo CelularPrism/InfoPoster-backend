@@ -254,6 +254,29 @@ namespace InfoPoster_backend.Repos
                                                             UserName = u.FirstName + " " + u.LastName,
                                                         }).ToListAsync();
 
+        public async Task<List<OrganizationModel>> SearchOrganizationList(string searchText, Guid city) =>
+            await _organization.OrganizationsFullInfo.Where(f => f.City == city)
+                                                     .Join(_organization.OrganizationsMultilang,
+                                                            f => f.OrganizationId,
+                                                            ml => ml.OrganizationId,
+                                                            (f, ml) => new { f.OrganizationId, ml.Name })
+                                                     .Where(f => f.Name.Contains(searchText))
+                                                     .Join(_organization.Organizations,
+                                                            ml => ml.OrganizationId,
+                                                            org => org.Id,
+                                                            (ml, org) => new OrganizationModel()
+                                                            {
+                                                                Id = org.Id,
+                                                                CategoryId = org.CategoryId,
+                                                                CreatedAt = org.CreatedAt,
+                                                                Name = ml.Name,
+                                                                Status = org.Status,
+                                                                SubcategoryId = org.SubcategoryId,
+                                                                UserId = org.UserId
+                                                            })
+                                                     .Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED)
+                                                     .ToListAsync();
+
         public async Task AddOrganization(OrganizationModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()
