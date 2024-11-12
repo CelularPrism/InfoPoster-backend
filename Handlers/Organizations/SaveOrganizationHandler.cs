@@ -30,12 +30,9 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string SocialLinks { get; set; }
         public string Description { get; set; }
         public List<PlaceRequestModel> ParkingOrg { get; set; }
-        public string Phone { get; set; }
-        public string ContactName { get; set; }
+        public string Contacts { get; set; }
+        public string InternalContacts { get; set; }
         public List<string> VideoUrls { get; set; }
-        public string FirstName { get; set; }
-        public string ContactPhone { get; set; }
-        public string ContactDescription { get; set; }
         public List<Guid> MenuCategories { get; set; }
     }
 

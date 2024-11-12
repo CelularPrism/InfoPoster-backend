@@ -11,8 +11,8 @@ namespace InfoPoster_backend.Models.Organizations
             Lang = lang;
             Name = model.Name;
             Description = model.Description;
-            Phone = model.Phone;
-            ContactName = model.ContactName;
+            Phone = model.InternalContacts;
+            ContactName = model.Contacts;
             SiteLink = model.SiteLink;
             Adress = model.Adress;
         }
@@ -25,11 +25,11 @@ namespace InfoPoster_backend.Models.Organizations
             if (string.IsNullOrEmpty(model.Description) || model.Lang == Lang)
                 Description = model.Description;
 
-            if (string.IsNullOrEmpty(model.Phone) || model.Lang == Lang)
-                Phone = model.Phone;
+            if (string.IsNullOrEmpty(model.InternalContacts) || model.Lang == Lang)
+                Phone = model.InternalContacts;
 
-            if (string.IsNullOrEmpty(model.ContactName) || model.Lang == Lang)
-                ContactName = model.ContactName;
+            if (string.IsNullOrEmpty(model.Contacts) || model.Lang == Lang)
+                ContactName = model.Contacts;
 
             if (string.IsNullOrEmpty(model.SiteLink) || model.Lang == Lang)
                 SiteLink = model.SiteLink;

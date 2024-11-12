@@ -32,10 +32,10 @@ namespace InfoPoster_backend.Handlers.Posters
         public string AgeRestriction { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
-        public string ContactPhone { get; set; }
-        public string Zalo { get; set; }
-        public string Email { get; set; }
-        public string ContactDescription { get; set; }
+        public Guid AttachedOrganizationId { get; set; }
+        public string Tickets { get; set; }
+        public string Contacts { get; set; }
+        public string InternalContacts { get; set; }
     }
 
     public class SaveFullInfoPosterResponse

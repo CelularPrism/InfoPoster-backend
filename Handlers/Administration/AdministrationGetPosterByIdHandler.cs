@@ -18,30 +18,30 @@ namespace InfoPoster_backend.Handlers.Administration
     public class AdministrationGetPosterByIdResponse
     {
         public Guid PosterId { get; set; }
-        public string Lang { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+        public string Lang { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
         [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime? ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
-        public string Place { get; set; } = string.Empty;
+        public string Place { get; set; }
         public Guid? City { get; set; }
-        public string TimeStart { get; set; } = string.Empty;
+        public string TimeStart { get; set; }
         public double Price { get; set; }
-        public string Adress { get; set; } = string.Empty;
-        public string PlaceLink { get; set; } = string.Empty;
-        public List<PlaceModel> Parking { get; set; } = new List<PlaceModel>();
-        public string Tags { get; set; } = string.Empty;
-        public List<string> SocialLinks { get; set; }
-        public string Phone { get; set; } = string.Empty;
-        public string SiteLink { get; set; } = string.Empty;
-        public string AgeRestriction { get; set; } = string.Empty;
+        public string Adress { get; set; }
+        public string PlaceLink { get; set; }
+        public List<PlaceModel> Parking { get; set; }
+        public string Tags { get; set; }
+        public string SocialLinks { get; set; }
+        public string Phone { get; set; }
+        public string SiteLink { get; set; }
+        public string AgeRestriction { get; set; }
         public List<string> VideoUrls { get; set; }
-        public string FirstName { get; set; } = string.Empty;
-        public string ContactPhone { get; set; } = string.Empty;
-        public string Zalo { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string ContactDescription { get; set; } = string.Empty;
+        public string FirstName { get; set; }
+        public Guid AttachedOrganizationId { get; set; }
+        public string Tickets { get; set; }
+        public string Contacts { get; set; }
+        public string InternalContacts { get; set; }
         public int Status { get; set; }
     }
 
@@ -96,11 +96,8 @@ namespace InfoPoster_backend.Handlers.Administration
             var contact = await _repository.GetContact(request.Id);
             if (contact != null)
             {
-                result.FirstName = !string.IsNullOrEmpty(contact.Name) ? contact.Name : string.Empty;
-                result.ContactPhone = !string.IsNullOrEmpty(contact.Phone) ? contact.Phone : string.Empty;
-                result.Zalo = !string.IsNullOrEmpty(contact.Zalo) ? contact.Zalo : string.Empty;
-                result.Email = !string.IsNullOrEmpty(contact.Email) ? contact.Email : string.Empty;
-                result.ContactDescription = !string.IsNullOrEmpty(contact.Comment) ? contact.Comment : string.Empty;
+                result.Contacts = !string.IsNullOrEmpty(contact.Name) ? contact.Name : string.Empty;
+                result.InternalContacts = !string.IsNullOrEmpty(contact.Phone) ? contact.Phone : string.Empty;
             }
             
             var files = await _repository.GetFileUrls(request.Id);
@@ -108,7 +105,7 @@ namespace InfoPoster_backend.Handlers.Administration
             result.ReleaseDate = poster.ReleaseDate;
             //result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
             result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
-            result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
+            result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
 
             var places = await _repository.GetPlaces(request.Id);
             if (places.Count > 0)

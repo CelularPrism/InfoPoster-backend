@@ -145,7 +145,7 @@ namespace InfoPoster_backend.Repos
             await _organization.OrganizationFileUrls.Where(f => f.OrganizationId == organizationId).ToListAsync();
 
         public async Task<List<PlaceModel>> GetPlaces(Guid organizationId) =>
-            await _organization.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
+            await _organization.Places.Where(p => p.ApplicationId == organizationId && p.Lang == _lang).ToListAsync();
 
         public async Task<List<CityModel>> GetCities(string lang) =>
             await _organization.CitiesMultilang.Where(c => c.Lang == lang).Select(c => new CityModel() { Id = c.CityId, Name = c.Name }).ToListAsync();
