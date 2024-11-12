@@ -15,6 +15,7 @@ namespace InfoPoster_backend.Models.Organizations
             ContactName = model.Contacts;
             SiteLink = model.SiteLink;
             Adress = model.Adress;
+            WorkTime = model.WorkTime;
         }
 
         public void Update(SaveOrganizationRequest model)
@@ -36,6 +37,9 @@ namespace InfoPoster_backend.Models.Organizations
 
             if (string.IsNullOrEmpty(model.Adress) || model.Lang == Lang)
                 Adress = model.Adress;
+            
+            if (string.IsNullOrEmpty(model.WorkTime) || model.Lang == Lang)
+                WorkTime = model.WorkTime;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -44,11 +48,9 @@ namespace InfoPoster_backend.Models.Organizations
         public string Name { get; set; }
         public string Adress { get; set; }
         public string SiteLink { get; set; }
-        public string SocialLinks { get; set; }
         public string Description { get; set; }
-        public string ParkingInfo { get; set; }
-        public string ParkingPlace { get; set; }
         public string Phone { get; set; }
         public string ContactName { get; set; }
+        public string WorkTime { get; set; }
     }
 }

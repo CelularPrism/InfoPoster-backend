@@ -37,7 +37,7 @@ namespace InfoPoster_backend.Repos
             await _context.PostersMultilang.Where(x => x.PosterId == posterId).ToListAsync();
 
         public async Task<ContactModel> GetContact(Guid posterId) =>
-            await _context.Contacts.FirstOrDefaultAsync(c => c.ApplicationId == posterId);
+            await _context.Contacts.FirstOrDefaultAsync(c => c.ApplicationId == posterId && c.Lang == _lang);
 
         public async Task<List<FileURLModel>> GetFileUrls(Guid posterId) =>
             await _context.FileUrls.Where(f => f.PosterId == posterId).ToListAsync();
@@ -203,15 +203,16 @@ namespace InfoPoster_backend.Repos
                                               .ToListAsync();
 
             poster.Parking = places;
+            poster.AttachedOrganizationName = await _context.OrganizationsMultilang.Where(m => m.OrganizationId == model.FullInfo.OrganizationId && m.Lang == _lang).Select(m => m.Name).FirstOrDefaultAsync();
 
             return poster;
         }
 
-        public async Task<List<PlaceModel>> GetPlaceList(Guid organizationId) =>
-            await _context.Places.Where(p => p.ApplicationId == organizationId).ToListAsync();
+        public async Task<List<PlaceModel>> GetPlaceList(Guid posterId) =>
+            await _context.Places.Where(p => p.ApplicationId == posterId).ToListAsync();
 
-        public async Task<List<ApplicationHistoryResponse>> GetHistoryList(Guid organizationId) =>
-            await _context.ApplicationHistory.Where(h => h.ApplicationId == organizationId)
+        public async Task<List<ApplicationHistoryResponse>> GetHistoryList(Guid posterId) =>
+            await _context.ApplicationHistory.Where(h => h.ApplicationId == posterId)
                                              .Join(_context.Users,
                                                    h => h.UserId,
                                                    u => u.Id,
@@ -222,7 +223,8 @@ namespace InfoPoster_backend.Repos
                                                         UpdatedAt = h.UpdatedAt,
                                                         UserId = h.UserId,
                                                         UserName = u.FirstName + " " + u.LastName,
-                                                   }).ToListAsync();
+                                                   })
+                                             .OrderByDescending(h => h.UpdatedAt).ToListAsync();
 
         public async Task AddPoster(PosterModel model, Guid userId)
         {
@@ -237,9 +239,15 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddContact(ContactModel model)
+        public async Task AddContact(List<ContactModel> model, Guid posterId)
         {
-            await _context.Contacts.AddAsync(model);
+            var oldContacts = await _context.Contacts.Where(c => c.ApplicationId == posterId).ToListAsync();
+            if (oldContacts.Count > 0)
+            {
+                _context.Contacts.RemoveRange(oldContacts);
+            }
+
+            await _context.Contacts.AddRangeAsync(model);
             await _context.SaveChangesAsync();
         }
 

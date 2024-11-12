@@ -90,12 +90,18 @@ namespace InfoPoster_backend.Handlers.Organizations
             var contact = await _repository.GetContact(request.OrganizationId);
             if (contact == null)
             {
-                contact = new ContactModel()
+                var contactList = new List<ContactModel>();
+                foreach (var lang in Constants.SystemLangs)
                 {
-                    ApplicationId = request.OrganizationId
-                };
-                contact.Update(request);
-                await _repository.AddContact(contact);
+                    contact = new ContactModel()
+                    {
+                        ApplicationId = request.OrganizationId,
+                        Lang = lang,
+                    };
+                    contact.Update(request);
+                    contactList.Add(contact);
+                }
+                await _repository.AddContact(contactList, request.OrganizationId);
             } else
             {
                 contact.Update(request);
@@ -119,15 +125,18 @@ namespace InfoPoster_backend.Handlers.Organizations
                 }
             }
 
-            var menus = request.MenuCategories.Select(m => new MenuToOrganizationModel()
-            {
-                Id = Guid.NewGuid(),
-                MenuId = m,
-                OrganizationId = request.OrganizationId
-            }).ToList();
-
             await _repository.SaveFiles(files, request.OrganizationId);
-            await _repository.SaveMenus(menus, request.OrganizationId);
+
+            if (request.MenuCategories != null)
+            {
+                var menus = request.MenuCategories.Select(m => new MenuToOrganizationModel()
+                {
+                    Id = Guid.NewGuid(),
+                    MenuId = m,
+                    OrganizationId = request.OrganizationId
+                }).ToList();
+                await _repository.SaveMenus(menus, request.OrganizationId);
+            }
 
             if (request.ParkingOrg != null && request.ParkingOrg.Count > 0)
             {

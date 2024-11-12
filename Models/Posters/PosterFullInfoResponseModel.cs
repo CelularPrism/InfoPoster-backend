@@ -21,6 +21,8 @@ namespace InfoPoster_backend.Models.Posters
             Phone = multilang.Phone;
             SiteLink = multilang.SiteLink;
             AgeRestriction = fullInfo.AgeRestriction;
+            Tickets = multilang.Tickets;
+            AttachedOrganizationId = fullInfo.OrganizationId;
         }
 
         public Guid Id { get; set; }
@@ -41,7 +43,10 @@ namespace InfoPoster_backend.Models.Posters
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
+        public string Tickets { get; set; }
         public List<GetFileResponse> GaleryUrls { get; set; }
         public List<string> VideoUrls { get; set; }
+        public Guid? AttachedOrganizationId { get; set; }
+        public string AttachedOrganizationName { get; set; }
     }
 }

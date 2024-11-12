@@ -7,22 +7,20 @@ namespace InfoPoster_backend.Models
     {
         public void Update(SaveOrganizationRequest request)
         {
-            Name = request.Contacts;
-            Phone = request.InternalContacts;
+            Contacts = request.Contacts;
+            InternalContacts = request.InternalContacts;
         }
 
         public void Update(SaveFullInfoPosterRequest request)
         {
-            Name = request.Contacts;
-            Phone = request.InternalContacts;
+            Contacts = request.Contacts;
+            InternalContacts = request.InternalContacts == "null" ? null : request.InternalContacts;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid ApplicationId { get; set; }
-        public string Name { get; set; } // Contacts
-        public string Phone { get; set; } // InternalContacts
-        public string Email { get; set; }
-        public string Zalo { get; set; }
-        public string Comment { get; set; }
+        public string Contacts { get; set; } // Contacts (Name)
+        public string InternalContacts { get; set; } // InternalContacts (Phone)
+        public string Lang { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Services.Selectel_API;
 using InfoPoster_backend.Tools;
 using MediatR;
+using System.ComponentModel.DataAnnotations;
 
 namespace InfoPoster_backend.Handlers.Posters
 {
@@ -16,6 +17,9 @@ namespace InfoPoster_backend.Handlers.Posters
         public string Lang { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string Place { get; set; }
@@ -32,7 +36,7 @@ namespace InfoPoster_backend.Handlers.Posters
         public string AgeRestriction { get; set; }
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
-        public Guid AttachedOrganizationId { get; set; }
+        public Guid? AttachedOrganizationId { get; set; }
         public string Tickets { get; set; }
         public string Contacts { get; set; }
         public string InternalContacts { get; set; }
@@ -74,6 +78,7 @@ namespace InfoPoster_backend.Handlers.Posters
                     Price = request.Price,
                     TimeStart = request.TimeStart,
                     City = request.City,
+                    OrganizationId = request.AttachedOrganizationId
                 };
                 await _repository.AddPosterFullInfo(fullInfo);
             }
@@ -85,6 +90,7 @@ namespace InfoPoster_backend.Handlers.Posters
                 fullInfo.PlaceLink = request.PlaceLink;
                 fullInfo.Price = request.Price;
                 fullInfo.TimeStart = request.TimeStart;
+                fullInfo.OrganizationId = request.AttachedOrganizationId;
                 await _repository.UpdatePosterFullInfo(fullInfo);
             }
 
@@ -117,12 +123,18 @@ namespace InfoPoster_backend.Handlers.Posters
 
             if (contact == null)
             {
-                contact = new ContactModel()
+                var contactList = new List<ContactModel>();
+                foreach (var lang in Constants.SystemLangs)
                 {
-                    ApplicationId = request.PosterId
-                };
-                contact.Update(request);
-                await _repository.AddContact(contact);
+                    contact = new ContactModel()
+                    {
+                        ApplicationId = request.PosterId,
+                        Lang = lang
+                    };
+                    contact.Update(request);
+                    contactList.Add(contact);
+                }
+                await _repository.AddContact(contactList, request.PosterId);
             } else
             {
                 contact.Update(request);
@@ -173,7 +185,7 @@ namespace InfoPoster_backend.Handlers.Posters
             if (string.IsNullOrEmpty(poster.Name))
                 poster.Name = request.Name;
 
-            poster.ReleaseDate = request.ReleaseDate;
+            poster.ReleaseDate = request.ReleaseDate.HasValue ? request.ReleaseDate.Value.Date : null;
             poster.CategoryId = request.CategoryId;
             poster.UpdatedAt = DateTime.UtcNow;
 

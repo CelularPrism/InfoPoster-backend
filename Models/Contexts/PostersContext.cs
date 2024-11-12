@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models.Account;
 using InfoPoster_backend.Models.Cities;
+using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using Microsoft.EntityFrameworkCore;
@@ -36,5 +37,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<FileToApplication> FileToApplication { get; set; }
         public DbSet<ContactModel> Contacts { get; set; }
         public DbSet<ApplicationHistoryModel> ApplicationHistory { get; set; }
+        public DbSet<OrganizationMultilangModel> OrganizationsMultilang { get; set; }
     }
 }

@@ -31,7 +31,8 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string Description { get; set; } = string.Empty;
         public List<PlaceModel> Parking { get; set; } = new List<PlaceModel>();
         public string Phone { get; set; } = string.Empty;
-        public string ContactName { get; set; } = string.Empty;
+        public string Contacts { get; set; } = string.Empty;
+        public string InternalContacts { get; set; } = string.Empty;
         public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string ContactPhone { get; set; } = string.Empty;
@@ -68,7 +69,6 @@ namespace InfoPoster_backend.Handlers.Organizations
             {
                 result.PriceLevel = !string.IsNullOrEmpty(fullInfo.PriceLevel)? fullInfo.PriceLevel : string.Empty;
                 result.Capacity = !string.IsNullOrEmpty(fullInfo.Capacity) ? fullInfo.Capacity : string.Empty;
-                result.WorkTime = !string.IsNullOrEmpty(fullInfo.WorkTime) ? fullInfo.WorkTime : string.Empty;
                 result.PlaceLink = !string.IsNullOrEmpty(fullInfo.PlaceLink) ? fullInfo.PlaceLink : string.Empty;
                 result.AgeRestriction = !string.IsNullOrEmpty(fullInfo.AgeRestriction) ? fullInfo.AgeRestriction : string.Empty;
                 result.City = fullInfo.City;
@@ -80,9 +80,9 @@ namespace InfoPoster_backend.Handlers.Organizations
                 result.Lang = !string.IsNullOrEmpty(ml.Lang) ? ml.Lang : string.Empty;
                 result.Description = !string.IsNullOrEmpty(ml.Description) ? ml.Description : string.Empty;
                 result.Phone = !string.IsNullOrEmpty(ml.Phone) ? ml.Phone : string.Empty;
-                result.ContactName = !string.IsNullOrEmpty(ml.ContactName) ? ml.ContactName : string.Empty;
                 result.Adress = !string.IsNullOrEmpty(ml.Adress) ? ml.Adress : string.Empty;
                 result.SiteLink = !string.IsNullOrEmpty(ml.SiteLink) ? ml.SiteLink : string.Empty;
+                result.WorkTime = !string.IsNullOrEmpty(ml.WorkTime) ? ml.WorkTime : string.Empty;
             } else
             {
                 result.Lang = request.Lang;
@@ -90,9 +90,8 @@ namespace InfoPoster_backend.Handlers.Organizations
 
             if (contact != null)
             {
-                result.FirstName = !string.IsNullOrEmpty(contact.Name) ? contact.Name : string.Empty;
-                result.ContactPhone = !string.IsNullOrEmpty(contact.Phone) ? contact.Phone : string.Empty;
-                result.ContactDescription = !string.IsNullOrEmpty(contact.Comment) ? contact.Comment : string.Empty;
+                result.InternalContacts = !string.IsNullOrEmpty(contact.InternalContacts) ? contact.InternalContacts : string.Empty;
+                result.Contacts = !string.IsNullOrEmpty(contact.Contacts) ? contact.Contacts : string.Empty;
             }
 
             var files = await _repository.GetFileUrls(request.Id);

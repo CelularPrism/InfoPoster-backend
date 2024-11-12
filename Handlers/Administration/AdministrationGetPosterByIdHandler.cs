@@ -33,12 +33,11 @@ namespace InfoPoster_backend.Handlers.Administration
         public List<PlaceModel> Parking { get; set; }
         public string Tags { get; set; }
         public string SocialLinks { get; set; }
-        public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
         public List<string> VideoUrls { get; set; }
-        public string FirstName { get; set; }
-        public Guid AttachedOrganizationId { get; set; }
+        public Guid? AttachedOrganizationId { get; set; }
+        public string AttachedOrganizationName { get; set; }
         public string Tickets { get; set; }
         public string Contacts { get; set; }
         public string InternalContacts { get; set; }
@@ -48,10 +47,12 @@ namespace InfoPoster_backend.Handlers.Administration
     public class AdministrationGetPosterByIdHandler : IRequestHandler<AdministrationGetPosterByIdRequest, AdministrationGetPosterByIdResponse>
     {
         private readonly PosterRepository _repository;
+        private readonly OrganizationRepository _organization;
 
-        public AdministrationGetPosterByIdHandler(PosterRepository repository)
+        public AdministrationGetPosterByIdHandler(PosterRepository repository, OrganizationRepository organization)
         {
             _repository = repository;
+            _organization = organization;
         }
 
         public async Task<AdministrationGetPosterByIdResponse> Handle(AdministrationGetPosterByIdRequest request, CancellationToken cancellationToken = default)
@@ -66,6 +67,13 @@ namespace InfoPoster_backend.Handlers.Administration
             var fullInfo = await _repository.GetFullInfoPoster(request.Id);
             if (fullInfo != null)
             {
+                if (fullInfo.OrganizationId != null)
+                {
+                    var organization = await _organization.GetOrganization((Guid)fullInfo.OrganizationId);
+                    result.AttachedOrganizationName = organization != null ? organization.Name : string.Empty;
+                    result.AttachedOrganizationId = organization.Id;
+                }
+
                 result.AgeRestriction = !string.IsNullOrEmpty(fullInfo.AgeRestriction) ? fullInfo.AgeRestriction : string.Empty;
                 result.CategoryId = fullInfo.CategoryId;
                 result.PlaceLink = !string.IsNullOrEmpty(fullInfo.PlaceLink) ? fullInfo.PlaceLink : string.Empty;
@@ -85,9 +93,9 @@ namespace InfoPoster_backend.Handlers.Administration
                 result.Lang = !string.IsNullOrEmpty(ml.Lang) ? ml.Lang : string.Empty;
                 result.Description = !string.IsNullOrEmpty(ml.Description) ? ml.Description : string.Empty;
                 result.Name = !string.IsNullOrEmpty(ml.Name) ? ml.Name : string.Empty;
-                result.Phone = !string.IsNullOrEmpty(ml.Phone) ? ml.Phone : string.Empty;
                 result.Place = !string.IsNullOrEmpty(ml.Place) ? ml.Place : string.Empty;
                 result.SiteLink = !string.IsNullOrEmpty(ml.SiteLink) ? ml.SiteLink : string.Empty;
+                result.Tickets = !string.IsNullOrEmpty(ml.Tickets) ? ml.Tickets : string.Empty;
             } else
             {
                 result.Lang = request.Lang;
@@ -96,8 +104,8 @@ namespace InfoPoster_backend.Handlers.Administration
             var contact = await _repository.GetContact(request.Id);
             if (contact != null)
             {
-                result.Contacts = !string.IsNullOrEmpty(contact.Name) ? contact.Name : string.Empty;
-                result.InternalContacts = !string.IsNullOrEmpty(contact.Phone) ? contact.Phone : string.Empty;
+                result.Contacts = !string.IsNullOrEmpty(contact.Contacts) ? contact.Contacts : string.Empty;
+                result.InternalContacts = !string.IsNullOrEmpty(contact.InternalContacts) ? contact.InternalContacts : string.Empty;
             }
             
             var files = await _repository.GetFileUrls(request.Id);

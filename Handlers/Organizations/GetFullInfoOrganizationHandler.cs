@@ -26,7 +26,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             Name = multilang.Name;
             PriceLevel = fullInfo.PriceLevel;
             Capacity = fullInfo.Capacity;
-            WorkTime = fullInfo.WorkTime;
+            WorkTime = multilang.WorkTime;
             Adress = multilang.Adress;
             PlaceLink = fullInfo.PlaceLink;
             SiteLink = multilang.SiteLink;

@@ -116,19 +116,14 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<OrganizationModel>> GetOrganizationList(Guid userId) =>
             await _organization.Organizations.Where(o => o.UserId == userId)
-                                             .Join(_organization.OrganizationsMultilang,
-                                                   o => o.Id,
-                                                   m => m.OrganizationId,
-                                                   (o, m) => new { Organization = o, Multilang = m })
-                                             .Where(m => m.Multilang.Lang == "en")
                                              .Select(o => new OrganizationModel() {
-                                                 Id = o.Organization.Id,
-                                                 Name = o.Multilang.Name,
-                                                 CategoryId = o.Organization.CategoryId,
-                                                 CreatedAt = o.Organization.CreatedAt,
-                                                 Status = o.Organization.Status,
-                                                 SubcategoryId = o.Organization.SubcategoryId,
-                                                 UserId = o.Organization.UserId
+                                                 Id = o.Id,
+                                                 Name = o.Name,
+                                                 CategoryId = o.CategoryId,
+                                                 CreatedAt = o.CreatedAt,
+                                                 Status = o.Status,
+                                                 SubcategoryId = o.SubcategoryId,
+                                                 UserId = o.UserId
                                              })
                                              .OrderByDescending(o => o.CreatedAt).ToListAsync();
 
@@ -178,7 +173,7 @@ namespace InfoPoster_backend.Repos
                                                    .Select(m => m.MenuId).ToListAsync();
 
         public async Task<ContactModel> GetContact(Guid organizationId) =>
-            await _organization.Contacts.FirstOrDefaultAsync(o => o.ApplicationId == organizationId);
+            await _organization.Contacts.FirstOrDefaultAsync(o => o.ApplicationId == organizationId && o.Lang == _lang);
 
         public async Task<GetFullInfoOrganizationResponse> GetFullInfo(Guid id)
         {
@@ -252,7 +247,8 @@ namespace InfoPoster_backend.Repos
                                                             UpdatedAt = h.UpdatedAt,
                                                             UserId = h.UserId,
                                                             UserName = u.FirstName + " " + u.LastName,
-                                                        }).ToListAsync();
+                                                        })
+                                                  .OrderByDescending(h => h.UpdatedAt).ToListAsync();
 
         public async Task<List<OrganizationModel>> SearchOrganizationList(string searchText, Guid city) =>
             await _organization.OrganizationsFullInfo.Where(f => f.City == city)
@@ -367,9 +363,14 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
-        public async Task AddContact(ContactModel contact)
+        public async Task AddContact(List<ContactModel> contact, Guid organizationId)
         {
-            await _organization.Contacts.AddAsync(contact);
+            var oldContact = await _organization.Contacts.Where(c => c.ApplicationId == organizationId).ToListAsync();
+            if (oldContact.Count > 0)
+            {
+                _organization.Contacts.RemoveRange(oldContact);
+            }
+            await _organization.Contacts.AddRangeAsync(contact);
             await _organization.SaveChangesAsync();
         }
 

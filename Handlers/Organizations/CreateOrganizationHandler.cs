@@ -33,19 +33,19 @@ namespace InfoPoster_backend.Handlers.Organizations
                 Status = (int)POSTER_STATUS.DRAFT
             };
 
-            var multilang = new List<OrganizationMultilangModel>(); ;
-            foreach (var lang in Constants.SystemLangs)
-            {
-                multilang.Add(new OrganizationMultilangModel()
-                {
-                    Id = Guid.NewGuid(),
-                    OrganizationId = organization.Id,
-                    Lang = lang
-                });
-            }
+            //var multilang = new List<OrganizationMultilangModel>(); ;
+            //foreach (var lang in Constants.SystemLangs)
+            //{
+            //    multilang.Add(new OrganizationMultilangModel()
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        OrganizationId = organization.Id,
+            //        Lang = lang
+            //    });
+            //}
 
             await _repository.AddOrganization(organization, userId);
-            await _repository.AddMultilang(multilang);
+            //await _repository.AddMultilang(multilang);
 
             var result = new CreateOrganizationResponse()
             {

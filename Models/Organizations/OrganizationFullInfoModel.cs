@@ -11,7 +11,6 @@ namespace InfoPoster_backend.Models.Organizations
             OrganizationId = model.OrganizationId;
             PriceLevel = model.PriceLevel;
             Capacity = model.Capacity;
-            WorkTime = model.WorkTime;
             PlaceLink = model.PlaceLink;
             AgeRestriction = model.AgeRestriction;
             City = model.City;
@@ -20,7 +19,6 @@ namespace InfoPoster_backend.Models.Organizations
         {
             PriceLevel = model.PriceLevel;
             Capacity = model.Capacity;
-            WorkTime = model.WorkTime;
             PlaceLink = model.PlaceLink;
             AgeRestriction = model.AgeRestriction;
             City = model.City;
@@ -31,7 +29,6 @@ namespace InfoPoster_backend.Models.Organizations
         public Guid? City { get; set; }
         public string PriceLevel { get; set; }
         public string Capacity { get; set; }
-        public string WorkTime { get; set; }
         public string PlaceLink { get; set; }
         public string AgeRestriction { get; set; }
     }
