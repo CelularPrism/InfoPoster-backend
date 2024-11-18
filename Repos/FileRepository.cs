@@ -28,6 +28,9 @@ namespace InfoPoster_backend.Repos
         public async Task<FileToApplication> GetApplicationFile(Guid id) =>
             await _context.FileToApplication.Where(f => f.FileId == id).FirstOrDefaultAsync();
 
+        public async Task<FileToApplication> GetApplicationFileByApplication(Guid applicationId) =>
+            await _context.FileToApplication.Where(f => f.FileId == applicationId).FirstOrDefaultAsync();
+
         public async Task RemoveFile(Guid fileId, Guid applicationId)
         {
             var file = await _context.FileToApplication.FirstOrDefaultAsync(f => f.FileId == fileId && f.ApplicationId == applicationId);

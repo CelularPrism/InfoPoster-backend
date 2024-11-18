@@ -6,16 +6,21 @@
         {
             Id = poster.Id;
             Name = multilang.Name;
+            Description = multilang.Description.Length < 100 ? multilang.Description : multilang.Description.Substring(0, 100);
             CategoryId = poster.CategoryId;
             Place = multilang.Place;
+
         }
 
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public DateTime ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public string Place { get; set; }
+        public double Price { get; set; }
         public Guid? FileId { get; set; }
+        public string FileURL { get; set; }
     }
 }

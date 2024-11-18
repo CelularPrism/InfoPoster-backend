@@ -1,5 +1,7 @@
-﻿using InfoPoster_backend.Models.Organizations;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Selectel_API;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -17,19 +19,28 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime CreatedAt { get; set; }
         public string Name { get; set; }
+        public string Desciption { get; set; }
         public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public Guid SubcategoryId { get; set; }
         public string SubcategoryName { get; set; }
         public string Place { get; set; }
+        public Guid? FileId { get; set; }
+        public string FileURL { get; set; }
+        public string PriceLevel { get; set; }
     }
 
     public class GetOrganizationsHandler : IRequestHandler<GetOrganizationsRequest, List<GetOrganizationsResponse>> 
     {
         private readonly OrganizationRepository _repository;
-        public GetOrganizationsHandler(OrganizationRepository organizationRepository)
+        private readonly FileRepository _file;
+        private readonly SelectelAuthService _selectelAuth;
+
+        public GetOrganizationsHandler(OrganizationRepository organizationRepository, FileRepository file, SelectelAuthService selectelAuth)
         {
             _repository = organizationRepository;
+            _file = file;
+            _selectelAuth = selectelAuth;
         }
 
         public async Task<List<GetOrganizationsResponse>> Handle(GetOrganizationsRequest request, CancellationToken cancellationToken = default)
@@ -50,7 +61,9 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  SubcategoryName = subcategory.Name,
                                                  Id = o.Id,
                                                  Name = o.Name,
-                                                 CreatedAt = o.CreatedAt
+                                                 CreatedAt = o.CreatedAt,
+                                                 PriceLevel = _repository.GetPriceLevel(o.Id),
+                                                 Desciption = _repository.GetDescription(o.Id),
                                              }).ToList();
             } else if (request.subcategoryId != Guid.Empty)
             {
@@ -66,7 +79,9 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  SubcategoryName = subcategory.Name,
                                                  Id = o.Id,
                                                  Name = o.Name,
-                                                 CreatedAt = o.CreatedAt
+                                                 CreatedAt = o.CreatedAt,
+                                                 PriceLevel = _repository.GetPriceLevel(o.Id),
+                                                 Desciption = _repository.GetDescription(o.Id),
                                              }).ToList();
             } else if (request.categoryId != Guid.Empty)
             {
@@ -82,7 +97,9 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  SubcategoryName = subcategories.Where(c => c.Id == o.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
                                                  Id = o.Id,
                                                  Name = o.Name,
-                                                 CreatedAt = o.CreatedAt
+                                                 CreatedAt = o.CreatedAt,
+                                                 PriceLevel = _repository.GetPriceLevel(o.Id),
+                                                 Desciption = _repository.GetDescription(o.Id),
                                              }).ToList();
             } else
             {
@@ -97,9 +114,30 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                 SubcategoryName = subcategories.Where(c => c.Id == o.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
                                                 Id = o.Id,
                                                 Name = o.Name,
-                                                CreatedAt = o.CreatedAt
+                                                CreatedAt = o.CreatedAt,
+                                                PriceLevel = _repository.GetPriceLevel(o.Id),
+                                                Desciption = _repository.GetDescription(o.Id),
                                          }).ToList();
             }
+
+            var loggedIn = await _selectelAuth.Login();
+            if (loggedIn)
+            {
+                var selectelUUID = await _selectelAuth.GetContainerUUID("dosdoc");
+                foreach (var item in result)
+                {
+                    var file = await _file.GetPrimaryFile(item.Id, (int)FILE_PLACES.GALLERY);
+                    if (file == null)
+                        file = await _file.GetApplicationFileByApplication(item.Id);
+
+                    if (file != null)
+                    {
+                        item.FileId = file.FileId;
+                        item.FileURL = string.Concat("https://", selectelUUID, ".selstorage.ru/", item.FileId);
+                    }
+                }
+            }
+
             return result;
         }
 

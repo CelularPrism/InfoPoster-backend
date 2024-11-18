@@ -72,7 +72,11 @@ namespace InfoPoster_backend.Repos
                                   .AsNoTracking()
                                   .ToListAsync();
 
-            var result = list.Select(p => new GetAllPostersResponse(p.p.p, p.p.m, p.UserName))
+            var result = list.Select(p => new GetAllPostersResponse(p.p.p, p.p.m, p.UserName)
+                                    {
+                                        CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
+                                        CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault()
+                                    })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
             return result;
@@ -114,8 +118,16 @@ namespace InfoPoster_backend.Repos
                                   .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED)
                                   .AsNoTracking()
                                   .ToListAsync();
+            var categories = await _context.CategoriesMultilang.Where(c => c.lang == lang).ToListAsync();
 
-            var result = list.Select(p => new PosterResponseModel(p.p.p, p.m))
+            var result = list.Select(p => new PosterResponseModel(p.p.p, p.m)
+                                    {
+                                        CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                        FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
+                                                 _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
+                                                 _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
+                                        Price = p.p.f.Price,
+                                    })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
             return result;
@@ -142,7 +154,10 @@ namespace InfoPoster_backend.Repos
             var result = list.Select(p => new PosterResponseModel(p.p.p, p.m) 
                                             { 
                                                 CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(), 
-                                                FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault(),
+                                                FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ? 
+                                                         _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
+                                                         _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
+                                                Price = p.p.f.Price,
                                             })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
@@ -198,7 +213,7 @@ namespace InfoPoster_backend.Repos
             poster.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
             poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
 
-            var places = await _context.Places.Where(p => p.ApplicationId == Id)
+            var places = await _context.Places.Where(p => p.ApplicationId == Id && p.Lang == lang)
                                               .AsNoTracking()
                                               .ToListAsync();
 

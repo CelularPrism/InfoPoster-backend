@@ -81,10 +81,15 @@ namespace InfoPoster_backend.Repos
                                                                                                 }).FirstOrDefaultAsync();
 
         public async Task<List<OrganizationModel>> GetOrganizationList() => await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED)
-                                                                 .Join(_organization.OrganizationsMultilang,
+                                                                 .Join(_organization.OrganizationsFullInfo,
                                                                        o => o.Id,
+                                                                       f => f.OrganizationId,
+                                                                       (o, f) => new { Organization = o, f.City })
+                                                                 .Where(f => f.City == _city)
+                                                                 .Join(_organization.OrganizationsMultilang,
+                                                                       o => o.Organization.Id,
                                                                        m => m.OrganizationId,
-                                                                       (o, m) => new { Organization = o, Multilang = m })
+                                                                       (o, m) => new { o.Organization, Multilang = m })
                                                                  .Where(m => m.Multilang.Lang == _lang)
                                                                  .Select(o => new OrganizationModel()
                                                                  {
@@ -110,7 +115,12 @@ namespace InfoPoster_backend.Repos
                                                                        user => user.Id,
                                                                        (o, user) => new { o.Organization, o.Multilang, UserName = user.FirstName + " " + user.LastName })
                                                                  .ToListAsync();
-            var result = organizations.Select(m => new GetAllOrganizationResponse(m.Organization, m.Multilang, m.UserName)).OrderByDescending(o => o.CreatedAt).ToList();
+            var result = organizations.Select(m => new GetAllOrganizationResponse(m.Organization, m.Multilang, m.UserName)
+                                            {
+                                                CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == m.Organization.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
+                                                SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == m.Organization.SubcategoryId && c.lang == "en").Select(s => s.Name).FirstOrDefault(),
+                                                CityName = _organization.OrganizationsFullInfo.Where(f => f.OrganizationId == m.Organization.Id).Select(f => f.City).Join(_organization.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault()
+                                            }).OrderByDescending(o => o.CreatedAt).ToList();
             return result;
         }
 
@@ -214,7 +224,7 @@ namespace InfoPoster_backend.Repos
             poster.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
             poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
 
-            var places = await _organization.Places.Where(p => p.ApplicationId == id)
+            var places = await _organization.Places.Where(p => p.ApplicationId == id && p.Lang == _lang)
                                               .AsNoTracking()
                                               .ToListAsync();
 
@@ -272,6 +282,12 @@ namespace InfoPoster_backend.Repos
                                                             })
                                                      .Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED)
                                                      .ToListAsync();
+
+        public string GetDescription(Guid organizationId) =>
+            _organization.OrganizationsMultilang.Where(m => m.OrganizationId == organizationId && m.Lang == _lang).Select(m => m.Description.Length < 100 ? m.Description : m.Description.Substring(0, 100)).FirstOrDefault();
+
+        public string GetPriceLevel(Guid organizationId) =>
+            _organization.OrganizationsFullInfo.Where(f => f.OrganizationId == organizationId).Select(f => f.PriceLevel).FirstOrDefault();
 
         public async Task AddOrganization(OrganizationModel model, Guid userId)
         {

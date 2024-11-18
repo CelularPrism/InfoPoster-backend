@@ -19,6 +19,7 @@ namespace InfoPoster_backend.Handlers.Administration
             CategoryId = poster.CategoryId;
             CreatedBy = userName;
             Status = poster.Status;
+            CreatedAt = poster.CreatedAt;
         }
 
         public Guid Id { get; set; }
@@ -28,6 +29,9 @@ namespace InfoPoster_backend.Handlers.Administration
         public Guid CategoryId { get; set; }
         public string CreatedBy { get; set; }
         public int Status { get; set; }
+        public string CategoryName { get; set; }
+        public string CityName { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class GetAllPostersHandler : IRequestHandler<GetAllPostersRequest, List<GetAllPostersResponse>>

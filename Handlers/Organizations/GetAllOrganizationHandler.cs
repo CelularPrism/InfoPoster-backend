@@ -28,6 +28,9 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid SubategoryId { get; set; }
         public string CreatedBy { get; set; }
         public int Status { get; set; }
+        public string CategoryName { get; set; }
+        public string CityName { get; set; }
+        public string SubcategoryName { get; set; }
     }
 
     public class GetAllOrganizationHandler : IRequestHandler<GetAllOrganizationRequest, List<GetAllOrganizationResponse>>
