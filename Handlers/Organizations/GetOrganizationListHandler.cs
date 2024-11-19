@@ -4,7 +4,14 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
 {
-    public class GetOrganizationListRequest : IRequest<List<GetOrganizationListResponse>> { }
+    public class GetOrganizationListRequest : IRequest<List<GetOrganizationListResponse>>
+    {
+        public int Sort { get; set; }
+        public Guid? CategoryId { get; set; }
+        public int? Status { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
 
     public class GetOrganizationListResponse
     {
@@ -29,6 +36,27 @@ namespace InfoPoster_backend.Handlers.Organizations
         {
             var userId = _loginService.GetUserId();
             var organizations = await _repository.GetOrganizationList(userId);
+
+            if (request.CategoryId != null)
+            {
+                organizations = organizations.Where(x => x.CategoryId == request.CategoryId).ToList();
+            }
+
+            if (request.Status != null)
+            {
+                organizations = organizations.Where(x => x.Status == request.Status).ToList();
+            }
+
+            if (request.StartDate != null)
+            {
+                organizations = organizations.Where(x => x.CreatedAt >= request.StartDate).ToList();
+            }
+
+            if (request.EndDate != null)
+            {
+                organizations = organizations.Where(x => x.CreatedAt <= request.EndDate).ToList();
+            }
+
             var result = organizations.Select(o => new GetOrganizationListResponse()
             {
                 Id = o.Id,
@@ -36,6 +64,15 @@ namespace InfoPoster_backend.Handlers.Organizations
                 Name = o.Name,
                 Status = o.Status
             }).ToList();
+
+            if (request.Sort == 0)
+            {
+                result = result.OrderByDescending(x => x.CreatedAt).ToList();
+            }
+            else
+            {
+                result = result.OrderBy(x => x.Status).ToList();
+            }
 
             return result;
         }

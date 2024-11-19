@@ -4,7 +4,15 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
 {
-    public class GetAllOrganizationRequest : IRequest<List<GetAllOrganizationResponse>> { }
+    public class GetAllOrganizationRequest : IRequest<List<GetAllOrganizationResponse>>
+    {
+        public int Sort { get; set; }
+        public Guid? CategoryId { get; set; }
+        public Guid? CityId { get; set; }
+        public int? Status { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
 
     public class GetAllOrganizationResponse
     {
@@ -29,6 +37,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string CreatedBy { get; set; }
         public int Status { get; set; }
         public string CategoryName { get; set; }
+        public Guid? CityId { get; set; }
         public string CityName { get; set; }
         public string SubcategoryName { get; set; }
     }
@@ -47,6 +56,41 @@ namespace InfoPoster_backend.Handlers.Organizations
         public async Task<List<GetAllOrganizationResponse>> Handle(GetAllOrganizationRequest request, CancellationToken cancellationToken = default)
         {
             var organizations = await _repository.GetOrganizationList(_lang);
+
+            if (request.CategoryId != null)
+            {
+                organizations = organizations.Where(x => x.CategoryId == request.CategoryId).ToList();
+            }
+
+            if (request.CityId != null)
+            {
+                organizations = organizations.Where(x => x.CityId == request.CityId).ToList();
+            }
+
+            if (request.Status != null)
+            {
+                organizations = organizations.Where(x => x.Status == request.Status).ToList();
+            }
+
+            if (request.StartDate != null)
+            {
+                organizations = organizations.Where(x => x.CreatedAt >= request.StartDate).ToList();
+            }
+
+            if (request.EndDate != null)
+            {
+                organizations = organizations.Where(x => x.CreatedAt <= request.EndDate).ToList();
+            }
+
+            if (request.Sort == 0)
+            {
+                organizations = organizations.OrderByDescending(x => x.CreatedAt).ToList();
+            }
+            else
+            {
+                organizations = organizations.OrderBy(x => x.Status).ToList();
+            }
+
             return organizations;
         }
     }

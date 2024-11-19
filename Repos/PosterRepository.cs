@@ -75,7 +75,8 @@ namespace InfoPoster_backend.Repos
             var result = list.Select(p => new GetAllPostersResponse(p.p.p, p.p.m, p.UserName)
                                     {
                                         CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
-                                        CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault()
+                                        CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
+                                        CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault()
                                     })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
@@ -97,7 +98,12 @@ namespace InfoPoster_backend.Repos
                                   .AsNoTracking()
                                   .ToListAsync();
 
-            var result = list.Select(p => new AdministrationGetPostersResponse(p.p.p, p.p.m, p.UserName))
+            var result = list.Select(p => new AdministrationGetPostersResponse(p.p.p, p.p.m, p.UserName)
+                                            {
+                                                CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
+                                                CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
+                                                CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault()
+                                            })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
             return result;

@@ -7,7 +7,15 @@ using System.Text.Json.Serialization;
 
 namespace InfoPoster_backend.Handlers.Administration
 {
-    public class GetAllPostersRequest : IRequest<List<GetAllPostersResponse>> { } 
+    public class GetAllPostersRequest : IRequest<List<GetAllPostersResponse>>
+    {
+        public int Sort { get; set; }
+        public Guid? CategoryId { get; set; }
+        public Guid? CityId { get; set; }
+        public int? Status { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
 
     public class GetAllPostersResponse
     {
@@ -30,8 +38,10 @@ namespace InfoPoster_backend.Handlers.Administration
         public string CreatedBy { get; set; }
         public int Status { get; set; }
         public string CategoryName { get; set; }
+        public Guid? CityId { get; set; }
         public string CityName { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 
     public class GetAllPostersHandler : IRequestHandler<GetAllPostersRequest, List<GetAllPostersResponse>>
@@ -48,6 +58,43 @@ namespace InfoPoster_backend.Handlers.Administration
         public async Task<List<GetAllPostersResponse>> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
         {
             var posters = await _repository.GetListNoTracking(_lang);
+
+            if (request.CategoryId != null)
+            {
+                posters = posters.Where(x => x.CategoryId == request.CategoryId).ToList();
+            }
+
+            if (request.CityId != null)
+            {
+                posters = posters.Where(x => x.CityId == request.CityId).ToList();
+            }
+
+            if (request.Status != null)
+            {
+                posters = posters.Where(x => x.Status == request.Status).ToList();
+            }
+
+            if (request.StartDate != null)
+            {
+                posters = posters.Where(x => x.CreatedAt >= request.StartDate).ToList();
+            }
+
+            if (request.EndDate != null)
+            {
+                posters = posters.Where(x => x.CreatedAt <= request.EndDate).ToList();
+            }
+
+            if (request.Sort == 0)
+            {
+                posters = posters.OrderByDescending(x => x.CreatedAt).ToList();
+            } else if (request.Sort == 1) 
+            {
+                posters = posters.OrderByDescending(x => x.UpdatedAt).ToList();
+            } else
+            {
+                posters = posters.OrderBy(x => x.Status).ToList();
+            }
+
             return posters;
         }
     }
