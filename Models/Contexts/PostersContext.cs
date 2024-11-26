@@ -37,6 +37,7 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<FileToApplication> FileToApplication { get; set; }
         public DbSet<ContactModel> Contacts { get; set; }
         public DbSet<ApplicationHistoryModel> ApplicationHistory { get; set; }
+        public DbSet<OrganizationModel> Organizations { get; set; }
         public DbSet<OrganizationMultilangModel> OrganizationsMultilang { get; set; }
         public DbSet<CityModel> Cities { get; set; }
     }
