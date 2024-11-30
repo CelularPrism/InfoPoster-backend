@@ -2,6 +2,7 @@
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
+using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Tools;
@@ -246,6 +247,8 @@ namespace InfoPoster_backend.Repos
                                                         UserName = u.FirstName + " " + u.LastName,
                                                    })
                                              .OrderByDescending(h => h.UpdatedAt).ToListAsync();
+
+        public async Task<bool> AnyOrganization(Guid organizationId) => await _context.Organizations.AnyAsync(o => o.Id == organizationId);
 
         public async Task AddPoster(PosterModel model, Guid userId)
         {

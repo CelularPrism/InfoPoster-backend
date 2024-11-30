@@ -1,7 +1,11 @@
-﻿using InfoPoster_backend.Models.Posters;
+﻿using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Tools;
 using MediatR;
+using Microsoft.AspNetCore.Http;
+using System.Net;
 
 namespace InfoPoster_backend.Handlers.Organizations
 {
@@ -11,7 +15,12 @@ namespace InfoPoster_backend.Handlers.Organizations
         public POSTER_STATUS Status { get; set; }
     }
 
-    public class ChangeOrganizationStatusResponse { }
+    public class ChangeOrganizationStatusResponse
+    {
+        public bool IsSuccess { get; set; } = true;
+        public HttpStatusCode StatusCode { get; set; }
+        public string ErrorMessage { get; set; }
+    }
 
     public class ChangeOrganizationStatusHandler : IRequestHandler<ChangeOrganizationStatusRequest, ChangeOrganizationStatusResponse>
     {
@@ -28,7 +37,61 @@ namespace InfoPoster_backend.Handlers.Organizations
         {
             var organization = await _repository.GetOrganization(request.Id);
             if (organization == null)
-                return null;
+                return new ChangeOrganizationStatusResponse() 
+                {
+                    IsSuccess = false,
+                    StatusCode = HttpStatusCode.NotFound,
+                    ErrorMessage = "Organization not found"
+                };
+
+            if (organization.Status == (int)POSTER_STATUS.PUBLISHED)
+            {
+                var fullInfo = await _repository.GetOrganizationFullInfo(request.Id);
+                //if (fullInfo.OrganizationId == null || !await _repository.AnyOrganization((Guid)fullInfo.OrganizationId))
+                //{
+                //    return new ChangePosterStatusResponse()
+                //    {
+                //        IsSuccess = false,
+                //        StatusCode = HttpStatusCode.NotFound,
+                //        ErrorMessage = "Organization is empty or not found"
+                //    };
+                //}
+
+                if (organization.CategoryId == Guid.Empty || organization.SubcategoryId == Guid.Empty || fullInfo.City == null || fullInfo.City == Guid.Empty || string.IsNullOrEmpty(fullInfo.Capacity) || string.IsNullOrEmpty(fullInfo.AgeRestriction) || string.IsNullOrEmpty(fullInfo.PriceLevel))
+                {
+                    return new ChangeOrganizationStatusResponse()
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessage = "Required fields is empty"
+                    };
+                }
+
+                OrganizationMultilangModel ml = null;
+                foreach (var lang in Constants.SystemLangs)
+                {
+                    ml = await _repository.GetOrganizationMultilang(request.Id, lang);
+                    if (ml == null)
+                    {
+                        return new ChangeOrganizationStatusResponse()
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.NotFound,
+                            ErrorMessage = "Poster on lang '" + lang + "' not found"
+                        };
+                    }
+
+                    if (string.IsNullOrEmpty(ml.Name) || string.IsNullOrEmpty(ml.Description))
+                    {
+                        return new ChangeOrganizationStatusResponse()
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.NotFound,
+                            ErrorMessage = "Required fields is empty on lang '" + lang + "'"
+                        };
+                    }
+                }
+            }
 
             organization.Status = (int)request.Status;
             await _repository.UpdateOrganization(organization, _user);

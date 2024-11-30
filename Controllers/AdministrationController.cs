@@ -114,7 +114,14 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> EnablePoster([FromForm] Guid posterId)
         {
             var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.PUBLISHED });
-            return Ok(result);
+
+            if (result != null && !result.IsSuccess)
+            {
+                ModelState.AddModelError("Error", result.ErrorMessage);
+                return BadRequest(ModelState);
+            }
+
+            return Ok();
         }
 
         [HttpPost("poster/active")]
@@ -222,7 +229,14 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> EnableOrganization([FromForm] Guid organizationId)
         {
             var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.PUBLISHED });
-            return Ok(result);
+
+            if (result != null && !result.IsSuccess)
+            {
+                ModelState.AddModelError("Error", result.ErrorMessage);
+                return BadRequest(ModelState);
+            }
+
+            return Ok();
         }
 
         [HttpPost("organization/active")]
