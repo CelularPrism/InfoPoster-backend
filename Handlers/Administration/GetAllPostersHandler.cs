@@ -15,6 +15,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public int? Status { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public Guid? UserId { get; set; }
     }
 
     public class GetAllPostersResponse
@@ -25,6 +26,7 @@ namespace InfoPoster_backend.Handlers.Administration
             Name = multilang.Name;
             ReleaseDate = poster.ReleaseDate;
             CategoryId = poster.CategoryId;
+            UserId = poster.UserId;
             CreatedBy = userName;
             Status = poster.Status;
             CreatedAt = poster.CreatedAt;
@@ -35,6 +37,7 @@ namespace InfoPoster_backend.Handlers.Administration
         [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime? ReleaseDate { get; set; }
         public Guid CategoryId { get; set; }
+        public Guid UserId { get; set; }
         public string CreatedBy { get; set; }
         public int Status { get; set; }
         public string CategoryName { get; set; }
@@ -82,6 +85,11 @@ namespace InfoPoster_backend.Handlers.Administration
             if (request.EndDate != null)
             {
                 posters = posters.Where(x => x.CreatedAt <= request.EndDate).ToList();
+            }
+
+            if (request.UserId != null)
+            {
+                posters = posters.Where(x => x.UserId == request.UserId).ToList();
             }
 
             if (request.Sort == 0)

@@ -14,6 +14,9 @@ namespace InfoPoster_backend.Repos
             _context = context;
         }
 
+        public async Task<List<UserModel>> SearchUsers(string text) => 
+            await _context.Users.Where(u => u.FirstName.Equals(text) || u.LastName.Equals(text) || u.Email.Equals(text)).ToListAsync();
+
         public async Task<UserModel> GetUser(string email) =>
             await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 

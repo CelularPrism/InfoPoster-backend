@@ -12,6 +12,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public int? Status { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public Guid? UserId { get; set; }
     }
 
     public class GetAllOrganizationResponse
@@ -25,6 +26,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             CreatedAt = organization.CreatedAt;
             CategoryId = organization.CategoryId;
             SubategoryId = organization.SubcategoryId;
+            UserId = organization.UserId;
             CreatedBy = userName;
             Status = organization.Status;
         }
@@ -34,6 +36,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public DateTime CreatedAt { get; set; }
         public Guid CategoryId { get; set; }
         public Guid SubategoryId { get; set; }
+        public Guid UserId { get; set; }
         public string CreatedBy { get; set; }
         public int Status { get; set; }
         public string CategoryName { get; set; }
@@ -80,6 +83,11 @@ namespace InfoPoster_backend.Handlers.Organizations
             if (request.EndDate != null)
             {
                 organizations = organizations.Where(x => x.CreatedAt <= request.EndDate).ToList();
+            }
+
+            if (request.UserId != null)
+            {
+                organizations = organizations.Where(x => x.UserId == request.UserId).ToList();
             }
 
             if (request.Sort == 0)

@@ -17,11 +17,11 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid OrganizationId { get; set; }
         public string Lang { get; set; }
         public string Name { get; set; }
-        public Guid CategoryId { get; set; }
-        public Guid SubcategoryId { get; set; }
+        public Guid? CategoryId { get; set; }
+        public Guid? SubcategoryId { get; set; }
         public string PriceLevel { get; set; }
         public string Capacity { get; set; }
-        public Guid City { get; set; }
+        public Guid? City { get; set; }
         public string WorkTime { get; set; }
         public string Adress { get; set; }
         public string PlaceLink { get; set; }
@@ -162,8 +162,8 @@ namespace InfoPoster_backend.Handlers.Organizations
             if (string.IsNullOrEmpty(organization.Name))
                 organization.Name = request.Name;
 
-            organization.CategoryId = request.CategoryId;
-            organization.SubcategoryId = request.SubcategoryId;
+            organization.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
+            organization.SubcategoryId = request.SubcategoryId == null ? Guid.Empty : (Guid)request.SubcategoryId;
 
             await _repository.UpdateOrganization(organization, _user);
 

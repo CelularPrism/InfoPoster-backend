@@ -8,6 +8,7 @@ namespace InfoPoster_backend.Handlers.Organizations
     {
         public int Sort { get; set; }
         public Guid? CategoryId { get; set; }
+        public Guid? CityId { get; set; }
         public int? Status { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -16,9 +17,15 @@ namespace InfoPoster_backend.Handlers.Organizations
     public class GetOrganizationListResponse
     {
         public Guid Id { get; set; }
+        public Guid CategoryId { get; set; }
+        public string CategoryName { get; set; }
+        public Guid SubcategoryId { get; set; }
+        public string SubcategoryName { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Name { get; set; }
         public int Status { get; set; }
+        public Guid? CityId { get; set; }
+        public string CityName { get; set; }
     }
 
     public class GetOrganizationListHandler : IRequestHandler<GetOrganizationListRequest, List<GetOrganizationListResponse>>
@@ -55,6 +62,11 @@ namespace InfoPoster_backend.Handlers.Organizations
             if (request.EndDate != null)
             {
                 organizations = organizations.Where(x => x.CreatedAt <= request.EndDate).ToList();
+            }
+
+            if (request.CityId != null)
+            {
+                organizations = organizations.Where(x => x.CityId == request.CityId).ToList();
             }
 
             var result = organizations.Select(o => new GetOrganizationListResponse()

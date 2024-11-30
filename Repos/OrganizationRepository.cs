@@ -125,17 +125,24 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<OrganizationModel>> GetOrganizationList(Guid userId) =>
+        public async Task<List<GetOrganizationListResponse>> GetOrganizationList(Guid userId) => 
             await _organization.Organizations.Where(o => o.UserId == userId)
-                                             .Select(o => new OrganizationModel() {
-                                                 Id = o.Id,
-                                                 Name = o.Name,
-                                                 CategoryId = o.CategoryId,
-                                                 CreatedAt = o.CreatedAt,
-                                                 Status = o.Status,
-                                                 SubcategoryId = o.SubcategoryId,
-                                                 UserId = o.UserId
-                                             })
+                                             .Join(_organization.OrganizationsFullInfo,
+                                                   o => o.Id,
+                                                   f => f.OrganizationId,
+                                                   (o, f) => new GetOrganizationListResponse()
+                                                   {
+                                                       Id = o.Id,
+                                                       Name = o.Name,
+                                                       CategoryId = o.CategoryId,
+                                                       CategoryName = _organization.Categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                       SubcategoryId = o.SubcategoryId,
+                                                       SubcategoryName = _organization.Subcategories.Where(c => c.Id == o.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                       CreatedAt = o.CreatedAt,
+                                                       Status = o.Status,
+                                                       CityId = f.City,
+                                                       CityName = _organization.CitiesMultilang.Where(c => c.CityId == f.City && c.Lang == _lang).Select(c => c.Name).FirstOrDefault()
+                                                   })
                                              .OrderByDescending(o => o.CreatedAt).ToListAsync();
 
         public async Task<OrganizationFullInfoModel> GetOrganizationFullInfo(Guid organizationId) =>
@@ -267,7 +274,7 @@ namespace InfoPoster_backend.Repos
                                                             f => f.OrganizationId,
                                                             ml => ml.OrganizationId,
                                                             (f, ml) => new { f.OrganizationId, ml.Name })
-                                                     .Where(f => f.Name.Contains(searchText))
+                                                     .Where(f => f.Name.Contains(searchText) || f.OrganizationId.ToString() == searchText)
                                                      .Join(_organization.Organizations,
                                                             ml => ml.OrganizationId,
                                                             org => org.Id,

@@ -21,9 +21,9 @@ namespace InfoPoster_backend.Handlers.Posters
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? ReleaseDate { get; set; }
-        public Guid CategoryId { get; set; }
+        public Guid? CategoryId { get; set; }
         public string Place { get; set; }
-        public Guid City { get; set; }
+        public Guid? City { get; set; }
         public string TimeStart { get; set; }
         public double Price { get; set; }
         public string Adress { get; set; }
@@ -73,7 +73,7 @@ namespace InfoPoster_backend.Handlers.Posters
                 {
                     PosterId = request.PosterId,
                     AgeRestriction = request.AgeRestriction,
-                    CategoryId = request.CategoryId,
+                    CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId,
                     PlaceLink = request.PlaceLink,
                     Price = request.Price,
                     TimeStart = request.TimeStart,
@@ -86,7 +86,7 @@ namespace InfoPoster_backend.Handlers.Posters
             { 
                 fullInfo.PosterId = request.PosterId;
                 fullInfo.AgeRestriction = request.AgeRestriction;
-                fullInfo.CategoryId = request.CategoryId;
+                fullInfo.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
                 fullInfo.PlaceLink = request.PlaceLink;
                 fullInfo.Price = request.Price;
                 fullInfo.TimeStart = request.TimeStart;
@@ -186,7 +186,7 @@ namespace InfoPoster_backend.Handlers.Posters
                 poster.Name = request.Name;
 
             poster.ReleaseDate = request.ReleaseDate.HasValue ? request.ReleaseDate.Value.Date : null;
-            poster.CategoryId = request.CategoryId;
+            poster.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
             poster.UpdatedAt = DateTime.UtcNow;
 
             await _repository.UpdatePoster(poster, _user);
