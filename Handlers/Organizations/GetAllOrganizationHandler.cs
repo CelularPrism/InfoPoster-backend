@@ -4,7 +4,7 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
 {
-    public class GetAllOrganizationRequest : IRequest<List<GetAllOrganizationResponse>>
+    public class GetAllOrganizationRequest : IRequest<GetAllOrganizationResponse>
     {
         public int Sort { get; set; }
         public Guid? CategoryId { get; set; }
@@ -13,13 +13,21 @@ namespace InfoPoster_backend.Handlers.Organizations
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public Guid? UserId { get; set; }
+        public int Page { get; set; }
+        public int CountPerPage { get; set; }
     }
 
     public class GetAllOrganizationResponse
     {
-        public GetAllOrganizationResponse() { }
+        public List<AllOrganizationModel> Organizations { get; set; }
+        public int Count { get; set; }
+        public int Page { get; set; }
+        public int CountPerPage { get; set; }
+    }
 
-        public GetAllOrganizationResponse(OrganizationModel organization, OrganizationMultilangModel multilang, string userName)
+    public class AllOrganizationModel
+    {
+        public AllOrganizationModel(OrganizationModel organization, OrganizationMultilangModel multilang, string userName)
         {
             Id = organization.Id;
             Name = multilang.Name;
@@ -45,7 +53,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string SubcategoryName { get; set; }
     }
 
-    public class GetAllOrganizationHandler : IRequestHandler<GetAllOrganizationRequest, List<GetAllOrganizationResponse>>
+    public class GetAllOrganizationHandler : IRequestHandler<GetAllOrganizationRequest, GetAllOrganizationResponse>
     {
         private readonly OrganizationRepository _repository;
         private readonly string _lang;
@@ -56,7 +64,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
-        public async Task<List<GetAllOrganizationResponse>> Handle(GetAllOrganizationRequest request, CancellationToken cancellationToken = default)
+        public async Task<GetAllOrganizationResponse> Handle(GetAllOrganizationRequest request, CancellationToken cancellationToken = default)
         {
             var organizations = await _repository.GetOrganizationList(_lang);
 
@@ -99,7 +107,16 @@ namespace InfoPoster_backend.Handlers.Organizations
                 organizations = organizations.OrderBy(x => x.Status).ToList();
             }
 
-            return organizations;
+            var result = new GetAllOrganizationResponse()
+            {
+                Count = organizations.Count,
+                CountPerPage = request.CountPerPage,
+                Page = request.Page
+            };
+
+            organizations = organizations.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
+            result.Organizations = organizations;
+            return result;
         }
     }
 }

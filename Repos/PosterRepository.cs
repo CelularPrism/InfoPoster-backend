@@ -54,7 +54,7 @@ namespace InfoPoster_backend.Repos
                                                        (f, s) => s)
                                                  .FirstOrDefaultAsync();
 
-        public async Task<List<GetAllPostersResponse>> GetListNoTracking(string lang)
+        public async Task<List<AllPostersResponse>> GetListNoTracking(string lang)
         {
             var list = await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING || p.Status == (int)POSTER_STATUS.PUBLISHED)
                                   .Join(_context.Categories,
@@ -73,7 +73,7 @@ namespace InfoPoster_backend.Repos
                                   .AsNoTracking()
                                   .ToListAsync();
 
-            var result = list.Select(p => new GetAllPostersResponse(p.p.p, p.p.m, p.UserName)
+            var result = list.Select(p => new AllPostersResponse(p.p.p, p.p.m, p.UserName)
                                     {
                                         CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
                                         CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
@@ -84,7 +84,7 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<AdministrationGetPostersResponse>> GetListNoTracking(Guid userId, string lang)
+        public async Task<List<AdministrationPostersResponse>> GetListNoTracking(Guid userId, string lang)
         {
             var list = await _context.Posters.Where(p => p.UserId == userId)
                                   .Join(_context.PostersMultilang,
@@ -99,7 +99,7 @@ namespace InfoPoster_backend.Repos
                                   .AsNoTracking()
                                   .ToListAsync();
 
-            var result = list.Select(p => new AdministrationGetPostersResponse(p.p.p, p.p.m, p.UserName)
+            var result = list.Select(p => new AdministrationPostersResponse(p.p.p, p.p.m, p.UserName)
                                             {
                                                 CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
                                                 CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),

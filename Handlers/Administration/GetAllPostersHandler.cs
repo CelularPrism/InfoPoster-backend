@@ -1,13 +1,12 @@
 ﻿using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
-using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Tools;
 using MediatR;
 using System.Text.Json.Serialization;
 
 namespace InfoPoster_backend.Handlers.Administration
 {
-    public class GetAllPostersRequest : IRequest<List<GetAllPostersResponse>>
+    public class GetAllPostersRequest : IRequest<GetAllPostersResponse>
     {
         public int Sort { get; set; }
         public Guid? CategoryId { get; set; }
@@ -16,11 +15,20 @@ namespace InfoPoster_backend.Handlers.Administration
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public Guid? UserId { get; set; }
+        public int Page { get; set; }
+        public int CountPerPage { get; set; }
     }
 
     public class GetAllPostersResponse
     {
-        public GetAllPostersResponse(PosterModel poster, PosterMultilangModel multilang, string userName)
+        public List<AllPostersResponse> Posters { get; set; }
+        public int Count { get; set; }
+        public int Page { get; set; }
+        public int CountPerPage { get; set; }
+    }
+    public class AllPostersResponse
+    {
+        public AllPostersResponse(PosterModel poster, PosterMultilangModel multilang, string userName)
         {
             Id = poster.Id;
             Name = multilang.Name;
@@ -47,7 +55,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public DateTime UpdatedAt { get; set; }
     }
 
-    public class GetAllPostersHandler : IRequestHandler<GetAllPostersRequest, List<GetAllPostersResponse>>
+    public class GetAllPostersHandler : IRequestHandler<GetAllPostersRequest, GetAllPostersResponse>
     {
         private readonly PosterRepository _repository;
         private readonly string _lang;
@@ -58,7 +66,7 @@ namespace InfoPoster_backend.Handlers.Administration
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
-        public async Task<List<GetAllPostersResponse>> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
+        public async Task<GetAllPostersResponse> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
         {
             var posters = await _repository.GetListNoTracking(_lang);
 
@@ -103,7 +111,16 @@ namespace InfoPoster_backend.Handlers.Administration
                 posters = posters.OrderBy(x => x.Status).ToList();
             }
 
-            return posters;
+            var result = new GetAllPostersResponse()
+            {
+                Count = posters.Count,
+                CountPerPage = request.CountPerPage,
+                Page = request.Page,
+            };
+            posters = posters.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
+            result.Posters = posters;
+
+            return result;
         }
     }
 }

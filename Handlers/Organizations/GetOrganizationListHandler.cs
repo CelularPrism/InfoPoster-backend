@@ -4,7 +4,7 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
 {
-    public class GetOrganizationListRequest : IRequest<List<GetOrganizationListResponse>>
+    public class GetOrganizationListRequest : IRequest<GetOrganizationListResponse>
     {
         public int Sort { get; set; }
         public Guid? CategoryId { get; set; }
@@ -12,9 +12,19 @@ namespace InfoPoster_backend.Handlers.Organizations
         public int? Status { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int Page { get; set; }
+        public int CountPerPage { get; set; }
     }
 
     public class GetOrganizationListResponse
+    {
+        public List<OrganizationResponseModel> Organizations { get; set; }
+        public int Count { get; set; }
+        public int Page { get; set; }
+        public int CountPerPage { get; set; }
+    }
+
+    public class OrganizationResponseModel
     {
         public Guid Id { get; set; }
         public Guid CategoryId { get; set; }
@@ -28,7 +38,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string CityName { get; set; }
     }
 
-    public class GetOrganizationListHandler : IRequestHandler<GetOrganizationListRequest, List<GetOrganizationListResponse>>
+    public class GetOrganizationListHandler : IRequestHandler<GetOrganizationListRequest, GetOrganizationListResponse>
     {
         private readonly OrganizationRepository _repository;
         private readonly LoginService _loginService;
@@ -39,7 +49,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             _loginService = loginService;
         }
 
-        public async Task<List<GetOrganizationListResponse>> Handle(GetOrganizationListRequest request, CancellationToken cancellationToken = default)
+        public async Task<GetOrganizationListResponse> Handle(GetOrganizationListRequest request, CancellationToken cancellationToken = default)
         {
             var userId = _loginService.GetUserId();
             var organizations = await _repository.GetOrganizationList(userId);
@@ -69,22 +79,23 @@ namespace InfoPoster_backend.Handlers.Organizations
                 organizations = organizations.Where(x => x.CityId == request.CityId).ToList();
             }
 
-            var result = organizations.Select(o => new GetOrganizationListResponse()
-            {
-                Id = o.Id,
-                CreatedAt = o.CreatedAt,
-                Name = o.Name,
-                Status = o.Status
-            }).ToList();
-
             if (request.Sort == 0)
             {
-                result = result.OrderByDescending(x => x.CreatedAt).ToList();
+                organizations = organizations.OrderByDescending(x => x.CreatedAt).ToList();
             }
             else
             {
-                result = result.OrderBy(x => x.Status).ToList();
+                organizations = organizations.OrderBy(x => x.Status).ToList();
             }
+
+            var result = new GetOrganizationListResponse()
+            {
+                Count = organizations.Count,
+                CountPerPage = request.CountPerPage,
+                Page = request.Page
+            };
+            organizations = organizations.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
+            result.Organizations = organizations;
 
             return result;
         }

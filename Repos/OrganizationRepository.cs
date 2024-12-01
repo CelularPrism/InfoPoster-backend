@@ -102,7 +102,7 @@ namespace InfoPoster_backend.Repos
                                                                      UserId = o.Organization.UserId
                                                                  }).ToListAsync();
 
-        public async Task<List<GetAllOrganizationResponse>> GetOrganizationList(string lang)
+        public async Task<List<AllOrganizationModel>> GetOrganizationList(string lang)
         {
             var organizations = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING || o.Status == (int)POSTER_STATUS.PUBLISHED)
                                                                  .Join(_organization.OrganizationsMultilang,
@@ -115,7 +115,7 @@ namespace InfoPoster_backend.Repos
                                                                        user => user.Id,
                                                                        (o, user) => new { o.Organization, o.Multilang, UserName = user.FirstName + " " + user.LastName })
                                                                  .ToListAsync();
-            var result = organizations.Select(m => new GetAllOrganizationResponse(m.Organization, m.Multilang, m.UserName)
+            var result = organizations.Select(m => new AllOrganizationModel(m.Organization, m.Multilang, m.UserName)
                                             {
                                                 CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == m.Organization.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
                                                 SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == m.Organization.SubcategoryId && c.lang == "en").Select(s => s.Name).FirstOrDefault(),
@@ -125,12 +125,12 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<GetOrganizationListResponse>> GetOrganizationList(Guid userId) => 
+        public async Task<List<OrganizationResponseModel>> GetOrganizationList(Guid userId) => 
             await _organization.Organizations.Where(o => o.UserId == userId)
                                              .Join(_organization.OrganizationsFullInfo,
                                                    o => o.Id,
                                                    f => f.OrganizationId,
-                                                   (o, f) => new GetOrganizationListResponse()
+                                                   (o, f) => new OrganizationResponseModel()
                                                    {
                                                        Id = o.Id,
                                                        Name = o.Name,

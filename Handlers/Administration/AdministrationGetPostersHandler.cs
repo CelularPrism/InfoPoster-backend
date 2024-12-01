@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace InfoPoster_backend.Handlers.Administration
 {
-    public class AdministrationGetPostersRequest : IRequest<List<AdministrationGetPostersResponse>>
+    public class AdministrationGetPostersRequest : IRequest<AdministrationGetPostersResponse>
     {
         public int Sort { get; set; }
         public Guid? CategoryId { get; set; }
@@ -15,11 +15,21 @@ namespace InfoPoster_backend.Handlers.Administration
         public int? Status { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int Page { get; set; }
+        public int CountPerPage { get; set; }
     }
 
     public class AdministrationGetPostersResponse
     {
-        public AdministrationGetPostersResponse(PosterModel poster, PosterMultilangModel multilang, string userName)
+        public List<AdministrationPostersResponse> Posters { get; set; }
+        public int Count { get; set; }
+        public int Page { get; set; }
+        public int CountPerPage { get; set; }
+    }
+
+    public class AdministrationPostersResponse
+    {
+        public AdministrationPostersResponse(PosterModel poster, PosterMultilangModel multilang, string userName)
         {
             Id = poster.Id;
             Name = multilang.Name;
@@ -45,7 +55,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public DateTime UpdatedAt { get; set; }
     }
 
-    public class AdministrationGetPostersHandler : IRequestHandler<AdministrationGetPostersRequest, List<AdministrationGetPostersResponse>>
+    public class AdministrationGetPostersHandler : IRequestHandler<AdministrationGetPostersRequest, AdministrationGetPostersResponse>
     {
         private readonly LoginService _loginService;
         private readonly PosterRepository _repository;
@@ -58,7 +68,7 @@ namespace InfoPoster_backend.Handlers.Administration
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
-        public async Task<List<AdministrationGetPostersResponse>> Handle(AdministrationGetPostersRequest request, CancellationToken cancellationToken = default)
+        public async Task<AdministrationGetPostersResponse> Handle(AdministrationGetPostersRequest request, CancellationToken cancellationToken = default)
         {
             var userId = _loginService.GetUserId();
             if (userId == Guid.Empty)
@@ -104,7 +114,16 @@ namespace InfoPoster_backend.Handlers.Administration
                 posterList = posterList.OrderBy(x => x.Status).ToList();
             }
 
-            return posterList;
+            var result = new AdministrationGetPostersResponse()
+            {
+                Count = posterList.Count,
+                CountPerPage = request.CountPerPage,
+                Page = request.Page,
+            };
+            posterList = posterList.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
+            result.Posters = posterList;
+
+            return result;
         }
     }
 }

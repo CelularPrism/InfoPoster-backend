@@ -42,9 +42,17 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("poster/available")]
-        public async Task<IActionResult> GetAvailablePosters([FromQuery] int sort, [FromQuery] Guid? categoryId, [FromQuery] Guid? cityId, [FromQuery] int? status, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+        public async Task<IActionResult> GetAvailablePosters(
+            [FromQuery] int sort, 
+            [FromQuery] Guid? categoryId, 
+            [FromQuery] Guid? cityId, 
+            [FromQuery] int? status, 
+            [FromQuery] DateTime? startDate, 
+            [FromQuery] DateTime? endDate,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new AdministrationGetPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort });
+            var result = await _mediator.Send(new AdministrationGetPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, Page = page, CountPerPage = countPerPage });
             return Ok(result);
         }
 
@@ -56,9 +64,18 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("poster/all")]
-        public async Task<IActionResult> GetAllPosters([FromQuery] int sort, [FromQuery] Guid? categoryId, [FromQuery] Guid? cityId, [FromQuery] int? status, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] Guid? editorId)
+        public async Task<IActionResult> GetAllPosters(
+            [FromQuery] int sort, 
+            [FromQuery] Guid? categoryId, 
+            [FromQuery] Guid? cityId, 
+            [FromQuery] int? status, 
+            [FromQuery] DateTime? startDate, 
+            [FromQuery] DateTime? endDate, 
+            [FromQuery] Guid? editorId,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetAllPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId });
+            var result = await _mediator.Send(new GetAllPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page, CountPerPage = countPerPage });
             return Ok(result);
         }
 
@@ -171,16 +188,33 @@ namespace InfoPoster_backend.Controllers
         } 
 
         [HttpGet("organization/all")]
-        public async Task<IActionResult> GetOrganizationPosters([FromQuery] int sort, [FromQuery] Guid? categoryId, [FromQuery] Guid? cityId, [FromQuery] int? status, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] Guid? editorId)
+        public async Task<IActionResult> GetOrganizationPosters(
+            [FromQuery] int sort, 
+            [FromQuery] Guid? categoryId, 
+            [FromQuery] Guid? cityId, 
+            [FromQuery] int? status, 
+            [FromQuery] DateTime? startDate, 
+            [FromQuery] DateTime? endDate, 
+            [FromQuery] Guid? editorId,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetAllOrganizationRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId });
+            var result = await _mediator.Send(new GetAllOrganizationRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page, CountPerPage = countPerPage });
             return Ok(result);
         }
 
         [HttpGet("organization/available")]
-        public async Task<IActionResult> GetAllOrganizations([FromQuery] int sort, [FromQuery] Guid? categoryId, [FromQuery] Guid? cityId, [FromQuery] int? status, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+        public async Task<IActionResult> GetAllOrganizations(
+            [FromQuery] int sort, 
+            [FromQuery] Guid? categoryId, 
+            [FromQuery] Guid? cityId, 
+            [FromQuery] int? status, 
+            [FromQuery] DateTime? startDate, 
+            [FromQuery] DateTime? endDate,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status });
+            var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page, CountPerPage = countPerPage });
             return Ok(result);
         }
 
