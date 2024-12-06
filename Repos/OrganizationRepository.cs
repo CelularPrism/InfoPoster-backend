@@ -120,7 +120,13 @@ namespace InfoPoster_backend.Repos
                                                 CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == m.Organization.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
                                                 SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == m.Organization.SubcategoryId && c.lang == "en").Select(s => s.Name).FirstOrDefault(),
                                                 CityName = _organization.OrganizationsFullInfo.Where(f => f.OrganizationId == m.Organization.Id).Select(f => f.City).Join(_organization.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
-                                                CityId = _organization.OrganizationsFullInfo.Where(f => f.OrganizationId == m.Organization.Id).Select(f => f.City).FirstOrDefault()
+                                                CityId = _organization.OrganizationsFullInfo.Where(f => f.OrganizationId == m.Organization.Id).Select(f => f.City).FirstOrDefault(),
+                                                LastUpdatedBy = _organization.ApplicationHistory.Any(h => h.ApplicationId == m.Organization.Id) ? _organization.ApplicationHistory.Where(h => h.ApplicationId == m.Organization.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId : null,
+                                                LastUpdatedByName = _organization.ApplicationHistory.Any(h => h.ApplicationId == m.Organization.Id) ? _organization.Users.Where(
+                                                                                                                                                            u => u.Id == _organization.ApplicationHistory.Where(h => h.ApplicationId == m.Organization.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId
+                                                                                                                                                        ).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault()
+                                                                                                                                                    : null,
+                                                LastUpdatedDate = _organization.ApplicationHistory.Any(h => h.ApplicationId == m.Organization.Id) ? _organization.ApplicationHistory.Where(h => h.ApplicationId == m.Organization.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UpdatedAt : null
                                             }).OrderByDescending(o => o.CreatedAt).ToList();
             return result;
         }

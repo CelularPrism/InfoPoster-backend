@@ -15,13 +15,41 @@ namespace InfoPoster_backend.Models.Organizations
             AgeRestriction = model.AgeRestriction;
             City = model.City;
         }
-        public void Update(SaveOrganizationRequest model)
+
+        public List<ApplicationChangeHistory> Update(SaveOrganizationRequest model, Guid articleId, Guid userId)
         {
-            PriceLevel = model.PriceLevel;
-            Capacity = model.Capacity;
-            PlaceLink = model.PlaceLink;
-            AgeRestriction = model.AgeRestriction;
-            City = model.City;
+            var history = new List<ApplicationChangeHistory>();
+            if (PriceLevel != model.PriceLevel)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "PriceLevel", PriceLevel, model.PriceLevel, userId));
+                PriceLevel = model.PriceLevel;
+            }
+
+            if (Capacity != model.Capacity)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "Capacity", Capacity, model.Capacity, userId));
+                Capacity = model.Capacity;
+            }
+
+            if (PlaceLink != model.PlaceLink)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "PlaceLink", PlaceLink, model.PlaceLink, userId));
+                PlaceLink = model.PlaceLink;
+            }
+
+            if (AgeRestriction != model.AgeRestriction)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "AgeRestriction", AgeRestriction, model.AgeRestriction, userId));
+                AgeRestriction = model.AgeRestriction;
+            }
+
+            if (City != model.City)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "City", City == null ? null : City.ToString(), model.City == null ? null : model.City.ToString(), userId));
+                City = model.City;
+            }
+
+            return history;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();

@@ -15,6 +15,7 @@ namespace InfoPoster_backend.Handlers.Statistics
     {
         public Guid UserId { get; set; }
         public string UserName { get; set; }
+        public string Email { get; set; }
         public string ImageSrc { get; set; }
         public int CountDraft { get; set; }
     }
@@ -53,7 +54,8 @@ namespace InfoPoster_backend.Handlers.Statistics
             var result = users.Select(u => new GetBestEditorStatResponse()
             {
                 UserId = u.Id,
-                UserName = u.FirstName + " " + u.LastName + " (" + u.Email + ")",
+                UserName = u.FirstName + " " + u.LastName,
+                Email = u.Email,
                 ImageSrc = u.ImageSrc,
                 CountDraft = orgList.Where(org => org.UserId == u.Id).Select(org => org.Count).FirstOrDefault() + posterList.Where(p => p.UserId == u.Id).Select(p => p.Count).FirstOrDefault()
             }).OrderByDescending(u => u.CountDraft).Take(3).ToList();

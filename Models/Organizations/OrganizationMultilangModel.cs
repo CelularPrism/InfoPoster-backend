@@ -5,41 +5,53 @@ namespace InfoPoster_backend.Models.Organizations
     public class OrganizationMultilangModel
     {
         public OrganizationMultilangModel() { }
-        public OrganizationMultilangModel(SaveOrganizationRequest model, string lang)
-        {
-            OrganizationId = model.OrganizationId;
-            Lang = lang;
-            Name = model.Name;
-            Description = model.Description;
-            Phone = model.InternalContacts;
-            ContactName = model.Contacts;
-            SiteLink = model.SiteLink;
-            Adress = model.Adress;
-            WorkTime = model.WorkTime;
-        }
 
-        public void Update(SaveOrganizationRequest model)
+        public List<ApplicationChangeHistory> Update(SaveOrganizationRequest model, Guid articleId, Guid userId)
         {
-            if (string.IsNullOrEmpty(model.Name) || model.Lang == Lang)
+            var history = new List<ApplicationChangeHistory>();
+            if (string.IsNullOrEmpty(Name) || model.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "Name " + Lang, Name, model.Name, userId));
                 Name = model.Name;
+            }
 
-            if (string.IsNullOrEmpty(model.Description) || model.Lang == Lang)
+            if (string.IsNullOrEmpty(Description) || model.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "Description " + Lang, Description, model.Description, userId));
                 Description = model.Description;
+            }
 
-            if (string.IsNullOrEmpty(model.InternalContacts) || model.Lang == Lang)
+            if (string.IsNullOrEmpty(Phone) || model.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "Phone " + Lang, Phone, model.InternalContacts, userId));
                 Phone = model.InternalContacts;
+            }
 
-            if (string.IsNullOrEmpty(model.Contacts) || model.Lang == Lang)
+            if (string.IsNullOrEmpty(ContactName) || model.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "ContactName " + Lang, ContactName, model.Contacts, userId));
                 ContactName = model.Contacts;
+            }
 
-            if (string.IsNullOrEmpty(model.SiteLink) || model.Lang == Lang)
+            if (string.IsNullOrEmpty(SiteLink) || model.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "SiteLink " + Lang, SiteLink, model.SiteLink, userId));
                 SiteLink = model.SiteLink;
+            }
 
-            if (string.IsNullOrEmpty(model.Adress) || model.Lang == Lang)
+            if (string.IsNullOrEmpty(Adress) || model.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "Adress " + Lang, Adress, model.Adress, userId));
                 Adress = model.Adress;
-            
-            if (string.IsNullOrEmpty(model.WorkTime) || model.Lang == Lang)
+            }
+
+            if (string.IsNullOrEmpty(WorkTime) || model.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, model.OrganizationId, "WorkTime " + Lang, WorkTime, model.WorkTime, userId));
                 WorkTime = model.WorkTime;
+            }
+
+            return history;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();

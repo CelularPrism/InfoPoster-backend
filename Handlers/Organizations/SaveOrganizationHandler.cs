@@ -9,6 +9,7 @@ using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Services.Selectel_API;
 using InfoPoster_backend.Tools;
 using MediatR;
+using Org.BouncyCastle.Utilities.Collections;
 
 namespace InfoPoster_backend.Handlers.Organizations
 {
@@ -58,14 +59,22 @@ namespace InfoPoster_backend.Handlers.Organizations
             if (organization == null || organization.Status == (int)POSTER_STATUS.PENDING || organization.Status == (int)POSTER_STATUS.PUBLISHED)
                 return null;
 
+            var articleId = Guid.NewGuid();
+            var changeHistory = new List<ApplicationChangeHistory>();
+
             var fullInfo = await _repository.GetOrganizationFullInfo(request.OrganizationId);
             if (fullInfo == null)
             {
-                fullInfo = new OrganizationFullInfoModel(request);
+                fullInfo = new OrganizationFullInfoModel();
+                fullInfo.OrganizationId = request.OrganizationId;
+
+                var history = fullInfo.Update(request, articleId, _user);
+                changeHistory.AddRange(history);
                 await _repository.AddFullInfo(fullInfo);
             } else
             {
-                fullInfo.Update(request);
+                var history = fullInfo.Update(request, articleId, _user);
+                changeHistory.AddRange(history);
                 await _repository.UpdateFullInfo(fullInfo);
             }
 
@@ -75,14 +84,21 @@ namespace InfoPoster_backend.Handlers.Organizations
                 ml = new List<OrganizationMultilangModel>();
                 foreach (var lang in Constants.SystemLangs)
                 {
-                    ml.Add(new OrganizationMultilangModel(request, lang));
+                    var mlModel = new OrganizationMultilangModel();
+                    mlModel.Lang = lang;
+                    mlModel.OrganizationId = request.OrganizationId;
+                    var history = mlModel.Update(request, articleId, _user);
+                    changeHistory.AddRange(history);
+
+                    ml.Add(mlModel);
                 }
                 await _repository.AddMultilang(ml);
             } else
             {
                 foreach (var multilang in ml)
                 {
-                    multilang.Update(request);
+                    var history = multilang.Update(request, articleId, _user);
+                    changeHistory.AddRange(history);
                 }
                 await _repository.UpdateMultilang(ml);
             }
@@ -98,19 +114,27 @@ namespace InfoPoster_backend.Handlers.Organizations
                         ApplicationId = request.OrganizationId,
                         Lang = lang,
                     };
-                    contact.Update(request);
+                    var history = contact.Update(request, articleId, _user);
+                    changeHistory.AddRange(history);
+
                     contactList.Add(contact);
                 }
                 await _repository.AddContact(contactList, request.OrganizationId);
             } else
             {
-                contact.Update(request);
+                var history = contact.Update(request, articleId, _user);
+                changeHistory.AddRange(history);
                 await _repository.UpdateContact(contact);
             }
 
             var files = new List<OrganizationFileURLModel>();
+            var filesOld = await _repository.GetFileUrls(request.OrganizationId);
             if (request.VideoUrls != null)
             {
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "VideoUrls", 
+                    "Count = " + filesOld.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Count(), 
+                    "Count = " + request.VideoUrls.Count, _user));
+
                 foreach (var video in request.VideoUrls)
                 {
                     files.Add(new OrganizationFileURLModel(request.OrganizationId, video, (int)FILE_CATEGORIES.VIDEO));
@@ -119,6 +143,8 @@ namespace InfoPoster_backend.Handlers.Organizations
             if (!string.IsNullOrEmpty(request.SocialLinks))
             {
                 var links = request.SocialLinks.Split(' ');
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "SocialLinks", string.Empty, string.Empty, _user));
+
                 foreach (var social in links)
                 {
                     files.Add(new OrganizationFileURLModel(request.OrganizationId, social, (int)FILE_CATEGORIES.SOCIAL_LINKS));

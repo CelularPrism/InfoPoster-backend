@@ -44,7 +44,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                     ErrorMessage = "Organization not found"
                 };
 
-            if (organization.Status == (int)POSTER_STATUS.PUBLISHED)
+            if (request.Status == POSTER_STATUS.PUBLISHED)
             {
                 var fullInfo = await _repository.GetOrganizationFullInfo(request.Id);
                 //if (fullInfo.OrganizationId == null || !await _repository.AnyOrganization((Guid)fullInfo.OrganizationId))

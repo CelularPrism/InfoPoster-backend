@@ -53,6 +53,9 @@ namespace InfoPoster_backend.Handlers.Administration
         public string CityName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public Guid? LastUpdatedBy { get; set; }
+        public string LastUpdatedByName { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
     }
 
     public class GetAllPostersHandler : IRequestHandler<GetAllPostersRequest, GetAllPostersResponse>

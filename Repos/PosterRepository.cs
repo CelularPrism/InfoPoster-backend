@@ -77,7 +77,13 @@ namespace InfoPoster_backend.Repos
                                     {
                                         CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
                                         CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
-                                        CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault()
+                                        CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault(),
+                                        LastUpdatedBy = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId : null,
+                                        LastUpdatedByName = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.Users.Where(
+                                                                                                                                            u => u.Id == _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId
+                                                                                                                                        ).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault() 
+                                                                                                                              : null,
+                                        LastUpdatedDate = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UpdatedAt : null
                                     })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();

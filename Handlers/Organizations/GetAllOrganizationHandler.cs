@@ -51,6 +51,9 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid? CityId { get; set; }
         public string CityName { get; set; }
         public string SubcategoryName { get; set; }
+        public Guid? LastUpdatedBy { get; set; }
+        public string LastUpdatedByName { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
     }
 
     public class GetAllOrganizationHandler : IRequestHandler<GetAllOrganizationRequest, GetAllOrganizationResponse>
