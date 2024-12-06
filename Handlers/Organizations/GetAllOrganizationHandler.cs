@@ -114,7 +114,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             {
                 Count = organizations.Count,
                 CountPerPage = request.CountPerPage,
-                Page = request.Page
+                Page = request.Page + 1
             };
 
             organizations = organizations.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();

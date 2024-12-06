@@ -98,7 +98,7 @@ namespace InfoPoster_backend.Handlers.Administration
             {
                 Count = posterList.Count,
                 CountPerPage = request.CountPerPage,
-                Page = request.Page,
+                Page = request.Page + 1,
             };
             posterList = posterList.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
             result.Posters = posterList;

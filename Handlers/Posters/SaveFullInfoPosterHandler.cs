@@ -131,13 +131,13 @@ namespace InfoPoster_backend.Handlers.Posters
                         ApplicationId = request.PosterId,
                         Lang = lang
                     };
-                    contact.Update(request);
+                    contact.Update(request, Guid.NewGuid(), _user);
                     contactList.Add(contact);
                 }
                 await _repository.AddContact(contactList, request.PosterId);
             } else
             {
-                contact.Update(request);
+                contact.Update(request, Guid.NewGuid(), _user);
                 await _repository.UpdateContact(contact);
             }
 
