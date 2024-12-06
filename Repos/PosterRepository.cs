@@ -28,6 +28,12 @@ namespace InfoPoster_backend.Repos
         public async Task<PosterModel> GetPoster(Guid id) =>
             await _context.Posters.FirstOrDefaultAsync(x => x.Id == id);
 
+        public async Task<List<CategoryModel>> GetCategories() =>
+            await _context.Categories.ToListAsync();
+
+        public async Task<bool> CheckAdmin(Guid userId) =>
+            await _context.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
+
         public async Task<PosterFullInfoModel> GetFullInfoPoster(Guid posterId) =>
             await _context.PostersFullInfo.FirstOrDefaultAsync(x => x.PosterId == posterId);
 
@@ -54,9 +60,13 @@ namespace InfoPoster_backend.Repos
                                                        (f, s) => s)
                                                  .FirstOrDefaultAsync();
 
-        public async Task<List<AllPostersResponse>> GetListNoTracking(string lang)
+        public async Task<List<AllPostersResponse>> GetListNoTracking(string lang, Guid userId)
         {
-            var list = await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING || p.Status == (int)POSTER_STATUS.PUBLISHED)
+            var isAdmin = await _context.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
+
+            var list = await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING || 
+                                                         p.Status == (int)POSTER_STATUS.PUBLISHED || 
+                                                         p.Status == (isAdmin ? (int)POSTER_STATUS.DRAFT : (int)POSTER_STATUS.PUBLISHED))
                                   .Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
@@ -431,6 +441,12 @@ namespace InfoPoster_backend.Repos
         public async Task RemovePlaceList(List<PlaceModel> model)
         {
             _context.Places.RemoveRange(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddChangeHistory(List<ApplicationChangeHistory> list)
+        {
+            await _context.ApplicationChangeHistory.AddRangeAsync(list);
             await _context.SaveChangesAsync();
         }
     }

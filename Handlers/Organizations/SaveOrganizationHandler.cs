@@ -56,7 +56,8 @@ namespace InfoPoster_backend.Handlers.Organizations
         public async Task<SaveOrganizationResponse> Handle(SaveOrganizationRequest request, CancellationToken cancellationToken = default)
         {
             var organization = await _repository.GetOrganization(request.OrganizationId);
-            if (organization == null || organization.Status == (int)POSTER_STATUS.PENDING || organization.Status == (int)POSTER_STATUS.PUBLISHED)
+            var isAdmin = await _repository.CheckAdmin(_user);
+            if (organization == null || ((organization.Status == (int)POSTER_STATUS.PENDING || organization.Status == (int)POSTER_STATUS.PUBLISHED) && !isAdmin))
                 return null;
 
             var articleId = Guid.NewGuid();
@@ -155,6 +156,7 @@ namespace InfoPoster_backend.Handlers.Organizations
 
             if (request.MenuCategories != null)
             {
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "MenuCategories", string.Empty, string.Empty, _user));
                 var menus = request.MenuCategories.Select(m => new MenuToOrganizationModel()
                 {
                     Id = Guid.NewGuid(),
@@ -182,15 +184,35 @@ namespace InfoPoster_backend.Handlers.Organizations
                     }).ToList();
                     places.AddRange(request.ParkingOrg.Select(p => new PlaceModel(p, request.OrganizationId)).ToList());
                 }
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "Parking", string.Empty, string.Empty, _user));
                 await _repository.AddPlaces(places);               
             }
 
             if (string.IsNullOrEmpty(organization.Name))
                 organization.Name = request.Name;
 
-            organization.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
-            organization.SubcategoryId = request.SubcategoryId == null ? Guid.Empty : (Guid)request.SubcategoryId;
+            var categories = await _repository.GetCategories();
+            var subcategories = await _repository.GetSubcategories();
 
+            if (organization.CategoryId != request.CategoryId)
+            {
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "CategoryId", 
+                    categories.Where(c => c.Id == organization.CategoryId).Select(c => c.Name).FirstOrDefault(), 
+                    categories.Where(c => c.Id == request.CategoryId).Select(c => c.Name).FirstOrDefault(), _user));
+
+                organization.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
+            }
+
+            if (organization.SubcategoryId != request.SubcategoryId)
+            {
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "SubcategoryId",
+                    subcategories.Where(c => c.Id == organization.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
+                    subcategories.Where(c => c.Id == request.SubcategoryId).Select(c => c.Name).FirstOrDefault(), _user));
+
+                organization.SubcategoryId = request.SubcategoryId == null ? Guid.Empty : (Guid)request.SubcategoryId;
+            }
+
+            await _repository.AddHistory(changeHistory);
             await _repository.UpdateOrganization(organization, _user);
 
             return new SaveOrganizationResponse();

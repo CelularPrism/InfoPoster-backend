@@ -42,5 +42,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<SubcategoryMultilangModel> SubcategoriesMultilang { get; set; }
         public DbSet<FileURLModel> FileUrls { get; set; }
         public DbSet<ApplicationHistoryModel> ApplicationHistory { get; set; }
+        public DbSet<ApplicationChangeHistory> ApplicationChangeHistory { get; set; }
     }
 }

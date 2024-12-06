@@ -6,47 +6,54 @@ namespace InfoPoster_backend.Models.Posters
     {
         public PosterMultilangModel() { }
 
-        public void Update(SaveFullInfoPosterRequest fullInfo)
+        public List<ApplicationChangeHistory> Update(SaveFullInfoPosterRequest fullInfo, Guid articleId, Guid userId)
         {
+            var history = new List<ApplicationChangeHistory>();
             if ((string.IsNullOrEmpty(Place) && fullInfo.Place != "null") || fullInfo.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "Place " + Lang, Place, fullInfo.Place, userId));
                 Place = fullInfo.Place;
+            }
 
             if (string.IsNullOrEmpty(Name) || fullInfo.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "Name " + Lang, Name, fullInfo.Name, userId));
                 Name = fullInfo.Name;
+            }
 
             if (string.IsNullOrEmpty(Adress) || fullInfo.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "Adress " + Lang, Adress, fullInfo.Adress, userId));
                 Adress = fullInfo.Adress;
+            }
 
             if (string.IsNullOrEmpty(Description) || fullInfo.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "Description " + Lang, Description, fullInfo.Description, userId));
                 Description = fullInfo.Description;
+            }
 
             if (string.IsNullOrEmpty(Phone) || fullInfo.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "Phone " + Lang, Phone, fullInfo.Phone, userId));
                 Phone = fullInfo.Phone;
+            }
 
             if (string.IsNullOrEmpty(SiteLink) || fullInfo.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "SiteLink " + Lang, SiteLink, fullInfo.SiteLink, userId));
                 SiteLink = fullInfo.SiteLink;
+            }
 
             if (string.IsNullOrEmpty(Tickets) || fullInfo.Lang == Lang)
+            {
+                history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "Tickets " + Lang, Tickets, fullInfo.Tickets, userId));
                 Tickets = fullInfo.Tickets;
+            }
+            return history;
         }
 
-        public PosterMultilangModel(SaveFullInfoPosterRequest fullInfo, string lang) 
-        {
-            Id = Guid.NewGuid();
-            PosterId = fullInfo.PosterId;
-            Lang = lang;
-            Name = fullInfo.Name;
-            Adress = fullInfo.Adress;
-            Description = fullInfo.Description;
-            Phone = fullInfo.Phone;
-            SiteLink = fullInfo.SiteLink;
-            Tickets = fullInfo.Tickets;
-
-            if ((string.IsNullOrEmpty(Place) && fullInfo.Place != "null") || fullInfo.Lang == Lang)
-                Place = fullInfo.Place;
-        }
-
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public Guid PosterId { get; set; }
         public string Lang { get; set; }
         public string Place { get; set; }

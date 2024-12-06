@@ -63,34 +63,32 @@ namespace InfoPoster_backend.Handlers.Posters
         public async Task<SaveFullInfoPosterResponse> Handle(SaveFullInfoPosterRequest request, CancellationToken cancellationToken = default)
         {
             var poster = await _repository.GetPoster(request.PosterId);
-            if (poster == null || poster.Status == (int)POSTER_STATUS.PENDING || poster.Status == (int)POSTER_STATUS.PUBLISHED)
+            var isAdmin = await _repository.CheckAdmin(_user);
+            if (poster == null || ((poster.Status == (int)POSTER_STATUS.PENDING || poster.Status == (int)POSTER_STATUS.PUBLISHED) && !isAdmin))
                 return null;
+
+            var changeHistory = new List<ApplicationChangeHistory>();
+            var history = new List<ApplicationChangeHistory>();
+            var articleId = Guid.NewGuid();
 
             var fullInfo = await _repository.GetFullInfoPoster(request.PosterId);
             if (fullInfo == null)
             {
                 fullInfo = new PosterFullInfoModel()
                 {
-                    PosterId = request.PosterId,
-                    AgeRestriction = request.AgeRestriction,
-                    CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId,
-                    PlaceLink = request.PlaceLink,
-                    Price = request.Price,
-                    TimeStart = request.TimeStart,
-                    City = request.City,
-                    OrganizationId = request.AttachedOrganizationId
+                    PosterId = request.PosterId
                 };
+
+                history = fullInfo.Update(request, articleId, _user);
+                changeHistory.AddRange(history);
                 await _repository.AddPosterFullInfo(fullInfo);
             }
             else 
             { 
                 fullInfo.PosterId = request.PosterId;
-                fullInfo.AgeRestriction = request.AgeRestriction;
-                fullInfo.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
-                fullInfo.PlaceLink = request.PlaceLink;
-                fullInfo.Price = request.Price;
-                fullInfo.TimeStart = request.TimeStart;
-                fullInfo.OrganizationId = request.AttachedOrganizationId;
+                history = fullInfo.Update(request, articleId, _user);
+                changeHistory.AddRange(history);
+
                 await _repository.UpdatePosterFullInfo(fullInfo);
             }
 
@@ -99,7 +97,14 @@ namespace InfoPoster_backend.Handlers.Posters
             {
                 foreach (var lang in Constants.SystemLangs) 
                 {
-                    multilang.Add(new PosterMultilangModel(request, lang));
+                    var ml = new PosterMultilangModel();
+                    ml.Id = Guid.NewGuid();
+                    ml.PosterId = request.PosterId;
+                    ml.Lang = lang;
+                    history = ml.Update(request, articleId, _user);
+                    changeHistory.AddRange(history);
+
+                    multilang.Add(ml);
                 }
                 await _repository.AddPosterMultilang(multilang);
             }
@@ -109,7 +114,8 @@ namespace InfoPoster_backend.Handlers.Posters
                 {
                     foreach (var ml in multilang)
                     {
-                        ml.Update(request);
+                        history = ml.Update(request, articleId, _user);
+                        changeHistory.AddRange(history);
                     }
                     await _repository.UpdatePosterMultilang(multilang);
                 }
@@ -131,20 +137,27 @@ namespace InfoPoster_backend.Handlers.Posters
                         ApplicationId = request.PosterId,
                         Lang = lang
                     };
-                    contact.Update(request, Guid.NewGuid(), _user);
+                    history = contact.Update(request, articleId, _user);
+                    changeHistory.AddRange(history);
                     contactList.Add(contact);
                 }
                 await _repository.AddContact(contactList, request.PosterId);
             } else
             {
-                contact.Update(request, Guid.NewGuid(), _user);
+                history = contact.Update(request, articleId, _user);
+                changeHistory.AddRange(history);
                 await _repository.UpdateContact(contact);
             }
 
             var files = new List<FileURLModel>();
+            var filesOld = await _repository.GetFileUrls(request.PosterId);
 
             if (request.VideoUrls != null)
             {
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "VideoUrls",
+                    "Count = " + filesOld.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Count(),
+                    "Count = " + request.VideoUrls.Count, _user));
+
                 foreach (var video in request.VideoUrls)
                 {
                     files.Add(new FileURLModel(request.PosterId, video, (int)FILE_CATEGORIES.VIDEO));
@@ -153,6 +166,8 @@ namespace InfoPoster_backend.Handlers.Posters
             if (!string.IsNullOrEmpty(request.SocialLinks))
             {
                 var links = request.SocialLinks.Split(' ');
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "SocialLinks", string.Empty, string.Empty, _user));
+
                 foreach (var social in links)
                 {
                     files.Add(new FileURLModel(request.PosterId, social, (int)FILE_CATEGORIES.SOCIAL_LINKS));
@@ -180,13 +195,26 @@ namespace InfoPoster_backend.Handlers.Posters
                     places.AddRange(request.Parking.Select(p => new PlaceModel(p, request.PosterId)).ToList());
                 }
                 await _repository.AddPlaces(places);
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Parking", string.Empty, string.Empty, _user));
             }
 
             if (string.IsNullOrEmpty(poster.Name))
                 poster.Name = request.Name;
 
             poster.ReleaseDate = request.ReleaseDate.HasValue ? request.ReleaseDate.Value.Date : null;
-            poster.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
+
+            var categories = await _repository.GetCategories();
+
+            if (poster.CategoryId != request.CategoryId)
+            {
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "CategoryId",
+                    categories.Where(c => c.Id == poster.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                    categories.Where(c => c.Id == request.CategoryId).Select(c => c.Name).FirstOrDefault(), _user));
+
+                poster.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
+            }
+
+            
             poster.UpdatedAt = DateTime.UtcNow;
 
             await _repository.UpdatePoster(poster, _user);

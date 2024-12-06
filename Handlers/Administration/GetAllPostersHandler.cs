@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Tools;
 using MediatR;
 using System.Text.Json.Serialization;
@@ -62,16 +63,18 @@ namespace InfoPoster_backend.Handlers.Administration
     {
         private readonly PosterRepository _repository;
         private readonly string _lang;
+        private readonly Guid _user;
 
-        public GetAllPostersHandler(PosterRepository repository, IHttpContextAccessor accessor)
+        public GetAllPostersHandler(PosterRepository repository, IHttpContextAccessor accessor, LoginService loginService)
         {
             _repository = repository;
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
+            _user = loginService.GetUserId();
         }
 
         public async Task<GetAllPostersResponse> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetListNoTracking(_lang);
+            var posters = await _repository.GetListNoTracking(_lang, _user);
 
             if (request.CategoryId != null)
             {

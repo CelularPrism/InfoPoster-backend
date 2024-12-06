@@ -22,21 +22,17 @@ namespace InfoPoster_backend.Handlers.Statistics
                 .GroupBy(o => new { o.UserId, o.CreatedAt })
                 .Select(g => new StatisticModel()
                 {
-                    UserId = g.Key.UserId,
-                    UserName = users.Where(u => u.Id == g.Key.UserId).Select(u => u.FirstName + " " + u.LastName + " (" + u.Email + ")").FirstOrDefault(),
-                    Day = g.Key.CreatedAt.Date,
+                    Date = g.Key.CreatedAt.Date,
                     Count = g.Count()
-                }).OrderBy(o => o.Day).ToList();
+                }).OrderBy(o => o.Date).ToList();
 
             Posters = posters.Where(p => p.Status == status)
                 .GroupBy(p => new { p.UserId, p.CreatedAt })
                 .Select(g => new StatisticModel()
                 {
-                    UserId = g.Key.UserId,
-                    UserName = users.Where(u => u.Id == g.Key.UserId).Select(u => u.FirstName + " " + u.LastName + " (" + u.Email + ")").FirstOrDefault(),
-                    Day = g.Key.CreatedAt.Date,
+                    Date = g.Key.CreatedAt.Date,
                     Count = g.Count()
-                }).OrderBy(p => p.Day).ToList();
+                }).OrderBy(p => p.Date).ToList();
         }
 
         public List<StatisticModel> Organizations { get; set; }
@@ -45,9 +41,7 @@ namespace InfoPoster_backend.Handlers.Statistics
 
     public class StatisticModel
     {
-        public Guid UserId { get; set; }
-        public string UserName { get; set; }
-        public DateTime Day { get; set; }
+        public DateTime Date { get; set; }
         public int Count { get; set; }
     }
 

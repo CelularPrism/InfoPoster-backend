@@ -29,6 +29,8 @@ namespace InfoPoster_backend.Repos
         public async Task<OrganizationModel> GetOrganization(Guid id) =>
             await _organization.Organizations.FirstOrDefaultAsync(o => o.Id == id);
 
+        public async Task<bool> CheckAdmin(Guid userId) => await _organization.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
+
         public async Task<List<CategoryModel>> GetCategories() => await _organization.Categories.Join(_organization.CategoriesMultilang,
                                                                                                       c => c.Id,
                                                                                                       m => m.CategoryId,
@@ -102,9 +104,12 @@ namespace InfoPoster_backend.Repos
                                                                      UserId = o.Organization.UserId
                                                                  }).ToListAsync();
 
-        public async Task<List<AllOrganizationModel>> GetOrganizationList(string lang)
+        public async Task<List<AllOrganizationModel>> GetOrganizationList(string lang, Guid userId)
         {
-            var organizations = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING || o.Status == (int)POSTER_STATUS.PUBLISHED)
+            var isAdmin = await _organization.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
+            var organizations = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING || 
+                                                                             o.Status == (int)POSTER_STATUS.PUBLISHED ||
+                                                                             o.Status == (isAdmin ? (int)POSTER_STATUS.PUBLISHED : (int)POSTER_STATUS.PUBLISHED))
                                                                  .Join(_organization.OrganizationsMultilang,
                                                                        o => o.Id,
                                                                        m => m.OrganizationId,
@@ -312,7 +317,7 @@ namespace InfoPoster_backend.Repos
 
             organization.Contacts = await _organization.Contacts.Where(c => c.ApplicationId == id && c.Lang == _lang).Select(c => c.Contacts).FirstOrDefaultAsync();
 
-            var files = await _organization.FileUrls.Where(f => f.PosterId == id)
+            var files = await _organization.OrganizationFileUrls.Where(f => f.OrganizationId == id)
                                                .AsNoTracking()
                                                .ToListAsync();
 
@@ -494,6 +499,12 @@ namespace InfoPoster_backend.Repos
         public async Task RemovePlaceList(List<PlaceModel> model)
         {
             _organization.Places.RemoveRange(model);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddHistory(List<ApplicationChangeHistory> list)
+        {
+            await _organization.ApplicationChangeHistory.AddRangeAsync(list);
             await _organization.SaveChangesAsync();
         }
     }

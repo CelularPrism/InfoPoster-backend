@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -60,16 +61,18 @@ namespace InfoPoster_backend.Handlers.Organizations
     {
         private readonly OrganizationRepository _repository;
         private readonly string _lang;
+        private Guid _user;
 
-        public GetAllOrganizationHandler(OrganizationRepository repository, IHttpContextAccessor accessor)
+        public GetAllOrganizationHandler(OrganizationRepository repository, IHttpContextAccessor accessor, LoginService loginService)
         {
             _repository = repository;
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
+            _user = loginService.GetUserId();
         }
 
         public async Task<GetAllOrganizationResponse> Handle(GetAllOrganizationRequest request, CancellationToken cancellationToken = default)
         {
-            var organizations = await _repository.GetOrganizationList(_lang);
+            var organizations = await _repository.GetOrganizationList(_lang, _user);
 
             if (request.CategoryId != null)
             {
