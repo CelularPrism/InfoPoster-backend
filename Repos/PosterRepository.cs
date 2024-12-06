@@ -84,10 +84,79 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<AdministrationPostersResponse>> GetListNoTracking(Guid userId, string lang)
+        public async Task<List<AdministrationPostersResponse>> GetListNoTracking(Guid userId, string lang, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate)
         {
-            var list = await _context.Posters.Where(p => p.UserId == userId)
-                                  .Join(_context.PostersMultilang,
+            var isAdmin = await _context.User_To_Roles.AnyAsync(u => u.UserId == userId && u.RoleId == Constants.ROLE_ADMIN);
+
+            if (!isAdmin)
+            {
+                var query = _context.Posters.Where(p => p.UserId == userId);
+                if (categoryId != null)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                if (status != null)
+                {
+                    query = query.Where(p => p.Status == status);
+                }
+
+                if (startDate != null)
+                {
+                    query = query.Where(p => p.CreatedAt >= startDate);
+                }
+
+                if (endDate != null)
+                {
+                    query = query.Where(p => p.CreatedAt <= endDate);
+                }
+
+                var list = await query.Join(_context.PostersMultilang,
+                                            p => p.Id,
+                                            m => m.PosterId,
+                                            (p, m) => new { p, m })
+                                      .Where(p => p.m.Lang == "en")
+                                      .Join(_context.Users,
+                                            p => p.p.UserId,
+                                            u => u.Id,
+                                            (p, u) => new { p, UserName = u.FirstName + " " + u.LastName })
+                                      .AsNoTracking()
+                                      .ToListAsync();
+
+                var result = list.Select(p => new AdministrationPostersResponse(p.p.p, p.p.m, p.UserName)
+                {
+                    CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
+                    CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
+                    CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault()
+                }).OrderBy(p => p.ReleaseDate)
+                  .ToList();
+
+                return result;
+            } else
+            {
+                var query = _context.Posters.AsQueryable();
+
+                if (categoryId != null)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                if (status != null)
+                {
+                    query = query.Where(p => p.Status == status);
+                }
+
+                if (startDate != null)
+                {
+                    query = query.Where(p => p.CreatedAt >= startDate);
+                }
+
+                if (endDate != null)
+                {
+                    query = query.Where(p => p.CreatedAt <= endDate);
+                }
+
+                var list = await query.Join(_context.PostersMultilang,
                                         p => p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
@@ -99,15 +168,16 @@ namespace InfoPoster_backend.Repos
                                   .AsNoTracking()
                                   .ToListAsync();
 
-            var result = list.Select(p => new AdministrationPostersResponse(p.p.p, p.p.m, p.UserName)
-                                            {
-                                                CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
-                                                CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
-                                                CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault()
-                                            })
-                             .OrderBy(p => p.ReleaseDate)
-                             .ToList();
-            return result;
+                var result = list.Select(p => new AdministrationPostersResponse(p.p.p, p.p.m, p.UserName)
+                {
+                    CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
+                    CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
+                    CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault()
+                }).OrderBy(p => p.ReleaseDate)
+                  .ToList();
+
+                return result;
+            }
         }
 
         public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, string lang = "en")
@@ -217,7 +287,7 @@ namespace InfoPoster_backend.Repos
                                                .AsNoTracking()
                                                .ToListAsync();
 
-            poster.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
+            poster.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
             poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
 
             var places = await _context.Places.Where(p => p.ApplicationId == Id && p.Lang == lang)
@@ -226,6 +296,7 @@ namespace InfoPoster_backend.Repos
 
             poster.Parking = places;
             poster.AttachedOrganizationName = await _context.OrganizationsMultilang.Where(m => m.OrganizationId == model.FullInfo.OrganizationId && m.Lang == _lang).Select(m => m.Name).FirstOrDefaultAsync();
+            poster.Contacts = await _context.Contacts.Where(c => c.ApplicationId == Id && c.Lang == _lang).Select(c => c.Contacts).FirstOrDefaultAsync();
 
             return poster;
         }

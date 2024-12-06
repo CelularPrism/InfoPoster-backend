@@ -51,8 +51,9 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string PlaceLink { get; set; } = string.Empty;
         public string SiteLink { get; set; } = string.Empty;
         public string AgeRestriction { get; set; } = string.Empty;
-        public List<string> SocialLinks { get; set; }
+        public string SocialLinks { get; set; }
         public string Description { get; set; } = string.Empty;
+        public string Contacts { get; set; } = string.Empty;
         public List<PlaceModel> Parking { get; set; } = new List<PlaceModel>();
         public string Phone { get; set; } = string.Empty;
         public List<GetFileResponse> GaleryUrls { get; set; }

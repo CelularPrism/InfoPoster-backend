@@ -8,6 +8,7 @@ namespace InfoPoster_backend.Handlers.Organizations
     {
         public int Sort { get; set; }
         public Guid? CategoryId { get; set; }
+        public Guid? SubcategoryId { get; set; }
         public Guid? CityId { get; set; }
         public int? Status { get; set; }
         public DateTime? StartDate { get; set; }
@@ -52,27 +53,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public async Task<GetOrganizationListResponse> Handle(GetOrganizationListRequest request, CancellationToken cancellationToken = default)
         {
             var userId = _loginService.GetUserId();
-            var organizations = await _repository.GetOrganizationList(userId);
-
-            if (request.CategoryId != null)
-            {
-                organizations = organizations.Where(x => x.CategoryId == request.CategoryId).ToList();
-            }
-
-            if (request.Status != null)
-            {
-                organizations = organizations.Where(x => x.Status == request.Status).ToList();
-            }
-
-            if (request.StartDate != null)
-            {
-                organizations = organizations.Where(x => x.CreatedAt >= request.StartDate).ToList();
-            }
-
-            if (request.EndDate != null)
-            {
-                organizations = organizations.Where(x => x.CreatedAt <= request.EndDate).ToList();
-            }
+            var organizations = await _repository.GetOrganizationList(userId, request.CategoryId, request.SubcategoryId, request.Status, request.StartDate, request.EndDate);
 
             if (request.CityId != null)
             {

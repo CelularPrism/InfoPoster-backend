@@ -31,6 +31,7 @@ namespace InfoPoster_backend
             builder.Services.AddScoped<PosterRepository>();
             builder.Services.AddScoped<OrganizationRepository>();
             builder.Services.AddScoped<FileRepository>();
+            builder.Services.AddScoped<StatisticRepository>();
 
             builder.Services.AddSpaStaticFiles(configuration =>
             {

@@ -74,31 +74,11 @@ namespace InfoPoster_backend.Handlers.Administration
             if (userId == Guid.Empty)
                 return null;
 
-            var posterList = await _repository.GetListNoTracking(userId, _lang);
-
-            if (request.CategoryId != null)
-            {
-                posterList = posterList.Where(x => x.CategoryId == request.CategoryId).ToList();
-            }
+            var posterList = await _repository.GetListNoTracking(userId, _lang, request.CategoryId, request.Status, request.StartDate, request.EndDate);
 
             if (request.CityId != null)
             {
                 posterList = posterList.Where(x => x.CityId == request.CityId).ToList();
-            }
-
-            if (request.Status != null)
-            {
-                posterList = posterList.Where(x => x.Status == request.Status).ToList();
-            }
-
-            if (request.StartDate != null)
-            {
-                posterList = posterList.Where(x => x.CreatedAt >= request.StartDate).ToList();
-            }
-
-            if (request.EndDate != null)
-            {
-                posterList = posterList.Where(x => x.CreatedAt <= request.EndDate).ToList();
             }
 
             if (request.Sort == 0)

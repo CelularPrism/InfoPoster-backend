@@ -27,7 +27,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string PlaceLink { get; set; } = string.Empty;
         public string SiteLink { get; set; } = string.Empty;
         public string AgeRestriction { get; set; } = string.Empty;
-        public List<string> SocialLinks { get; set; }
+        public string SocialLinks { get; set; }
         public string Description { get; set; } = string.Empty;
         public List<PlaceModel> Parking { get; set; } = new List<PlaceModel>();
         public string Phone { get; set; } = string.Empty;
@@ -99,7 +99,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             if (files.Count > 0)
             {
                 result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
-                result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
+                result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
             }
 
             var places = await _repository.GetPlaces(request.Id);

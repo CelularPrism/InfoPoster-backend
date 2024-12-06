@@ -22,6 +22,7 @@ namespace InfoPoster_backend.Models.Contexts
         }
 
         public DbSet<UserModel> Users { get; set; }
+        public DbSet<UserToRolesModel> User_To_Roles { get; set; }
         public DbSet<PosterModel> Posters { get; set; }
         public DbSet<PosterFullInfoModel> PostersFullInfo { get; set; }
         public DbSet<PosterMultilangModel> PostersMultilang { get; set; }

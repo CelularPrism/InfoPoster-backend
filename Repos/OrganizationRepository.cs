@@ -125,25 +125,104 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<OrganizationResponseModel>> GetOrganizationList(Guid userId) => 
-            await _organization.Organizations.Where(o => o.UserId == userId)
-                                             .Join(_organization.OrganizationsFullInfo,
-                                                   o => o.Id,
-                                                   f => f.OrganizationId,
-                                                   (o, f) => new OrganizationResponseModel()
-                                                   {
-                                                       Id = o.Id,
-                                                       Name = o.Name,
-                                                       CategoryId = o.CategoryId,
-                                                       CategoryName = _organization.Categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
-                                                       SubcategoryId = o.SubcategoryId,
-                                                       SubcategoryName = _organization.Subcategories.Where(c => c.Id == o.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
-                                                       CreatedAt = o.CreatedAt,
-                                                       Status = o.Status,
-                                                       CityId = f.City,
-                                                       CityName = _organization.CitiesMultilang.Where(c => c.CityId == f.City && c.Lang == _lang).Select(c => c.Name).FirstOrDefault()
-                                                   })
-                                             .OrderByDescending(o => o.CreatedAt).ToListAsync();
+        public async Task<List<OrganizationResponseModel>> GetOrganizationList(Guid userId, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate)
+        {
+            var isAdmin = await _organization.User_To_Roles.AnyAsync(u => u.UserId == userId && u.RoleId == Constants.ROLE_ADMIN);
+
+            if (!isAdmin)
+            {
+                var query = _organization.Organizations.Where(o => o.UserId == userId);
+                if (categoryId != null)
+                {
+                    query = query.Where(o => o.CategoryId == categoryId);
+                }
+
+                if (subcategoryId != null)
+                {
+                    query = query.Where(o => o.SubcategoryId == subcategoryId);
+                }
+                
+                if (status != null)
+                {
+                    query = query.Where(o => o.Status == status);
+                }
+
+                if (startDate != null)
+                {
+                    query = query.Where(o => o.CreatedAt >= startDate);
+                }
+
+                if (endDate != null)
+                {
+                    query = query.Where(o => o.CreatedAt <= endDate);
+                }
+
+                var result = await query.Join(_organization.OrganizationsFullInfo,
+                                                       o => o.Id,
+                                                       f => f.OrganizationId,
+                                                       (o, f) => new OrganizationResponseModel()
+                                                       {
+                                                           Id = o.Id,
+                                                           Name = o.Name,
+                                                           CategoryId = o.CategoryId,
+                                                           CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == o.CategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           SubcategoryId = o.SubcategoryId,
+                                                           SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == o.SubcategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           CreatedAt = o.CreatedAt,
+                                                           Status = o.Status,
+                                                           CityId = f.City,
+                                                           CityName = _organization.CitiesMultilang.Where(c => c.CityId == f.City && c.Lang == _lang).Select(c => c.Name).FirstOrDefault()
+                                                       })
+                                                 .OrderByDescending(o => o.CreatedAt).ToListAsync();
+                return result;
+            } else
+            {
+                var query = _organization.Organizations.AsQueryable();
+                if (categoryId != null)
+                {
+                    query = query.Where(o => o.CategoryId == categoryId);
+                }
+
+                if (subcategoryId != null)
+                {
+                    query = query.Where(o => o.SubcategoryId == subcategoryId);
+                }
+
+                if (status != null)
+                {
+                    query = query.Where(o => o.Status == status);
+                }
+
+                if (startDate != null)
+                {
+                    query = query.Where(o => o.CreatedAt >= startDate);
+                }
+
+                if (endDate != null)
+                {
+                    query = query.Where(o => o.CreatedAt <= endDate);
+                }
+
+                var result = await query.Join(_organization.OrganizationsFullInfo,
+                                                       o => o.Id,
+                                                       f => f.OrganizationId,
+                                                       (o, f) => new OrganizationResponseModel()
+                                                       {
+                                                           Id = o.Id,
+                                                           Name = o.Name,
+                                                           CategoryId = o.CategoryId,
+                                                           CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == o.CategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           SubcategoryId = o.SubcategoryId,
+                                                           SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == o.SubcategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           CreatedAt = o.CreatedAt,
+                                                           Status = o.Status,
+                                                           CityId = f.City,
+                                                           CityName = _organization.CitiesMultilang.Where(c => c.CityId == f.City && c.Lang == _lang).Select(c => c.Name).FirstOrDefault()
+                                                       })
+                                                 .OrderByDescending(o => o.CreatedAt).ToListAsync();
+                return result;
+            }
+        }
 
         public async Task<OrganizationFullInfoModel> GetOrganizationFullInfo(Guid organizationId) =>
             await _organization.OrganizationsFullInfo.FirstOrDefaultAsync(f => f.OrganizationId == organizationId);
@@ -209,37 +288,39 @@ namespace InfoPoster_backend.Repos
                                                .AsNoTracking()
                                                .FirstOrDefaultAsync();
 
-            var poster = new GetFullInfoOrganizationResponse(model.Organization, model.FullInfo, model.Multilang);
-            poster.CategoryName = await _organization.CategoriesMultilang.Where(c => c.CategoryId == poster.CategoryId && c.lang == _lang)
+            var organization = new GetFullInfoOrganizationResponse(model.Organization, model.FullInfo, model.Multilang);
+            organization.CategoryName = await _organization.CategoriesMultilang.Where(c => c.CategoryId == organization.CategoryId && c.lang == _lang)
                                                                     .AsNoTracking()
                                                                     .Select(c => c.Name)
                                                                     .FirstOrDefaultAsync();
 
-            poster.SubcategoryName = await _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == poster.SubcategoryId && c.lang == _lang)
+            organization.SubcategoryName = await _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == organization.SubcategoryId && c.lang == _lang)
                                                                     .AsNoTracking()
                                                                     .Select(c => c.Name)
                                                                     .FirstOrDefaultAsync();
 
-            poster.City = await _organization.CitiesMultilang.Where(c => c.CityId == poster.CityId && c.Lang == _lang)
+            organization.City = await _organization.CitiesMultilang.Where(c => c.CityId == organization.CityId && c.Lang == _lang)
                                                                     .AsNoTracking()
                                                                     .Select(c => c.Name)
                                                                     .FirstOrDefaultAsync();
+
+            organization.Contacts = await _organization.Contacts.Where(c => c.ApplicationId == id && c.Lang == _lang).Select(c => c.Contacts).FirstOrDefaultAsync();
 
             var files = await _organization.FileUrls.Where(f => f.PosterId == id)
                                                .AsNoTracking()
                                                .ToListAsync();
 
-            poster.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).ToList();
-            poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
+            organization.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
+            organization.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
 
             var places = await _organization.Places.Where(p => p.ApplicationId == id && p.Lang == _lang)
                                               .AsNoTracking()
                                               .ToListAsync();
 
-            poster.Parking = places;
-            poster.Lang = _lang;
+            organization.Parking = places;
+            organization.Lang = _lang;
 
-            poster.MenuCategories = await _organization.MenusToOrganization.Where(m => m.OrganizationId == id)
+            organization.MenuCategories = await _organization.MenusToOrganization.Where(m => m.OrganizationId == id)
                                                                            .Join(_organization.MenusMultilang,
                                                                                  org => org.MenuId,
                                                                                  ml => ml.MenuId,
@@ -247,7 +328,7 @@ namespace InfoPoster_backend.Repos
                                                                            .Where(ml => ml.Lang == _lang)
                                                                            .Select(ml => ml.Name)
                                                                            .ToListAsync();
-            return poster;
+            return organization;
         }
 
         public async Task<List<PlaceModel>> GetPlaceList(Guid organizationId) =>

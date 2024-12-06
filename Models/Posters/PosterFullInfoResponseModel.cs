@@ -39,7 +39,7 @@ namespace InfoPoster_backend.Models.Posters
         public string PlaceLink { get; set; }
         public List<PlaceModel> Parking { get; set; }
         public string Tags { get; set; }
-        public List<string> SocialLinks { get; set; }
+        public string SocialLinks { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
@@ -48,5 +48,6 @@ namespace InfoPoster_backend.Models.Posters
         public List<string> VideoUrls { get; set; }
         public Guid? AttachedOrganizationId { get; set; }
         public string AttachedOrganizationName { get; set; }
+        public string Contacts { get; set; }
     }
 }

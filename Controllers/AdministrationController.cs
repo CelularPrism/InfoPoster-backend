@@ -52,7 +52,7 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new AdministrationGetPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, Page = page, CountPerPage = countPerPage });
+            var result = await _mediator.Send(new AdministrationGetPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, Page = page - 1, CountPerPage = countPerPage });
             return Ok(result);
         }
 
@@ -75,7 +75,7 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetAllPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page, CountPerPage = countPerPage });
+            var result = await _mediator.Send(new GetAllPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
             return Ok(result);
         }
 
@@ -126,7 +126,7 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba")]
+        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba,c7d65315-0ad4-486f-9bc1-88f86cc1d45b")]
         [HttpPost("poster/enable")]
         public async Task<IActionResult> EnablePoster([FromForm] Guid posterId)
         {
@@ -179,7 +179,7 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba")]
+        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba,c7d65315-0ad4-486f-9bc1-88f86cc1d45b")]
         [HttpGet("search/editors")]
         public async Task<IActionResult> SearchEditor([FromQuery] string searchText)
         {
@@ -199,7 +199,7 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetAllOrganizationRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page, CountPerPage = countPerPage });
+            var result = await _mediator.Send(new GetAllOrganizationRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
             return Ok(result);
         }
 
@@ -214,7 +214,7 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page, CountPerPage = countPerPage });
+            var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
             return Ok(result);
         }
 
@@ -258,7 +258,7 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba")]
+        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba,c7d65315-0ad4-486f-9bc1-88f86cc1d45b")]
         [HttpPost("organization/enable")]
         public async Task<IActionResult> EnableOrganization([FromForm] Guid organizationId)
         {
