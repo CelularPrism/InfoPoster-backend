@@ -143,13 +143,9 @@ namespace InfoPoster_backend.Handlers.Organizations
             }
             if (!string.IsNullOrEmpty(request.SocialLinks))
             {
-                var links = request.SocialLinks.Split(' ');
+                var links = request.SocialLinks;
                 changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "SocialLinks", string.Empty, string.Empty, _user));
-
-                foreach (var social in links)
-                {
-                    files.Add(new OrganizationFileURLModel(request.OrganizationId, social, (int)FILE_CATEGORIES.SOCIAL_LINKS));
-                }
+                files.Add(new OrganizationFileURLModel(request.OrganizationId, links, (int)FILE_CATEGORIES.SOCIAL_LINKS));
             }
 
             await _repository.SaveFiles(files, request.OrganizationId);
