@@ -74,36 +74,11 @@ namespace InfoPoster_backend.Handlers.Administration
 
         public async Task<GetAllPostersResponse> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetListNoTracking(_lang, _user);
-
-            if (request.CategoryId != null)
-            {
-                posters = posters.Where(x => x.CategoryId == request.CategoryId).ToList();
-            }
+            var posters = await _repository.GetListNoTracking(_lang, _user, request.CategoryId, request.Status, request.StartDate, request.EndDate, request.UserId);
 
             if (request.CityId != null)
             {
                 posters = posters.Where(x => x.CityId == request.CityId).ToList();
-            }
-
-            if (request.Status != null)
-            {
-                posters = posters.Where(x => x.Status == request.Status).ToList();
-            }
-
-            if (request.StartDate != null)
-            {
-                posters = posters.Where(x => x.CreatedAt >= request.StartDate).ToList();
-            }
-
-            if (request.EndDate != null)
-            {
-                posters = posters.Where(x => x.CreatedAt <= request.EndDate).ToList();
-            }
-
-            if (request.UserId != null)
-            {
-                posters = posters.Where(x => x.UserId == request.UserId).ToList();
             }
 
             if (request.Sort == 0)

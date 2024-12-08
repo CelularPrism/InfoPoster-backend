@@ -104,13 +104,39 @@ namespace InfoPoster_backend.Repos
                                                                      UserId = o.Organization.UserId
                                                                  }).ToListAsync();
 
-        public async Task<List<AllOrganizationModel>> GetOrganizationList(string lang, Guid userId)
+        public async Task<List<AllOrganizationModel>> GetOrganizationList(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId)
         {
-            var isAdmin = await _organization.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
-            var organizations = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING || 
+            var isAdmin = await _organization.User_To_Roles.AnyAsync(us => us.UserId == adminId && us.RoleId == Constants.ROLE_ADMIN);
+            var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||
                                                                              o.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                                             o.Status == (isAdmin ? (int)POSTER_STATUS.PUBLISHED : (int)POSTER_STATUS.PUBLISHED))
-                                                                 .Join(_organization.OrganizationsMultilang,
+                                                                             o.Status == (isAdmin ? (int)POSTER_STATUS.DRAFT : (int)POSTER_STATUS.PUBLISHED));
+
+            if (categoryId != null)
+            {
+                query = query.Where(q => q.CategoryId == categoryId);
+            }
+
+            if (status != null)
+            {
+                query = query.Where(q => q.Status == status);
+            }
+
+            if (startDate != null)
+            {
+                query = query.Where(q => q.CreatedAt >= startDate);
+            }
+
+            if (endDate != null)
+            {
+                query = query.Where(q => q.CreatedAt <= endDate);
+            }
+
+            if (userId != null)
+            {
+                query = query.Where(q => q.UserId == userId);
+            }
+
+            var organizations = await query.Join(_organization.OrganizationsMultilang,
                                                                        o => o.Id,
                                                                        m => m.OrganizationId,
                                                                        (o, m) => new { Organization = o, Multilang = m })

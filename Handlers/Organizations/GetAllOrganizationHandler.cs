@@ -72,36 +72,11 @@ namespace InfoPoster_backend.Handlers.Organizations
 
         public async Task<GetAllOrganizationResponse> Handle(GetAllOrganizationRequest request, CancellationToken cancellationToken = default)
         {
-            var organizations = await _repository.GetOrganizationList(_lang, _user);
-
-            if (request.CategoryId != null)
-            {
-                organizations = organizations.Where(x => x.CategoryId == request.CategoryId).ToList();
-            }
+            var organizations = await _repository.GetOrganizationList(_lang, _user, request.CategoryId, request.Status, request.StartDate, request.EndDate, request.UserId);
 
             if (request.CityId != null)
             {
                 organizations = organizations.Where(x => x.CityId == request.CityId).ToList();
-            }
-
-            if (request.Status != null)
-            {
-                organizations = organizations.Where(x => x.Status == request.Status).ToList();
-            }
-
-            if (request.StartDate != null)
-            {
-                organizations = organizations.Where(x => x.CreatedAt >= request.StartDate).ToList();
-            }
-
-            if (request.EndDate != null)
-            {
-                organizations = organizations.Where(x => x.CreatedAt <= request.EndDate).ToList();
-            }
-
-            if (request.UserId != null)
-            {
-                organizations = organizations.Where(x => x.UserId == request.UserId).ToList();
             }
 
             if (request.Sort == 0)

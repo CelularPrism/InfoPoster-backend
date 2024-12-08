@@ -60,14 +60,39 @@ namespace InfoPoster_backend.Repos
                                                        (f, s) => s)
                                                  .FirstOrDefaultAsync();
 
-        public async Task<List<AllPostersResponse>> GetListNoTracking(string lang, Guid userId)
+        public async Task<List<AllPostersResponse>> GetListNoTracking(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId)
         {
-            var isAdmin = await _context.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
+            var isAdmin = await _context.User_To_Roles.AnyAsync(us => us.UserId == adminId && us.RoleId == Constants.ROLE_ADMIN);
+            var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
+                                                    p.Status == (int)POSTER_STATUS.PUBLISHED ||
+                                                    p.Status == (isAdmin ? (int)POSTER_STATUS.DRAFT : (int)POSTER_STATUS.PUBLISHED));
 
-            var list = await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING || 
-                                                         p.Status == (int)POSTER_STATUS.PUBLISHED || 
-                                                         p.Status == (isAdmin ? (int)POSTER_STATUS.DRAFT : (int)POSTER_STATUS.PUBLISHED))
-                                  .Join(_context.Categories,
+            if (categoryId != null)
+            {
+                query = query.Where(q => q.CategoryId == categoryId);
+            }
+
+            if (status != null)
+            {
+                query = query.Where(q => q.Status == status);
+            }
+
+            if (startDate != null)
+            {
+                query = query.Where(q => q.CreatedAt >= startDate);
+            }
+
+            if (endDate != null)
+            {
+                query = query.Where(q => q.CreatedAt <= endDate);
+            }
+
+            if (userId != null)
+            {
+                query = query.Where(q => q.UserId == userId);
+            }
+
+            var list = await query.Join(_context.Categories,
                                         p => p.CategoryId,
                                         c => c.Id,
                                         (p, c) => p)
