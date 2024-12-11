@@ -209,7 +209,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             }
 
             await _repository.AddHistory(changeHistory);
-            await _repository.UpdateOrganization(organization, _user);
+            await _repository.UpdateOrganization(organization, _user, articleId);
 
             return new SaveOrganizationResponse();
         }

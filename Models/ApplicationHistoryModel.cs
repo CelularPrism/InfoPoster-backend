@@ -15,5 +15,6 @@
         public string UserName { get; set; }
         public Guid ApplicationId { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public bool AnyFieldsLog { get; set; }
     }
 }

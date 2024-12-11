@@ -383,8 +383,12 @@ namespace InfoPoster_backend.Repos
                                                             UpdatedAt = h.UpdatedAt,
                                                             UserId = h.UserId,
                                                             UserName = u.FirstName + " " + u.LastName,
+                                                            AnyFieldsLog = _organization.ApplicationChangeHistory.Any(c => c.ArticleId == h.Id)
                                                         })
                                                   .OrderByDescending(h => h.UpdatedAt).ToListAsync();
+
+        public async Task<List<ApplicationChangeHistory>> GetChangeHistory(Guid articleId) =>
+            await _organization.ApplicationChangeHistory.Where(h => h.ArticleId == articleId).OrderByDescending(h => h.ChangedAt).ToListAsync();
 
         public async Task<List<OrganizationModel>> SearchOrganizationList(string searchText, Guid city) =>
             await _organization.OrganizationsFullInfo.Where(f => f.City == city)
@@ -468,10 +472,11 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
-        public async Task UpdateOrganization(OrganizationModel model, Guid userId)
+        public async Task UpdateOrganization(OrganizationModel model, Guid userId, Guid articleId)
         {
             var history = new ApplicationHistoryModel()
             {
+                Id = articleId,
                 ApplicationId = model.Id,
                 UserId = userId
             };

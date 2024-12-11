@@ -4,7 +4,7 @@
     {
         public ApplicationChangeHistory() { }
 
-        public ApplicationChangeHistory(Guid articleId, Guid applicationId, string? fieldName, string? oldValue, string newValue, Guid userId)
+        public ApplicationChangeHistory(Guid articleId, Guid applicationId, string fieldName, string? oldValue, string? newValue, Guid userId)
         {
             ArticleId = articleId;
             ApplicationId = applicationId;

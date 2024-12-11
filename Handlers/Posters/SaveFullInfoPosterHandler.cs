@@ -213,7 +213,8 @@ namespace InfoPoster_backend.Handlers.Posters
             
             poster.UpdatedAt = DateTime.UtcNow;
 
-            await _repository.UpdatePoster(poster, _user);
+            await _repository.AddChangeHistory(changeHistory);
+            await _repository.UpdatePoster(poster, _user, articleId);
 
             var result = new SaveFullInfoPosterResponse()
             {

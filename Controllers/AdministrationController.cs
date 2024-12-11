@@ -158,6 +158,16 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("poster/history/fields")]
+        public async Task<IActionResult> GetPosterFieldsHistory([FromQuery] Guid articleId)
+        {
+            var result = await _mediator.Send(new GetPosterChangeHistoryRequest() { Id = articleId });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
         [HttpGet("menu")]
         public async Task<IActionResult> GetMenuList()
         {
@@ -284,6 +294,16 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetOrganizationHistory([FromQuery] Guid organizationId)
         {
             var result = await _mediator.Send(new GetOrganizationHistoryRequest() { Id = organizationId });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("organization/history/fields")]
+        public async Task<IActionResult> GetOrganizationFieldsHistory([FromQuery] Guid articleId)
+        {
+            var result = await _mediator.Send(new GetOrganizationChangeHistoryRequest() { Id = articleId });
             if (result == null)
                 return NotFound();
 

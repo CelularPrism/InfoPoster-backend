@@ -15,7 +15,7 @@ namespace InfoPoster_backend.Services.Login
         private readonly string _audience;
         private readonly string _privateKey;
 
-        private readonly double lifetimeJwt = 60.0;
+        private readonly double lifetimeJwt = 720.0;
         public JWTService(IHttpContextAccessor accessor, IConfiguration configuration)
         {
             _accessor = accessor;

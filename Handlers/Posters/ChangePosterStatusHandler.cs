@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Posters;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Tools;
@@ -45,15 +46,6 @@ namespace InfoPoster_backend.Handlers.Posters
             if (request.Status == POSTER_STATUS.PUBLISHED)
             {
                 var fullInfo = await _repository.GetFullInfoPoster(request.Id);
-                //if (fullInfo.OrganizationId == null || !await _repository.AnyOrganization((Guid)fullInfo.OrganizationId))
-                //{
-                //    return new ChangePosterStatusResponse()
-                //    {
-                //        IsSuccess = false,
-                //        StatusCode = HttpStatusCode.NotFound,
-                //        ErrorMessage = "Organization is empty or not found"
-                //    };
-                //}
 
                 if (poster.CategoryId == Guid.Empty || fullInfo.City == null || fullInfo.City == Guid.Empty || string.IsNullOrEmpty(fullInfo.AgeRestriction) || string.IsNullOrEmpty(fullInfo.TimeStart))
                 {
@@ -100,9 +92,13 @@ namespace InfoPoster_backend.Handlers.Posters
                     }
                 }
             }
-            
+
+            var articleId = Guid.NewGuid();
+            var changeHistory = new List<ApplicationChangeHistory>() { new ApplicationChangeHistory(articleId, request.Id, "Status", poster.Status.ToString(), request.Status.ToString(), _user) };
+            await _repository.AddChangeHistory(changeHistory);
+
             poster.Status = (int)request.Status;
-            await _repository.UpdatePoster(poster, _user);
+            await _repository.UpdatePoster(poster, _user, articleId);
 
             return new ChangePosterStatusResponse();
         }
