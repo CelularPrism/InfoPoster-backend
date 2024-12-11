@@ -28,6 +28,8 @@ namespace InfoPoster_backend.Handlers.Organizations
 
     public class AllOrganizationModel
     {
+        public AllOrganizationModel() { }
+
         public AllOrganizationModel(OrganizationModel organization, OrganizationMultilangModel multilang, string userName)
         {
             Id = organization.Id;
@@ -60,34 +62,24 @@ namespace InfoPoster_backend.Handlers.Organizations
     public class GetAllOrganizationHandler : IRequestHandler<GetAllOrganizationRequest, GetAllOrganizationResponse>
     {
         private readonly OrganizationRepository _repository;
+        private readonly CategoryRepository _categoryRepository;
         private readonly string _lang;
         private Guid _user;
 
-        public GetAllOrganizationHandler(OrganizationRepository repository, IHttpContextAccessor accessor, LoginService loginService)
+        public GetAllOrganizationHandler(OrganizationRepository repository, CategoryRepository categoryRepository, IHttpContextAccessor accessor, LoginService loginService)
         {
             _repository = repository;
+            _categoryRepository = categoryRepository;
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
             _user = loginService.GetUserId();
         }
 
         public async Task<GetAllOrganizationResponse> Handle(GetAllOrganizationRequest request, CancellationToken cancellationToken = default)
         {
-            var organizations = await _repository.GetOrganizationList(_lang, _user, request.CategoryId, request.Status, request.StartDate, request.EndDate, request.UserId);
-
-            if (request.CityId != null)
-            {
-                organizations = organizations.Where(x => x.CityId == request.CityId).ToList();
-            }
-
-            if (request.Sort == 0)
-            {
-                organizations = organizations.OrderByDescending(x => x.CreatedAt).ToList();
-            }
-            else
-            {
-                organizations = organizations.OrderBy(x => x.Status).ToList();
-            }
-
+            var organizations = await _repository.GetOrganizationList(_lang, _user, request.CategoryId, request.Status, request.StartDate, request.EndDate, request.UserId, request.CityId);
+            var cities = await _repository.GetCities(_lang);
+            var categories = await _repository.GetCategories();
+            var subcategories = await _repository.GetSubcategories();
             var result = new GetAllOrganizationResponse()
             {
                 Count = organizations.Count,
@@ -96,7 +88,43 @@ namespace InfoPoster_backend.Handlers.Organizations
             };
 
             organizations = organizations.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
-            result.Organizations = organizations;
+            var idEnum = organizations.Select(x => x.Id);
+            var userEnum = organizations.Select(x => x.UserId);
+            var multilang = await _repository.GetMultilang(idEnum);
+            var fullInfo = await _repository.GetFullInfo(idEnum);
+            var users = await _repository.GetUsers(userEnum);
+
+            var orgList = organizations.Select(o => new AllOrganizationModel()
+            {
+                Id = o.Id,
+                CategoryId = o.CategoryId,
+                CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                Name = multilang.Where(m => m.OrganizationId == o.Id).Select(m => m.Name).FirstOrDefault(),
+                CityId = fullInfo.Where(f => f.OrganizationId == o.Id).Select(f => f.City).FirstOrDefault(),
+                CityName = fullInfo.Where(f => f.OrganizationId == o.Id)
+                                   .Join(cities,
+                                         f => f.City,
+                                         c => c.Id,
+                                         (f, c) => c.Name)
+                                   .FirstOrDefault(),
+                CreatedAt = o.CreatedAt,
+                CreatedBy = users.Where(u => u.Id == o.UserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault(),
+                UserId = o.UserId,
+                Status = o.Status,
+                SubategoryId = o.SubcategoryId,
+                SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault(),
+            }).ToList();
+
+            if (request.Sort == 0)
+            {
+                orgList = orgList.OrderByDescending(x => x.CreatedAt).ToList();
+            }
+            else
+            {
+                orgList = orgList.OrderBy(x => x.Status).ToList();
+            }
+
+            result.Organizations = orgList;
             return result;
         }
     }
