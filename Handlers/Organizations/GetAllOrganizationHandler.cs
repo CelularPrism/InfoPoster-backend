@@ -54,22 +54,17 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid? CityId { get; set; }
         public string CityName { get; set; }
         public string SubcategoryName { get; set; }
-        public Guid? LastUpdatedBy { get; set; }
-        public string LastUpdatedByName { get; set; }
-        public DateTime? LastUpdatedDate { get; set; }
     }
 
     public class GetAllOrganizationHandler : IRequestHandler<GetAllOrganizationRequest, GetAllOrganizationResponse>
     {
         private readonly OrganizationRepository _repository;
-        private readonly CategoryRepository _categoryRepository;
         private readonly string _lang;
         private Guid _user;
 
-        public GetAllOrganizationHandler(OrganizationRepository repository, CategoryRepository categoryRepository, IHttpContextAccessor accessor, LoginService loginService)
+        public GetAllOrganizationHandler(OrganizationRepository repository, IHttpContextAccessor accessor, LoginService loginService)
         {
             _repository = repository;
-            _categoryRepository = categoryRepository;
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
             _user = loginService.GetUserId();
         }

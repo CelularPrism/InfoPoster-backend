@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
 using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Account;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
@@ -7,6 +8,7 @@ using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using SQLitePCL;
 using System.Linq;
 
@@ -30,6 +32,18 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<CategoryModel>> GetCategories() =>
             await _context.Categories.ToListAsync();
+
+        public async Task<List<SubcategoryModel>> GetSubcategories() => await _context.Subcategories.Join(_context.SubcategoriesMultilang,
+                                                                                                      c => c.Id,
+                                                                                                      m => m.SubcategoryId,
+                                                                                                      (c, m) => new { Subcategory = c, Multilang = m })
+                                                                                                .Where(c => c.Multilang.lang == _lang)
+                                                                                                .Select(c => new SubcategoryModel()
+                                                                                                {
+                                                                                                    Id = c.Subcategory.Id,
+                                                                                                    Name = c.Multilang.Name,
+                                                                                                    ImageSrc = c.Subcategory.ImageSrc
+                                                                                                }).ToListAsync();
 
         public async Task<bool> CheckAdmin(Guid userId) =>
             await _context.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
@@ -60,7 +74,7 @@ namespace InfoPoster_backend.Repos
                                                        (f, s) => s)
                                                  .FirstOrDefaultAsync();
 
-        public async Task<List<AllPostersResponse>> GetListNoTracking(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId)
+        public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
             var isAdmin = await _context.User_To_Roles.AnyAsync(us => us.UserId == adminId && us.RoleId == Constants.ROLE_ADMIN);
             var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
@@ -92,38 +106,61 @@ namespace InfoPoster_backend.Repos
                 query = query.Where(q => q.UserId == userId);
             }
 
-            var list = await query.Join(_context.Categories,
-                                        p => p.CategoryId,
-                                        c => c.Id,
-                                        (p, c) => p)
-                                  .Join(_context.PostersMultilang,
-                                        p => p.Id,
-                                        m => m.PosterId,
-                                        (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == "en")
-                                  .Join(_context.Users,
-                                        p => p.p.UserId,
-                                        u => u.Id,
-                                        (p, u) => new { p, UserName = u.FirstName + " " + u.LastName })
-                                  .AsNoTracking()
-                                  .ToListAsync();
+            if (cityId != null)
+            {
+                query = query.Join(_context.PostersFullInfo,
+                                   q => q.Id,
+                                   f => f.PosterId,
+                                   (q, f) => new { Poster = q, CityId = f.City })
+                             .Where(q => q.CityId == cityId)
+                             .Select(q => q.Poster);
+            }
 
-            var result = list.Select(p => new AllPostersResponse(p.p.p, p.p.m, p.UserName)
-                                    {
-                                        CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
-                                        CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
-                                        CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault(),
-                                        LastUpdatedBy = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId : null,
-                                        LastUpdatedByName = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.Users.Where(
-                                                                                                                                            u => u.Id == _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId
-                                                                                                                                        ).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault() 
-                                                                                                                              : null,
-                                        LastUpdatedDate = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UpdatedAt : null
-                                    })
-                             .OrderBy(p => p.ReleaseDate)
-                             .ToList();
+            var result = await query.ToListAsync();
+            //var list = await query.Join(_context.Categories,
+            //                            p => p.CategoryId,
+            //                            c => c.Id,
+            //                            (p, c) => p)
+            //                      .Join(_context.PostersMultilang,
+            //                            p => p.Id,
+            //                            m => m.PosterId,
+            //                            (p, m) => new { p, m })
+            //                      .Where(p => p.m.Lang == "en")
+            //                      .Join(_context.Users,
+            //                            p => p.p.UserId,
+            //                            u => u.Id,
+            //                            (p, u) => new { p, UserName = u.FirstName + " " + u.LastName })
+            //                      .AsNoTracking()
+            //                      .ToListAsync();
+
+            //var result = list.Select(p => new AllPostersResponse(p.p.p, p.p.m, p.UserName)
+            //                        {
+            //                            CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
+            //                            CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
+            //                            CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault(),
+            //                            LastUpdatedBy = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId : null,
+            //                            LastUpdatedByName = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.Users.Where(
+            //                                                                                                                                u => u.Id == _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId
+            //                                                                                                                            ).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault() 
+            //                                                                                                                  : null,
+            //                            LastUpdatedDate = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UpdatedAt : null
+            //                        })
+            //                 .OrderBy(p => p.ReleaseDate)
+            //                 .ToList();
             return result;
         }
+
+        public async Task<List<PosterMultilangModel>> GetMultilang(IEnumerable<Guid> posters) =>
+            await _context.PostersMultilang.Where(m => m.Lang == _lang && posters.Contains(m.PosterId)).ToListAsync();
+
+        public async Task<List<PosterFullInfoModel>> GetFullInfo(IEnumerable<Guid> posters) =>
+            await _context.PostersFullInfo.Where(f => posters.Contains(f.PosterId)).ToListAsync();
+
+        public async Task<List<UserModel>> GetUsers(IEnumerable<Guid> users) =>
+            await _context.Users.Where(u => users.Contains(u.Id)).ToListAsync();
+
+        public async Task<List<CityModel>> GetCities() =>
+            await _context.CitiesMultilang.Where(c => c.Lang == _lang).Select(c => new CityModel() { Id = c.CityId, Name = c.Name }).ToListAsync();
 
         public async Task<List<AdministrationPostersResponse>> GetListNoTracking(Guid userId, string lang, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate)
         {

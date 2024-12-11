@@ -29,6 +29,8 @@ namespace InfoPoster_backend.Handlers.Administration
     }
     public class AllPostersResponse
     {
+        public AllPostersResponse() { }
+
         public AllPostersResponse(PosterModel poster, PosterMultilangModel multilang, string userName)
         {
             Id = poster.Id;
@@ -54,9 +56,6 @@ namespace InfoPoster_backend.Handlers.Administration
         public string CityName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public Guid? LastUpdatedBy { get; set; }
-        public string LastUpdatedByName { get; set; }
-        public DateTime? LastUpdatedDate { get; set; }
     }
 
     public class GetAllPostersHandler : IRequestHandler<GetAllPostersRequest, GetAllPostersResponse>
@@ -74,32 +73,56 @@ namespace InfoPoster_backend.Handlers.Administration
 
         public async Task<GetAllPostersResponse> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetListNoTracking(_lang, _user, request.CategoryId, request.Status, request.StartDate, request.EndDate, request.UserId);
-
-            if (request.CityId != null)
-            {
-                posters = posters.Where(x => x.CityId == request.CityId).ToList();
-            }
-
-            if (request.Sort == 0)
-            {
-                posters = posters.OrderByDescending(x => x.CreatedAt).ToList();
-            } else if (request.Sort == 1) 
-            {
-                posters = posters.OrderByDescending(x => x.UpdatedAt).ToList();
-            } else
-            {
-                posters = posters.OrderBy(x => x.Status).ToList();
-            }
-
+            var posters = await _repository.GetListNoTracking(_lang, _user, request.CategoryId, request.Status, request.StartDate, request.EndDate, request.UserId, request.CityId);
+            var cities = await _repository.GetCities();
+            var categories = await _repository.GetCategories();
+            var subcategories = await _repository.GetSubcategories();
             var result = new GetAllPostersResponse()
             {
                 Count = posters.Count,
                 CountPerPage = request.CountPerPage,
-                Page = request.Page + 1,
+                Page = request.Page + 1
             };
+
             posters = posters.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
-            result.Posters = posters;
+            var idEnum = posters.Select(x => x.Id);
+            var userEnum = posters.Select(x => x.UserId);
+            var multilang = await _repository.GetMultilang(idEnum);
+            var fullInfo = await _repository.GetFullInfo(idEnum);
+            var users = await _repository.GetUsers(userEnum);
+
+            var orgList = posters.Select(o => new AllPostersResponse()
+            {
+                Id = o.Id,
+                CategoryId = o.CategoryId,
+                CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                Name = multilang.Where(m => m.PosterId == o.Id).Select(m => m.Name).FirstOrDefault(),
+                CityId = fullInfo.Where(f => f.OrganizationId == o.Id).Select(f => f.City).FirstOrDefault(),
+                CityName = fullInfo.Where(f => f.OrganizationId == o.Id)
+                                   .Join(cities,
+                                         f => f.City,
+                                         c => c.Id,
+                                         (f, c) => c.Name)
+                                   .FirstOrDefault(),
+                CreatedAt = o.CreatedAt,
+                CreatedBy = users.Where(u => u.Id == o.UserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault(),
+                UserId = o.UserId,
+                Status = o.Status,
+                UpdatedAt = o.UpdatedAt,
+                ReleaseDate = o.ReleaseDate
+            }).ToList();
+
+            if (request.Sort == 0)
+            {
+                orgList = orgList.OrderByDescending(x => x.CreatedAt).ToList();
+            } else if (request.Sort == 1) 
+            {
+                orgList = orgList.OrderByDescending(x => x.UpdatedAt).ToList();
+            } else
+            {
+                orgList = orgList.OrderBy(x => x.Status).ToList();
+            }
+            result.Posters = orgList;
 
             return result;
         }
