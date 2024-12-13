@@ -19,22 +19,28 @@ namespace InfoPoster_backend.Handlers.Statistics
         public GetPublishedResponse(List<OrganizationModel> organizations, List<PosterModel> posters, List<UserModel> users, int status)
         {
             Organizations = organizations.Where(o => o.Status == status)
-                .GroupBy(o => new { o.UserId, o.CreatedAt })
+                .GroupBy(o => o.CreatedAt.Date)
                 .Select(g => new StatisticModel()
                 {
-                    Date = g.Key.CreatedAt.Date,
+                    Date = g.Key,
                     Count = g.Count()
                 }).OrderBy(o => o.Date).ToList();
 
             Posters = posters.Where(p => p.Status == status)
-                .GroupBy(p => new { p.UserId, p.CreatedAt })
+                .GroupBy(p => p.CreatedAt.Date)
                 .Select(g => new StatisticModel()
                 {
-                    Date = g.Key.CreatedAt.Date,
+                    Date = g.Key,
                     Count = g.Count()
                 }).OrderBy(p => p.Date).ToList();
+
+            Dates = new List<DateTime>();
+            Dates.AddRange(Organizations.Select(o => o.Date));
+            Dates.AddRange(Posters.Select(p => p.Date));
+            Dates = Dates.OrderBy(d => d).ToList();
         }
 
+        public List<DateTime> Dates { get; set; }
         public List<StatisticModel> Organizations { get; set; }
         public List<StatisticModel> Posters { get; set; }
     }
