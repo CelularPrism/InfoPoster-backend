@@ -30,6 +30,9 @@ namespace InfoPoster_backend.Repos
         public async Task<PosterModel> GetPoster(Guid id) =>
             await _context.Posters.FirstOrDefaultAsync(x => x.Id == id);
 
+        public async Task<List<PosterModel>> GetPosterListByUserId(Guid userId) =>
+            await _context.Posters.Where(p => p.UserId == userId).ToListAsync();
+
         public async Task<List<CategoryModel>> GetCategories() =>
             await _context.Categories.ToListAsync();
 
@@ -76,10 +79,9 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
-            var isAdmin = await _context.User_To_Roles.AnyAsync(us => us.UserId == adminId && us.RoleId == Constants.ROLE_ADMIN);
             var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
                                                     p.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                    p.Status == (isAdmin ? (int)POSTER_STATUS.DRAFT : (int)POSTER_STATUS.PUBLISHED));
+                                                    p.Status == (int)POSTER_STATUS.DRAFT);
 
             if (categoryId != null)
             {
@@ -117,36 +119,6 @@ namespace InfoPoster_backend.Repos
             }
 
             var result = await query.ToListAsync();
-            //var list = await query.Join(_context.Categories,
-            //                            p => p.CategoryId,
-            //                            c => c.Id,
-            //                            (p, c) => p)
-            //                      .Join(_context.PostersMultilang,
-            //                            p => p.Id,
-            //                            m => m.PosterId,
-            //                            (p, m) => new { p, m })
-            //                      .Where(p => p.m.Lang == "en")
-            //                      .Join(_context.Users,
-            //                            p => p.p.UserId,
-            //                            u => u.Id,
-            //                            (p, u) => new { p, UserName = u.FirstName + " " + u.LastName })
-            //                      .AsNoTracking()
-            //                      .ToListAsync();
-
-            //var result = list.Select(p => new AllPostersResponse(p.p.p, p.p.m, p.UserName)
-            //                        {
-            //                            CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
-            //                            CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
-            //                            CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault(),
-            //                            LastUpdatedBy = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId : null,
-            //                            LastUpdatedByName = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.Users.Where(
-            //                                                                                                                                u => u.Id == _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UserId
-            //                                                                                                                            ).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault() 
-            //                                                                                                                  : null,
-            //                            LastUpdatedDate = _context.ApplicationHistory.Any(h => h.ApplicationId == p.p.p.Id) ? _context.ApplicationHistory.Where(h => h.ApplicationId == p.p.p.Id).OrderByDescending(h => h.UpdatedAt).AsNoTracking().FirstOrDefault().UpdatedAt : null
-            //                        })
-            //                 .OrderBy(p => p.ReleaseDate)
-            //                 .ToList();
             return result;
         }
 

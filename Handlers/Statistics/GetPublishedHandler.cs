@@ -37,7 +37,7 @@ namespace InfoPoster_backend.Handlers.Statistics
             Dates = new List<DateTime>();
             Dates.AddRange(Organizations.Select(o => o.Date));
             Dates.AddRange(Posters.Select(p => p.Date));
-            Dates = Dates.OrderBy(d => d).ToList();
+            Dates = Dates.GroupBy(d => d).Select(d => d.Key).OrderBy(d => d).ToList();
         }
 
         public List<DateTime> Dates { get; set; }

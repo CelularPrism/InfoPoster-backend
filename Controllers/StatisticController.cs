@@ -45,5 +45,26 @@ namespace InfoPoster_backend.Controllers
             var result = await _mediator.Send(new GetBestEditorStatRequest() { DateStart = dateStart, DateEnd = dateEnd });
             return Ok(result);
         }
+
+        [HttpGet("by-editor")]
+        public async Task<IActionResult> GetStatisticByEditor([FromQuery] int method, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            var result = await _mediator.Send(new GetStatisticByEditorRequest() {  Method = method, DateStart = startDate, DateEnd = endDate });
+            return Ok(result);
+        }
+
+        [HttpGet("by-editor/table")]
+        public async Task<IActionResult> GetStatisticTableByEditor([FromQuery] int method, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            var result = await _mediator.Send(new GetStatisticTableByEditorRequest() { Method = method, StartDate = startDate, EndDate = endDate });
+            return Ok(result);
+        }
+
+        [HttpGet("by-editor/actual")]
+        public async Task<IActionResult> GetStatisticActualByEditor()
+        {
+            var result = await _mediator.Send(new GetStatisticActualByEditorRequest());
+            return Ok(result);
+        }
     }
 }

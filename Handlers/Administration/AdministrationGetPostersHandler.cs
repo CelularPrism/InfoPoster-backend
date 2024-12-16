@@ -29,6 +29,8 @@ namespace InfoPoster_backend.Handlers.Administration
 
     public class AdministrationPostersResponse
     {
+        public AdministrationPostersResponse() { }
+
         public AdministrationPostersResponse(PosterModel poster, PosterMultilangModel multilang, string userName)
         {
             Id = poster.Id;
@@ -74,12 +76,53 @@ namespace InfoPoster_backend.Handlers.Administration
             if (userId == Guid.Empty)
                 return null;
 
-            var posterList = await _repository.GetListNoTracking(userId, _lang, request.CategoryId, request.Status, request.StartDate, request.EndDate);
-
-            if (request.CityId != null)
+            var posters = await _repository.GetListNoTracking(_lang, userId, request.CategoryId, request.Status, request.StartDate, request.EndDate, userId, request.CityId);
+            var cities = await _repository.GetCities();
+            var categories = await _repository.GetCategories();
+            var subcategories = await _repository.GetSubcategories();
+            var result = new AdministrationGetPostersResponse()
             {
-                posterList = posterList.Where(x => x.CityId == request.CityId).ToList();
+                Count = posters.Count,
+                CountPerPage = request.CountPerPage,
+                Page = request.Page + 1
+            };
+
+            if (request.Sort == 0)
+            {
+                posters = posters.OrderByDescending(x => x.CreatedAt).ToList();
             }
+            else if (request.Sort == 1)
+            {
+                posters = posters.OrderByDescending(x => x.UpdatedAt).ToList();
+            }
+            else
+            {
+                posters = posters.OrderBy(x => x.Status).ToList();
+            }
+
+            posters = posters.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
+            var idEnum = posters.Select(x => x.Id);
+            var multilang = await _repository.GetMultilang(idEnum);
+            var fullInfo = await _repository.GetFullInfo(idEnum);
+
+            var posterList = posters.Select(o => new AdministrationPostersResponse()
+            {
+                Id = o.Id,
+                CategoryId = o.CategoryId,
+                CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                Name = multilang.Where(m => m.PosterId == o.Id).Select(m => m.Name).FirstOrDefault(),
+                CityId = fullInfo.Where(f => f.OrganizationId == o.Id).Select(f => f.City).FirstOrDefault(),
+                CityName = fullInfo.Where(f => f.OrganizationId == o.Id)
+                                   .Join(cities,
+                                         f => f.City,
+                                         c => c.Id,
+                                         (f, c) => c.Name)
+                                   .FirstOrDefault(),
+                CreatedAt = o.CreatedAt,
+                Status = o.Status,
+                UpdatedAt = o.UpdatedAt,
+                ReleaseDate = o.ReleaseDate
+            }).ToList();
 
             if (request.Sort == 0)
             {
@@ -94,12 +137,6 @@ namespace InfoPoster_backend.Handlers.Administration
                 posterList = posterList.OrderBy(x => x.Status).ToList();
             }
 
-            var result = new AdministrationGetPostersResponse()
-            {
-                Count = posterList.Count,
-                CountPerPage = request.CountPerPage,
-                Page = request.Page + 1,
-            };
             posterList = posterList.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
             result.Posters = posterList;
 

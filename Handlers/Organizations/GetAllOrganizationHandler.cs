@@ -82,6 +82,15 @@ namespace InfoPoster_backend.Handlers.Organizations
                 Page = request.Page + 1
             };
 
+            if (request.Sort == 0)
+            {
+                organizations = organizations.OrderByDescending(x => x.CreatedAt).ToList();
+            }
+            else
+            {
+                organizations = organizations.OrderBy(x => x.Status).ToList();
+            }
+
             organizations = organizations.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
             var idEnum = organizations.Select(x => x.Id);
             var userEnum = organizations.Select(x => x.UserId);

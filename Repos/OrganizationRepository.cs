@@ -30,6 +30,9 @@ namespace InfoPoster_backend.Repos
         public async Task<OrganizationModel> GetOrganization(Guid id) =>
             await _organization.Organizations.FirstOrDefaultAsync(o => o.Id == id);
 
+        public async Task<List<OrganizationModel>> GetOrganizationListByUserId(Guid userId) =>
+            await _organization.Organizations.Where(o => o.UserId == userId).ToListAsync();
+
         public async Task<bool> CheckAdmin(Guid userId) => await _organization.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
 
         public async Task<List<CategoryModel>> GetCategories() => await _organization.Categories.Join(_organization.CategoriesMultilang,
@@ -107,10 +110,9 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<OrganizationModel>> GetOrganizationList(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
-            var isAdmin = await _organization.User_To_Roles.AnyAsync(us => us.UserId == adminId && us.RoleId == Constants.ROLE_ADMIN);
             var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||
                                                                              o.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                                             o.Status == (isAdmin ? (int)POSTER_STATUS.DRAFT : (int)POSTER_STATUS.PUBLISHED));
+                                                                             o.Status == (int)POSTER_STATUS.DRAFT);
 
             if (categoryId != null)
             {

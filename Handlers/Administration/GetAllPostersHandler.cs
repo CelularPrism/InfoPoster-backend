@@ -84,6 +84,19 @@ namespace InfoPoster_backend.Handlers.Administration
                 Page = request.Page + 1
             };
 
+            if (request.Sort == 0)
+            {
+                posters = posters.OrderByDescending(x => x.CreatedAt).ToList();
+            }
+            else if (request.Sort == 1)
+            {
+                posters = posters.OrderByDescending(x => x.UpdatedAt).ToList();
+            }
+            else
+            {
+                posters = posters.OrderBy(x => x.Status).ToList();
+            }
+
             posters = posters.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
             var idEnum = posters.Select(x => x.Id);
             var userEnum = posters.Select(x => x.UserId);
