@@ -268,13 +268,13 @@ namespace InfoPoster_backend.Repos
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == lang).ToListAsync();
 
             var result = list.Select(p => new PosterResponseModel(p.p.p, p.m)
-                                    {
-                                        CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(),
-                                        FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
+            {
+                CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
                                                  _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
                                                  _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
-                                        Price = p.p.f.Price,
-                                    })
+                Price = p.p.f.Price,
+            })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
             return result;
@@ -298,14 +298,14 @@ namespace InfoPoster_backend.Repos
 
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == lang).ToListAsync();
 
-            var result = list.Select(p => new PosterResponseModel(p.p.p, p.m) 
-                                            { 
-                                                CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(), 
-                                                FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ? 
+            var result = list.Select(p => new PosterResponseModel(p.p.p, p.m)
+            {
+                CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
                                                          _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
                                                          _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
-                                                Price = p.p.f.Price,
-                                            })
+                Price = p.p.f.Price,
+            })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
             return result;
@@ -381,12 +381,12 @@ namespace InfoPoster_backend.Repos
                                                    u => u.Id,
                                                    (h, u) => new ApplicationHistoryResponse()
                                                    {
-                                                        ApplicationId = h.ApplicationId,
-                                                        Id = h.Id,
-                                                        UpdatedAt = h.UpdatedAt,
-                                                        UserId = h.UserId,
-                                                        UserName = u.FirstName + " " + u.LastName,
-                                                        AnyFieldsLog = _context.ApplicationChangeHistory.Any(c => c.ArticleId == h.Id)
+                                                       ApplicationId = h.ApplicationId,
+                                                       Id = h.Id,
+                                                       UpdatedAt = h.UpdatedAt,
+                                                       UserId = h.UserId,
+                                                       UserName = u.FirstName + " " + u.LastName,
+                                                       AnyFieldsLog = _context.ApplicationChangeHistory.Any(c => c.ArticleId == h.Id)
                                                    })
                                              .OrderByDescending(h => h.UpdatedAt).ToListAsync();
 
@@ -394,6 +394,9 @@ namespace InfoPoster_backend.Repos
             await _context.ApplicationChangeHistory.Where(h => h.ArticleId == articleId).OrderByDescending(h => h.ChangedAt).ToListAsync();
 
         public async Task<bool> AnyOrganization(Guid organizationId) => await _context.Organizations.AnyAsync(o => o.Id == organizationId);
+
+        public async Task<RejectedComments> GetLastRejectedComment(Guid posterId) =>
+            await _context.RejectedComments.Where(r => r.ApplicationId == posterId).OrderByDescending(r => r.CreatedAt).FirstOrDefaultAsync();
 
         public async Task AddPoster(PosterModel model, Guid userId)
         {
@@ -438,6 +441,12 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddRejectedComment(RejectedComments model)
+        {
+            await _context.RejectedComments.AddAsync(model);
+            await _context.SaveChangesAsync();
+        }
+ 
         public async Task UpdatePoster(PosterModel model, Guid userId, Guid articleId)
         {
             var history = new ApplicationHistoryModel()

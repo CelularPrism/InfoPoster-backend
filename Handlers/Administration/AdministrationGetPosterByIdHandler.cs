@@ -42,6 +42,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Contacts { get; set; }
         public string InternalContacts { get; set; }
         public int Status { get; set; }
+        public string Comment { get; set; }
     }
 
     public class AdministrationGetPosterByIdHandler : IRequestHandler<AdministrationGetPosterByIdRequest, AdministrationGetPosterByIdResponse>
@@ -120,6 +121,9 @@ namespace InfoPoster_backend.Handlers.Administration
             {
                 result.Parking = places;
             }
+            var comment = await _repository.GetLastRejectedComment(request.Id);
+            if (comment != null)
+                result.Comment = comment.Text;
             
             return result;
         }

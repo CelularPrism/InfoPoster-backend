@@ -14,6 +14,7 @@ namespace InfoPoster_backend.Handlers.Organizations
     {
         public Guid Id { get; set; }
         public POSTER_STATUS Status { get; set; }
+        public string Comment { get; set; }
     }
 
     public class ChangeOrganizationStatusResponse
@@ -84,6 +85,9 @@ namespace InfoPoster_backend.Handlers.Organizations
                     }
                 }
             }
+
+            if (request.Status == POSTER_STATUS.REJECTED && !string.IsNullOrEmpty(request.Comment))
+                await _repository.AddRejectedComment(new RejectedComments() { ApplicationId = organization.Id, UserId = _user, Text = request.Comment });
 
             var articleId = Guid.NewGuid();
             var changeHistory = new List<ApplicationChangeHistory>() { new ApplicationChangeHistory(articleId, request.Id, "Status", organization.Status.ToString(), request.Status.ToString(), _user) };

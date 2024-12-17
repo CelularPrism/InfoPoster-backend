@@ -43,5 +43,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<CityModel> Cities { get; set; }
         public DbSet<CityMultilangModel> CitiesMultilang { get; set; }
         public DbSet<ApplicationChangeHistory> ApplicationChangeHistory { get; set; }
+        public DbSet<RejectedComments> RejectedComments { get; set; }
     }
 }

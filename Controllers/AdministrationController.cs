@@ -152,9 +152,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpPost("poster/disable")]
-        public async Task<IActionResult> DisablePoster([FromForm] Guid posterId)
+        public async Task<IActionResult> DisablePoster([FromForm] Guid posterId, [FromForm] string comment)
         {
-            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.REJECTED });
+            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.REJECTED, Comment = comment });
             return Ok(result);
         }
 
@@ -317,9 +317,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpPost("organization/disable")]
-        public async Task<IActionResult> DisableOrganization([FromForm] Guid organizationId)
+        public async Task<IActionResult> DisableOrganization([FromForm] Guid organizationId, [FromForm] string comment)
         {
-            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.REJECTED });
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.REJECTED, Comment = comment });
             return Ok(result);
         }
 

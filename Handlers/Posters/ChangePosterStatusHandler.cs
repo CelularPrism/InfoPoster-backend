@@ -12,6 +12,7 @@ namespace InfoPoster_backend.Handlers.Posters
     {
         public Guid Id { get; set; }
         public POSTER_STATUS Status { get; set; }
+        public string Comment { get; set; }
     }
 
     public class ChangePosterStatusResponse 
@@ -92,6 +93,9 @@ namespace InfoPoster_backend.Handlers.Posters
                     }
                 }
             }
+
+            if (request.Status == POSTER_STATUS.REJECTED && !string.IsNullOrEmpty(request.Comment))
+                await _repository.AddRejectedComment(new RejectedComments() { ApplicationId = poster.Id, Text = request.Comment });
 
             var articleId = Guid.NewGuid();
             var changeHistory = new List<ApplicationChangeHistory>() { new ApplicationChangeHistory(articleId, request.Id, "Status", poster.Status.ToString(), request.Status.ToString(), _user) };

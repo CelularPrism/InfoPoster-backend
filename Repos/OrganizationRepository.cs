@@ -440,6 +440,9 @@ namespace InfoPoster_backend.Repos
         public string GetPriceLevel(Guid organizationId) =>
             _organization.OrganizationsFullInfo.Where(f => f.OrganizationId == organizationId).Select(f => f.PriceLevel).FirstOrDefault();
 
+        public async Task<RejectedComments> GetLastRejectedComment(Guid organizationId) =>
+            await _organization.RejectedComments.Where(r => r.ApplicationId == organizationId).OrderByDescending(r => r.CreatedAt).FirstOrDefaultAsync();
+
         public async Task AddOrganization(OrganizationModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()
@@ -557,6 +560,12 @@ namespace InfoPoster_backend.Repos
         public async Task AddHistory(List<ApplicationChangeHistory> list)
         {
             await _organization.ApplicationChangeHistory.AddRangeAsync(list);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddRejectedComment(RejectedComments model)
+        {
+            await _organization.RejectedComments.AddAsync(model);
             await _organization.SaveChangesAsync();
         }
     }

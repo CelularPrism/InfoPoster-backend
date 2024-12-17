@@ -43,5 +43,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<FileURLModel> FileUrls { get; set; }
         public DbSet<ApplicationHistoryModel> ApplicationHistory { get; set; }
         public DbSet<ApplicationChangeHistory> ApplicationChangeHistory { get; set; }
+        public DbSet<RejectedComments> RejectedComments { get; set; }
     }
 }

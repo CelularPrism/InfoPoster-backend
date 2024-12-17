@@ -39,6 +39,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string ContactDescription { get; set; } = string.Empty;
         public int Status { get; set; }
         public List<Guid> MenuCategories { get; set; }
+        public string Comment { get; set; }
     }
 
     public class GetOrganizationHandler : IRequestHandler<GetOrganizationRequest, GetOrganizationResponse>
@@ -113,6 +114,9 @@ namespace InfoPoster_backend.Handlers.Organizations
             result.OrganizationId = organization.Id;
             result.CategoryId = organization.CategoryId;
             result.SubcategoryId = organization.SubcategoryId;
+            var comment = await _repository.GetLastRejectedComment(request.Id);
+            if (comment != null)
+                result.Comment = comment.Text;
 
             return result;
         }
