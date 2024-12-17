@@ -9,5 +9,6 @@
         public string LastName { get; set; }
         public string Phone { get; set; }
         public string ImageSrc { get; set; }
+        public bool IsBlocked { get; set; }
     }
 }

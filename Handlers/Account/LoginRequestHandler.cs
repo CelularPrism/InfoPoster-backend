@@ -48,7 +48,7 @@ namespace InfoPoster_backend.Handlers.Account
         public async Task<LoginResponseModel> Handle(LoginRequestModel request, CancellationToken cancellationToken = default)
         {
             var user = await _repository.GetUser(request.Email);
-            if (user == null || !string.Equals(user.Password, request.Password)) 
+            if (user == null || !string.Equals(user.Password, request.Password) || user.IsBlocked) 
                 return null;
             var roles = await _repository.GetUserRoles(user.Id);
             var token = await _login.Login(user, roles);

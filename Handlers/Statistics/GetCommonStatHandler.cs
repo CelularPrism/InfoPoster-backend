@@ -36,7 +36,7 @@ namespace InfoPoster_backend.Handlers.Statistics
             var posters = await _repository.GetPosterList(request.DateStart, request.DateEnd);
             var users = await _repository.GetUserList();
 
-            var result = users.Select(us => new GetCommonStatResponse() 
+            var result = users.Where(us => !us.IsBlocked).Select(us => new GetCommonStatResponse() 
             {
                 UserId = us.Id,
                 UserName = us.FirstName + " " + us.LastName + " (" + us.Email + ")",
