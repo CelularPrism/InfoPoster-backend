@@ -76,7 +76,7 @@ namespace InfoPoster_backend.Handlers.Administration
             if (userId == Guid.Empty)
                 return null;
 
-            var posters = await _repository.GetListNoTracking(_lang, userId, request.CategoryId, request.Status, request.StartDate, request.EndDate, userId, request.CityId);
+            var posters = await _repository.GetListNoTracking(_lang, userId, request.CategoryId, request.Status, request.StartDate, request.EndDate, null, request.CityId);
             var cities = await _repository.GetCities();
             var categories = await _repository.GetCategories();
             var subcategories = await _repository.GetSubcategories();
