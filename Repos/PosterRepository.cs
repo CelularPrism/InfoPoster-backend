@@ -33,6 +33,9 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PosterModel>> GetPosterListByUserId(Guid userId) =>
             await _context.Posters.Where(p => p.UserId == userId).ToListAsync();
 
+        public async Task<int> GetCountByStatus(int status) =>
+            await _context.Posters.Where(p => p.Status == status).CountAsync();
+
         public async Task<List<CategoryModel>> GetCategories() =>
             await _context.Categories.ToListAsync();
 
@@ -79,9 +82,28 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
+            var isAdmin = await _context.User_To_Roles.AnyAsync(u => u.UserId == adminId && u.RoleId == Constants.ROLE_ADMIN);
             var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
                                                     p.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                    p.Status == (int)POSTER_STATUS.DRAFT);
+                                                    p.Status == (int)POSTER_STATUS.DRAFT ||
+                                                    (isAdmin ? p.Status == (int)POSTER_STATUS.REVIEWING : true));
+
+            query = FilterPosters(query, categoryId, status, startDate, endDate, userId, cityId);
+            var result = await query.ToListAsync();
+            return result;
+        }
+
+        public async Task<List<PosterModel>> GetRejectedListNoTracking(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        {
+            var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.REJECTED);
+
+            query = FilterPosters(query, categoryId, status, startDate, endDate, userId, cityId);
+            var result = await query.ToListAsync();
+            return result;
+        }
+
+        private IQueryable<PosterModel> FilterPosters(IQueryable<PosterModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        {
 
             if (categoryId != null)
             {
@@ -117,9 +139,7 @@ namespace InfoPoster_backend.Repos
                              .Where(q => q.CityId == cityId)
                              .Select(q => q.Poster);
             }
-
-            var result = await query.ToListAsync();
-            return result;
+            return query;
         }
 
         public async Task<List<PosterMultilangModel>> GetMultilang(IEnumerable<Guid> posters) =>

@@ -46,6 +46,13 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("now")]
+        public async Task<IActionResult> GetNowEditorStat([FromQuery] DateTime dateStart, [FromQuery] DateTime dateEnd)
+        {
+            var result = await _mediator.Send(new GetStatisticActualRequest());
+            return Ok(result);
+        }
+
         [HttpGet("by-editor")]
         public async Task<IActionResult> GetStatisticByEditor([FromQuery] int method, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {

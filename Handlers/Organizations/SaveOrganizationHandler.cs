@@ -57,7 +57,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         {
             var organization = await _repository.GetOrganization(request.OrganizationId);
             var isAdmin = await _repository.CheckAdmin(_user);
-            if (organization == null || ((organization.Status == (int)POSTER_STATUS.PENDING || organization.Status == (int)POSTER_STATUS.PUBLISHED) && !isAdmin))
+            if (organization == null || ((organization.Status == (int)POSTER_STATUS.PENDING || organization.Status == (int)POSTER_STATUS.PUBLISHED || organization.Status == (int)POSTER_STATUS.REVIEWING) && !isAdmin))
                 return null;
 
             var articleId = Guid.NewGuid();

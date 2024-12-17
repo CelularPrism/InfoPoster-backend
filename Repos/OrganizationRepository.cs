@@ -33,6 +33,9 @@ namespace InfoPoster_backend.Repos
         public async Task<List<OrganizationModel>> GetOrganizationListByUserId(Guid userId) =>
             await _organization.Organizations.Where(o => o.UserId == userId).ToListAsync();
 
+        public async Task<int> GetCountByStatus(int status) =>
+            await _organization.Organizations.Where(o => o.Status == status).CountAsync();
+
         public async Task<bool> CheckAdmin(Guid userId) => await _organization.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
 
         public async Task<List<CategoryModel>> GetCategories() => await _organization.Categories.Join(_organization.CategoriesMultilang,
@@ -110,10 +113,30 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<OrganizationModel>> GetOrganizationList(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
+            var isAdmin = await _organization.User_To_Roles.AnyAsync(u => u.UserId == adminId && u.RoleId == Constants.ROLE_ADMIN);
             var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||
-                                                                             o.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                                             o.Status == (int)POSTER_STATUS.DRAFT);
+                                                               o.Status == (int)POSTER_STATUS.PUBLISHED ||
+                                                               o.Status == (int)POSTER_STATUS.DRAFT ||
+                                                               (isAdmin ? o.Status == (int)POSTER_STATUS.REVIEWING : true));
 
+            query = FilterOrganization(query, categoryId, status, startDate, endDate, userId, cityId);
+
+            var result = await query.ToListAsync();
+            return result;
+        }
+
+        public async Task<List<OrganizationModel>> GetRejectedOrganizationList(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        {
+            var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.REJECTED);
+
+            query = FilterOrganization(query, categoryId, status, startDate, endDate, userId, cityId);
+
+            var result = await query.ToListAsync();
+            return result;
+        }
+
+        private IQueryable<OrganizationModel> FilterOrganization(IQueryable<OrganizationModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        {
             if (categoryId != null)
             {
                 query = query.Where(q => q.CategoryId == categoryId);
@@ -148,9 +171,7 @@ namespace InfoPoster_backend.Repos
                              .Where(q => q.CityId == cityId)
                              .Select(q => q.Organization);
             }
-
-            var result = await query.ToListAsync();
-            return result;
+            return query;
         }
 
         public async Task<List<OrganizationMultilangModel>> GetMultilang(IEnumerable<Guid> organizations) =>

@@ -64,7 +64,7 @@ namespace InfoPoster_backend.Handlers.Posters
         {
             var poster = await _repository.GetPoster(request.PosterId);
             var isAdmin = await _repository.CheckAdmin(_user);
-            if (poster == null || ((poster.Status == (int)POSTER_STATUS.PENDING || poster.Status == (int)POSTER_STATUS.PUBLISHED) && !isAdmin))
+            if (poster == null || ((poster.Status == (int)POSTER_STATUS.PENDING || poster.Status == (int)POSTER_STATUS.PUBLISHED || poster.Status == (int)POSTER_STATUS.REVIEWING) && !isAdmin))
                 return null;
 
             var changeHistory = new List<ApplicationChangeHistory>();

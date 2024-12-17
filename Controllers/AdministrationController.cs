@@ -56,6 +56,21 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("poster/rejected")]
+        public async Task<IActionResult> GetRejectedPosters(
+            [FromQuery] int sort,
+            [FromQuery] Guid? categoryId,
+            [FromQuery] Guid? cityId,
+            [FromQuery] int? status,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
+        {
+            var result = await _mediator.Send(new AdministrationGetRejectedPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, Page = page - 1, CountPerPage = countPerPage });
+            return Ok(result);
+        }
+
         [HttpGet("poster/get")]
         public async Task<IActionResult> GetPosterById([FromQuery] Guid id, [FromQuery] string lang)
         {
@@ -122,7 +137,7 @@ namespace InfoPoster_backend.Controllers
         [HttpPost("poster/disable")]
         public async Task<IActionResult> DisablePoster([FromForm] Guid posterId)
         {
-            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.DRAFT });
+            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.REJECTED });
             return Ok(result);
         }
 
@@ -145,6 +160,14 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> ActivatePoster([FromForm] Guid posterId)
         {
             var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.PENDING });
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba,c7d65315-0ad4-486f-9bc1-88f86cc1d45b")]
+        [HttpPost("poster/review")]
+        public async Task<IActionResult> ReviewPoster([FromForm] Guid posterId)
+        {
+            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.REVIEWING });
             return Ok(result);
         }
 
@@ -198,7 +221,7 @@ namespace InfoPoster_backend.Controllers
         } 
 
         [HttpGet("organization/all")]
-        public async Task<IActionResult> GetOrganizationPosters(
+        public async Task<IActionResult> GetAllOrganizations(
             [FromQuery] int sort, 
             [FromQuery] Guid? categoryId, 
             [FromQuery] Guid? cityId, 
@@ -214,12 +237,27 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("organization/available")]
-        public async Task<IActionResult> GetAllOrganizations(
+        public async Task<IActionResult> GetAvailableOrganizations(
             [FromQuery] int sort, 
             [FromQuery] Guid? categoryId, 
             [FromQuery] Guid? cityId, 
             [FromQuery] int? status, 
             [FromQuery] DateTime? startDate, 
+            [FromQuery] DateTime? endDate,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
+        {
+            var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
+            return Ok(result);
+        }
+
+        [HttpGet("organization/rejected")]
+        public async Task<IActionResult> GetRejectedOrganizations(
+            [FromQuery] int sort,
+            [FromQuery] Guid? categoryId,
+            [FromQuery] Guid? cityId,
+            [FromQuery] int? status,
+            [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
@@ -264,7 +302,7 @@ namespace InfoPoster_backend.Controllers
         [HttpPost("organization/disable")]
         public async Task<IActionResult> DisableOrganization([FromForm] Guid organizationId)
         {
-            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.DRAFT });
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.REJECTED });
             return Ok(result);
         }
 
@@ -287,6 +325,14 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> ActivateOrganization([FromForm] Guid organizationId)
         {
             var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.PENDING });
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "4657c003-ab5a-4553-ad0a-7e8d5ec3dbba,c7d65315-0ad4-486f-9bc1-88f86cc1d45b")]
+        [HttpPost("organization/review")]
+        public async Task<IActionResult> ReviewOrganization([FromForm] Guid organizationId)
+        {
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.REVIEWING });
             return Ok(result);
         }
 

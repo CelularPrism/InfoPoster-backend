@@ -7,7 +7,9 @@ namespace InfoPoster_backend.Models.Posters
         PENDING,
         DRAFT,
         DELETED,
-        PUBLISHED
+        PUBLISHED,
+        REJECTED,
+        REVIEWING
     }
 
     public class PosterModel
