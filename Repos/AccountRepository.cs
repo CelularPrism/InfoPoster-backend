@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Account;
 using InfoPoster_backend.Models.Contexts;
+using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
 
 namespace InfoPoster_backend.Repos
@@ -16,6 +17,22 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<UserModel>> SearchUsers(string text) => 
             await _context.Users.Where(u => u.FirstName.Equals(text) || u.LastName.Equals(text) || u.Email.Equals(text)).ToListAsync();
+
+        public async Task<List<UserModel>> GetUsersForAdmin() =>
+            await _context.User_To_Roles.Where(r => r.RoleId != Constants.ROLE_ADMIN)
+                                        .Join(_context.Users,
+                                              r => r.UserId,
+                                              user => user.Id,
+                                              (r, user) => user)
+                                        .ToListAsync();
+
+        public async Task<List<UserModel>> GetEditors() =>
+            await _context.User_To_Roles.Where(r => r.RoleId == Constants.ROLE_EDITOR)
+                                        .Join(_context.Users,
+                                              r => r.UserId,
+                                              user => user.Id,
+                                              (r, user) => user)
+                                        .ToListAsync();
 
         public async Task<UserModel> GetUser(string email) =>
             await _context.Users.FirstOrDefaultAsync(u => u.Email == email);

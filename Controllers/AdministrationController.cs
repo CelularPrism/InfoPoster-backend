@@ -20,6 +20,23 @@ namespace InfoPoster_backend.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            var result = await _mediator.Send(new GetUsersRequest());
+            return Ok(result);
+        }
+
+        [HttpPost("users/update")]
+        public async Task<IActionResult> UpdateUser([FromForm] UpdateUserRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
         [HttpGet("categories/get")]
         public async Task<IActionResult> GetCategories(CategoryType type)
         {
