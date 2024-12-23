@@ -38,6 +38,13 @@ namespace InfoPoster_backend.Repos
 
         public async Task<bool> CheckAdmin(Guid userId) => await _organization.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
 
+        public async Task<int> GetCountByCity(Guid city) => await _organization.OrganizationsFullInfo.Where(f => f.City == city)
+                                                                                                     .Join(_organization.Organizations,
+                                                                                                           f => f.OrganizationId,
+                                                                                                           org => org.Id,
+                                                                                                           (f, org) => org)
+                                                                                                     .Where(org => org.Status == (int)POSTER_STATUS.PUBLISHED).CountAsync();
+
         public async Task<List<CategoryModel>> GetCategories() => await _organization.Categories.Join(_organization.CategoriesMultilang,
                                                                                                       c => c.Id,
                                                                                                       m => m.CategoryId,
@@ -301,6 +308,9 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<CityModel>> GetCities(string lang) =>
             await _organization.CitiesMultilang.Where(c => c.Lang == lang).Select(c => new CityModel() { Id = c.CityId, Name = c.Name }).ToListAsync();
+
+        public async Task<string> GetCityName(Guid city) =>
+            await _organization.CitiesMultilang.Where(c => c.Lang == _lang && c.CityId == city).Select(c => c.Name).FirstOrDefaultAsync();
 
         public async Task<SelectelFileURLModel> GetSelectelFile(Guid organizationId) =>
             await _organization.FileToApplication.Where(f => f.ApplicationId == organizationId)

@@ -24,10 +24,26 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("count")]
+        public async Task<IActionResult> GetOrganizationsCount()
+        {
+            var result = await _mediator.Send(new GetOrganizationsCountRequest());
+            return Ok(result);
+        }
+
+        [HttpGet("actual")]
+        public async Task<IActionResult> GetActualOrganizations()
+        {
+            var result = await _mediator.Send(new GetOrganizationsRequest() { startDate = DateTime.MinValue, endDate = DateTime.MaxValue });
+            result = result.OrderByDescending(r => r.CreatedAt).Take(10).ToList();
+            return Ok(result);
+        }
+
         [HttpGet("by-category")]
         public async Task<IActionResult> GetOrganizationsByCategory([FromQuery] GetOrganizationsRequest request)
         {
             var result = await _mediator.Send(request);
+            result = result.OrderByDescending(r => r.CreatedAt).ToList();
             return Ok(result);
         }
 
@@ -35,6 +51,7 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetOrganizationsBySubcategory([FromQuery] GetOrganizationsRequest request)
         {
             var result = await _mediator.Send(request);
+            result = result.OrderByDescending(r => r.CreatedAt).ToList();
             return Ok(result);
         }
 
