@@ -61,12 +61,14 @@ namespace InfoPoster_backend.Handlers.Administration
     {
         private readonly LoginService _loginService;
         private readonly PosterRepository _repository;
+        private readonly AccountRepository _accountRepository;
         private readonly string _lang;
 
-        public AdministrationGetPostersHandler(LoginService loginService, PosterRepository repository, IHttpContextAccessor accessor)
+        public AdministrationGetPostersHandler(LoginService loginService, PosterRepository repository, AccountRepository accountRepository, IHttpContextAccessor accessor)
         {
             _loginService = loginService;
             _repository = repository;
+            _accountRepository = accountRepository;
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
@@ -75,8 +77,34 @@ namespace InfoPoster_backend.Handlers.Administration
             var userId = _loginService.GetUserId();
             if (userId == Guid.Empty)
                 return null;
+            var roles = await _accountRepository.GetUserRoles(userId);
+            var isAdmin = roles.Any(u => u == Constants.ROLE_ADMIN);
+            var availableStatuses = new List<int>()
+            {
+                (int)POSTER_STATUS.PENDING,
+                (int)POSTER_STATUS.PENDING,
+                (int)POSTER_STATUS.PUBLISHED,
+                (int)POSTER_STATUS.DRAFT
+            };
 
-            var posters = await _repository.GetListNoTracking(_lang, userId, request.CategoryId, request.Status, request.StartDate, request.EndDate, null, request.CityId);
+            if (isAdmin)
+            {
+                availableStatuses.Add((int)POSTER_STATUS.REVIEWING);
+            }
+            else
+            {
+                availableStatuses.Add((int)POSTER_STATUS.DELETED);
+            }
+
+            if (request.Status != null)
+            {
+                availableStatuses = new List<int>()
+                {
+                    (int)request.Status
+                };
+            }
+
+            var posters = await _repository.GetListNoTracking(_lang, userId, availableStatuses, request.CategoryId, request.StartDate, request.EndDate, isAdmin ? null : userId, request.CityId);
             var cities = await _repository.GetCities();
             var categories = await _repository.GetCategories();
             var subcategories = await _repository.GetSubcategories();
@@ -137,7 +165,6 @@ namespace InfoPoster_backend.Handlers.Administration
                 posterList = posterList.OrderBy(x => x.Status).ToList();
             }
 
-            posterList = posterList.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).ToList();
             result.Posters = posterList;
 
             return result;

@@ -37,7 +37,17 @@ namespace InfoPoster_backend.Repos
             await _context.Posters.Where(p => p.Status == status).CountAsync();
 
         public async Task<List<CategoryModel>> GetCategories() =>
-            await _context.Categories.ToListAsync();
+            await _context.CategoriesMultilang.Where(c => c.lang == _lang)
+                                              .Join(_context.Categories,
+                                                    c => c.CategoryId,
+                                                    category => category.Id,
+                                                    (c, cat) => new CategoryModel()
+                                                    {
+                                                        Id = cat.Id,
+                                                        ImageSrc = cat.ImageSrc,
+                                                        Name = c.Name,
+                                                        Type = cat.Type
+                                                    }).ToListAsync();
 
         public async Task<List<SubcategoryModel>> GetSubcategories() => await _context.Subcategories.Join(_context.SubcategoriesMultilang,
                                                                                                       c => c.Id,
@@ -80,15 +90,16 @@ namespace InfoPoster_backend.Repos
                                                        (f, s) => s)
                                                  .FirstOrDefaultAsync();
 
-        public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, List<int> statuses, Guid? categoryId, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
             var isAdmin = await _context.User_To_Roles.AnyAsync(u => u.UserId == adminId && u.RoleId == Constants.ROLE_ADMIN);
-            var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
-                                                    p.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                    p.Status == (int)POSTER_STATUS.DRAFT ||
-                                                    (isAdmin ? p.Status == (int)POSTER_STATUS.REVIEWING : true));
+            //var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
+            //                                        p.Status == (int)POSTER_STATUS.PUBLISHED ||
+            //                                        p.Status == (int)POSTER_STATUS.DRAFT ||
+            //                                        p.Status == (isAdmin ? (int)POSTER_STATUS.REVIEWING : (int)POSTER_STATUS.DELETED));
+            var query = _context.Posters.Where(p => statuses.Contains(p.Status));
 
-            query = FilterPosters(query, categoryId, status, startDate, endDate, userId, cityId);
+            query = FilterPosters(query, categoryId, null, startDate, endDate, userId, cityId);
             var result = await query.ToListAsync();
             return result;
         }
@@ -97,7 +108,7 @@ namespace InfoPoster_backend.Repos
         {
             var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.REJECTED);
 
-            query = FilterPosters(query, categoryId, status, startDate, endDate, userId, cityId);
+            query = FilterPosters(query, categoryId, null, startDate, endDate, userId, cityId);
             var result = await query.ToListAsync();
             return result;
         }

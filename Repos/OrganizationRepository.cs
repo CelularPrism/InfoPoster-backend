@@ -111,15 +111,17 @@ namespace InfoPoster_backend.Repos
                                                                      UserId = o.Organization.UserId
                                                                  }).ToListAsync();
 
-        public async Task<List<OrganizationModel>> GetOrganizationList(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        public async Task<List<OrganizationModel>> GetOrganizationList(string lang, Guid adminId, List<int> statuses, Guid? categoryId, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
             var isAdmin = await _organization.User_To_Roles.AnyAsync(u => u.UserId == adminId && u.RoleId == Constants.ROLE_ADMIN);
-            var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||
-                                                               o.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                               o.Status == (int)POSTER_STATUS.DRAFT ||
-                                                               (isAdmin ? o.Status == (int)POSTER_STATUS.REVIEWING : true));
+            //var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||
+            //                                                   o.Status == (int)POSTER_STATUS.PUBLISHED ||
+            //                                                   o.Status == (int)POSTER_STATUS.DRAFT ||
+            //                                                   o.Status == (isAdmin ? (int)POSTER_STATUS.REVIEWING : (int)POSTER_STATUS.DELETED));
 
-            query = FilterOrganization(query, categoryId, status, startDate, endDate, userId, cityId);
+            var query = _organization.Organizations.Where(o => statuses.Contains(o.Status));
+
+            query = FilterOrganization(query, categoryId, null, startDate, endDate, userId, cityId);
 
             var result = await query.ToListAsync();
             return result;

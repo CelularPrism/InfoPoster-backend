@@ -73,7 +73,24 @@ namespace InfoPoster_backend.Handlers.Administration
 
         public async Task<GetAllPostersResponse> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetListNoTracking(_lang, _user, request.CategoryId, request.Status, request.StartDate, request.EndDate, request.UserId, request.CityId);
+            var availableStatuses = new List<int>()
+            {
+                (int)POSTER_STATUS.PENDING,
+                (int)POSTER_STATUS.PUBLISHED,
+                (int)POSTER_STATUS.DRAFT,
+                (int)POSTER_STATUS.REJECTED,
+                (int)POSTER_STATUS.REVIEWING
+            };
+
+            if (request.Status != null)
+            {
+                availableStatuses = new List<int>()
+                {
+                    (int)request.Status
+                };
+            }
+
+            var posters = await _repository.GetListNoTracking(_lang, _user, availableStatuses, request.CategoryId, request.StartDate, request.EndDate, request.UserId, request.CityId);
             var cities = await _repository.GetCities();
             var categories = await _repository.GetCategories();
             var subcategories = await _repository.GetSubcategories();

@@ -1,6 +1,8 @@
 ﻿using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -59,19 +61,38 @@ namespace InfoPoster_backend.Handlers.Organizations
     public class GetAllOrganizationHandler : IRequestHandler<GetAllOrganizationRequest, GetAllOrganizationResponse>
     {
         private readonly OrganizationRepository _repository;
+        private readonly AccountRepository _accountRepository;
         private readonly string _lang;
         private Guid _user;
 
-        public GetAllOrganizationHandler(OrganizationRepository repository, IHttpContextAccessor accessor, LoginService loginService)
+        public GetAllOrganizationHandler(OrganizationRepository repository, AccountRepository accountRepository, IHttpContextAccessor accessor, LoginService loginService)
         {
             _repository = repository;
+            _accountRepository = accountRepository;
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
             _user = loginService.GetUserId();
         }
 
         public async Task<GetAllOrganizationResponse> Handle(GetAllOrganizationRequest request, CancellationToken cancellationToken = default)
         {
-            var organizations = await _repository.GetOrganizationList(_lang, _user, request.CategoryId, request.Status, request.StartDate, request.EndDate, request.UserId, request.CityId);
+            var availableStatuses = new List<int>()
+            {
+                (int)POSTER_STATUS.PENDING,
+                (int)POSTER_STATUS.PUBLISHED,
+                (int)POSTER_STATUS.DRAFT,
+                (int)POSTER_STATUS.REJECTED,
+                (int)POSTER_STATUS.REVIEWING
+            };
+
+            if (request.Status != null)
+            {
+                availableStatuses = new List<int>()
+                {
+                    (int)request.Status
+                };
+            }
+
+            var organizations = await _repository.GetOrganizationList(_lang, _user, availableStatuses, request.CategoryId, request.StartDate, request.EndDate, request.UserId, request.CityId);
             var cities = await _repository.GetCities(_lang);
             var categories = await _repository.GetCategories();
             var subcategories = await _repository.GetSubcategories();
