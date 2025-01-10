@@ -12,6 +12,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public DateTime endDate { get; set; }
         public Guid categoryId { get; set; } = Guid.Empty;
         public Guid subcategoryId { get; set; } = Guid.Empty;
+        public int? Count { get; set; }
     }
 
     public class GetOrganizationsResponse
@@ -46,6 +47,12 @@ namespace InfoPoster_backend.Handlers.Organizations
         public async Task<List<GetOrganizationsResponse>> Handle(GetOrganizationsRequest request, CancellationToken cancellationToken = default)
         {
             var organizationList = await _repository.GetOrganizationList();
+            organizationList = organizationList.OrderByDescending(o => o.CreatedAt).ToList();
+            if (request.Count != null)
+            {
+                organizationList = organizationList.Take((int)request.Count).ToList();
+            }
+
             var result = new List<GetOrganizationsResponse>();
             if (request.categoryId != Guid.Empty && request.subcategoryId != Guid.Empty) 
             {

@@ -66,13 +66,11 @@ namespace InfoPoster_backend.Handlers.Organizations
                 (int)POSTER_STATUS.PENDING,
                 (int)POSTER_STATUS.PENDING,
                 (int)POSTER_STATUS.PUBLISHED,
-                (int)POSTER_STATUS.DRAFT
+                (int)POSTER_STATUS.DRAFT,
+                (int)POSTER_STATUS.REVIEWING
             };
 
-            if (isAdmin)
-            {
-                availableStatuses.Add((int)POSTER_STATUS.REVIEWING);
-            } else
+            if (!isAdmin)
             {
                 availableStatuses.Add((int)POSTER_STATUS.DELETED);
             }
