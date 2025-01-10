@@ -45,13 +45,6 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [HttpGet("subcategories")]
-        public async Task<IActionResult> GetSubcategories([FromQuery] GetSubcategoriesRequest request)
-        {
-            var result = await _mediator.Send(request);
-            return Ok(result);
-        }
-
         [HttpGet("full-info")]
         public async Task<IActionResult> GetFullInfoPoster([FromQuery] GetFullInfoPosterRequest request)
         {

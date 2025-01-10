@@ -21,6 +21,6 @@ namespace InfoPoster_backend.Handlers.Posters
         }
 
         public async Task<List<CategoryResponseModel>> Handle(GetCategoriesRequest request, CancellationToken cancellationToken = default) =>
-            await _repository.GetCategoriesNoTracking((int)request.type, _lang);
+            await _repository.GetCategoriesNoTracking(request.type, _lang);
     }
 }
