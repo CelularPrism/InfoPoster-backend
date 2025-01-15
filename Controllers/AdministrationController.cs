@@ -1,7 +1,9 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Offers;
 using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Offers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +42,7 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("categories/get")]
         public async Task<IActionResult> GetCategories(CategoryType type)
         {
-            var result = await _mediator.Send(new GetCategoriesRequest() { type = type });
+            var result = await _mediator.Send(new GetCategoriesRequest() { type = type, IsAdmin = true });
             return Ok(result);
         }
 
@@ -54,6 +56,7 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("subcategories/get")]
         public async Task<IActionResult> GetSubcategories([FromQuery] GetSubcategoriesRequest request)
         {
+            request.IsAdmin = true;
             var result = await _mediator.Send(request);
             return Ok(result);
         }
@@ -428,6 +431,69 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> DeleteFile([FromQuery] Guid fileId, Guid applicationId)
         {
             var result = await _mediator.Send(new DeleteFileRequest() { FileId = fileId, ApplicationId = applicationId });
+            return Ok(result);
+        }
+
+        //[HttpGet("offer/all")]
+        //public async Task<IActionResult> GetAllOffers(
+        //    [FromQuery] int sort,
+        //    [FromQuery] OFFER_TYPES? type,
+        //    [FromQuery] Guid? cityId,
+        //    [FromQuery] int? status,
+        //    [FromQuery] DateTime? startDate,
+        //    [FromQuery] DateTime? endDate,
+        //    [FromQuery] Guid? editorId,
+        //    [FromQuery] int page = 0,
+        //    [FromQuery] int countPerPage = 10)
+        //{
+        //    var result = await _mediator.Send(new GetAllOrganizationRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
+        //    return Ok(result);
+        //}
+
+        //[HttpGet("offer/available")]
+        //public async Task<IActionResult> GetAvailableOffers(
+        //    [FromQuery] int sort,
+        //    [FromQuery] OFFER_TYPES? type,
+        //    [FromQuery] Guid? cityId,
+        //    [FromQuery] int? status,
+        //    [FromQuery] DateTime? startDate,
+        //    [FromQuery] DateTime? endDate,
+        //    [FromQuery] int page = 0,
+        //    [FromQuery] int countPerPage = 10)
+        //{
+        //    var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
+        //    return Ok(result);
+        //}
+
+        //[HttpGet("offer/rejected")]
+        //public async Task<IActionResult> GetRejectedOffers(
+        //    [FromQuery] int sort,
+        //    [FromQuery] OFFER_TYPES? type,
+        //    [FromQuery] Guid? cityId,
+        //    [FromQuery] int? status,
+        //    [FromQuery] DateTime? startDate,
+        //    [FromQuery] DateTime? endDate,
+        //    [FromQuery] int page = 0,
+        //    [FromQuery] int countPerPage = 10)
+        //{
+        //    var result = await _mediator.Send(new GetRejectedOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
+        //    return Ok(result);
+        //}
+
+        [HttpPost("offer/create")]
+        public async Task<IActionResult> CreateOffer([FromForm] CreateOfferRequest request)
+        {
+            var result = await _mediator.Send(request);
+            return Ok(result);
+        }
+
+        [HttpPost("offer/full-info/save")]
+        public async Task<IActionResult> SaveFullInfoOffer([FromForm] SaveFullInfoOfferRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+                return BadRequest();
+
             return Ok(result);
         }
     }

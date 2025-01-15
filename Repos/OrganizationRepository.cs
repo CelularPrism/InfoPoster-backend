@@ -38,6 +38,8 @@ namespace InfoPoster_backend.Repos
 
         public async Task<bool> CheckAdmin(Guid userId) => await _organization.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
 
+        public async Task<List<OrganizationMultilangModel>> SearchOrganizations(string searchText) => await _organization.OrganizationsMultilang.Where(p => p.Name.Contains(searchText) && p.Lang == _lang).Take(5).AsNoTracking().ToListAsync();
+
         public async Task<int> GetCountByCity(Guid city) => await _organization.OrganizationsFullInfo.Where(f => f.City == city)
                                                                                                      .Join(_organization.Organizations,
                                                                                                            f => f.OrganizationId,
@@ -428,8 +430,8 @@ namespace InfoPoster_backend.Repos
                                                      .Join(_organization.OrganizationsMultilang,
                                                             f => f.OrganizationId,
                                                             ml => ml.OrganizationId,
-                                                            (f, ml) => new { f.OrganizationId, ml.Name })
-                                                     .Where(f => f.Name.Contains(searchText) || f.OrganizationId.ToString() == searchText)
+                                                            (f, ml) => new { f.OrganizationId, ml.Name, ml.Lang })
+                                                     .Where(f => (f.Name.Contains(searchText) || f.OrganizationId.ToString() == searchText) && f.Lang == _lang)
                                                      .Join(_organization.Organizations,
                                                             ml => ml.OrganizationId,
                                                             org => org.Id,

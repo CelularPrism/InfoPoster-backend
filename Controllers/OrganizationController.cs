@@ -34,7 +34,7 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("actual")]
         public async Task<IActionResult> GetActualOrganizations()
         {
-            var result = await _mediator.Send(new GetOrganizationsRequest() { startDate = DateTime.MinValue, endDate = DateTime.MaxValue, Count = 10 });
+            var result = await _mediator.Send(new GetOrganizationsRequest() { startDate = DateTime.MinValue, endDate = DateTime.MaxValue, Limit = 10, Offset = 0 });
             return Ok(result);
         }
 

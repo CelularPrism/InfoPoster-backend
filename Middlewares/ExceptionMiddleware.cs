@@ -40,19 +40,6 @@ namespace InfoPoster_backend.Middlewares
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            string connectionString = "Server=localhost;Database=InfoPoster;User=root;Password=HvSY88Z9fajV;";
-
-            try
-            {
-                using (var connectiondb = new MySqlConnection(connectionString))
-                {
-                    connectiondb.Open();
-                }
-            }
-            catch (Exception ex)
-            {
-                exception = ex;
-            }
 
             await context.Response.WriteAsync(new ErrorDetails()
             {

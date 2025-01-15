@@ -3,19 +3,29 @@ using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
 using MediatR;
+using System.Diagnostics;
 
 namespace InfoPoster_backend.Handlers.Organizations
 {
-    public class GetOrganizationsRequest : IRequest<List<GetOrganizationsResponse>>
+    public class GetOrganizationsRequest : IRequest<GetOrganizationsResponse>
     {
         public DateTime startDate { get; set; }
         public DateTime endDate { get; set; }
         public Guid categoryId { get; set; } = Guid.Empty;
         public Guid subcategoryId { get; set; } = Guid.Empty;
-        public int? Count { get; set; }
+        public int Limit { get; set; }
+        public int Offset { get; set; }
     }
 
     public class GetOrganizationsResponse
+    {
+        public List<InfoOrganization> data { get; set; }
+        public int Limit { get; set; }
+        public int Offset { get; set; }
+        public int Total { get; set; }
+    }
+
+    public class InfoOrganization
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime CreatedAt { get; set; }
@@ -31,7 +41,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public string PriceLevel { get; set; }
     }
 
-    public class GetOrganizationsHandler : IRequestHandler<GetOrganizationsRequest, List<GetOrganizationsResponse>> 
+    public class GetOrganizationsHandler : IRequestHandler<GetOrganizationsRequest, GetOrganizationsResponse> 
     {
         private readonly OrganizationRepository _repository;
         private readonly FileRepository _file;
@@ -44,23 +54,18 @@ namespace InfoPoster_backend.Handlers.Organizations
             _selectelAuth = selectelAuth;
         }
 
-        public async Task<List<GetOrganizationsResponse>> Handle(GetOrganizationsRequest request, CancellationToken cancellationToken = default)
+        public async Task<GetOrganizationsResponse> Handle(GetOrganizationsRequest request, CancellationToken cancellationToken = default)
         {
             var organizationList = await _repository.GetOrganizationList();
-            organizationList = organizationList.OrderByDescending(o => o.CreatedAt).ToList();
-            if (request.Count != null)
-            {
-                organizationList = organizationList.Take((int)request.Count).ToList();
-            }
 
-            var result = new List<GetOrganizationsResponse>();
+            var data = new List<InfoOrganization>();
             if (request.categoryId != Guid.Empty && request.subcategoryId != Guid.Empty) 
             {
                 var category = await _repository.GetCategory(request.categoryId);
                 var subcategory = await _repository.GetSubcategory(request.subcategoryId);
 
-                result = organizationList.Where(o => o.CategoryId == request.categoryId && o.SubcategoryId == request.subcategoryId)
-                                             .Select(o => new GetOrganizationsResponse()
+                data = organizationList.Where(o => o.CategoryId == request.categoryId && o.SubcategoryId == request.subcategoryId)
+                                             .Select(o => new InfoOrganization()
                                              {
                                                  CategoryId = o.CategoryId,
                                                  CategoryName = category.Name,
@@ -77,8 +82,8 @@ namespace InfoPoster_backend.Handlers.Organizations
                 var subcategory = await _repository.GetSubcategory(request.subcategoryId);
                 var categories = await _repository.GetCategories();
 
-                result = organizationList.Where(o => o.SubcategoryId == request.subcategoryId)
-                                             .Select(o => new GetOrganizationsResponse()
+                data = organizationList.Where(o => o.SubcategoryId == request.subcategoryId)
+                                             .Select(o => new InfoOrganization()
                                              {
                                                  CategoryId = o.CategoryId,
                                                  CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
@@ -95,8 +100,8 @@ namespace InfoPoster_backend.Handlers.Organizations
                 var subcategories = await _repository.GetSubcategories();
                 var category = await _repository.GetCategory(request.categoryId);
 
-                result = organizationList.Where(o => o.CategoryId == request.categoryId)
-                                             .Select(o => new GetOrganizationsResponse()
+                data = organizationList.Where(o => o.CategoryId == request.categoryId)
+                                             .Select(o => new InfoOrganization()
                                              {
                                                  CategoryId = o.CategoryId,
                                                  CategoryName = category.Name,
@@ -113,7 +118,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 var categories = await _repository.GetCategories();
                 var subcategories = await _repository.GetSubcategories();
 
-                result = organizationList.Select(o => new GetOrganizationsResponse()
+                data = organizationList.Select(o => new InfoOrganization()
                                          {
                                                 CategoryId = o.CategoryId,
                                                 CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
@@ -131,7 +136,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             if (loggedIn)
             {
                 var selectelUUID = await _selectelAuth.GetContainerUUID("dosdoc");
-                foreach (var item in result)
+                foreach (var item in data)
                 {
                     var file = await _file.GetPrimaryFile(item.Id, (int)FILE_PLACES.GALLERY);
                     if (file == null)
@@ -144,6 +149,16 @@ namespace InfoPoster_backend.Handlers.Organizations
                     }
                 }
             }
+            var total = data.Count;
+            data = data.OrderByDescending(o => o.CreatedAt).Skip(request.Offset).Take(request.Limit).ToList();
+
+            var result = new GetOrganizationsResponse()
+            {
+                data = data,
+                Limit = request.Limit,
+                Offset = request.Offset,
+                Total = total
+            };
 
             return result;
         }

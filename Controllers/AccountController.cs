@@ -47,6 +47,13 @@ namespace InfoPoster_backend.Controllers
             return Ok();
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string searchText)
+        {
+            var result = await _mediator.Send(new SearchApplicationRequest() { SearchText = searchText });
+            return Ok(result);
+        }
+
         [HttpPost("email/send")]
         public async Task<IActionResult> SendEmail([FromForm] string firstName, [FromForm] string email, [FromForm] string phone, [FromForm] string message)
         {

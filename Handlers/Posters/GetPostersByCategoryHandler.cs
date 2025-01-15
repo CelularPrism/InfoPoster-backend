@@ -5,14 +5,24 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
 {
-    public class GetPostersByCategoryRequest : IRequest<List<PosterResponseModel>>
+    public class GetPostersByCategoryRequest : IRequest<GetPostersByCategoryResponse>
     {
         public DateTime startDate { get; set; }
         public DateTime endDate { get; set; }
         public Guid categoryId { get; set; }
+        public int Limit { get; set; }
+        public int Offset { get; set; }
     }
 
-    public class GetPostersByCategoryHandler : IRequestHandler<GetPostersByCategoryRequest, List<PosterResponseModel>>
+    public class GetPostersByCategoryResponse
+    {
+        public List<PosterResponseModel> data { get; set; }
+        public int Limit { get; set; }
+        public int Offset { get; set; }
+        public int Total { get; set; }
+    }
+
+    public class GetPostersByCategoryHandler : IRequestHandler<GetPostersByCategoryRequest, GetPostersByCategoryResponse>
     {
         private readonly PosterRepository _repository;
         private readonly SelectelAuthService _selectelAuth;
@@ -25,20 +35,28 @@ namespace InfoPoster_backend.Handlers.Posters
             _selectelAuth = selectelAuth;
         }
 
-        public async Task<List<PosterResponseModel>> Handle(GetPostersByCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<GetPostersByCategoryResponse> Handle(GetPostersByCategoryRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _repository.GetListNoTracking(request.startDate, request.endDate, request.categoryId, _lang);
+            var (list, total) = await _repository.GetListNoTracking(request.Limit, request.Offset, request.startDate, request.endDate, request.categoryId, _lang);
 
             var loggedIn = await _selectelAuth.Login();
             var selectelUUID = string.Empty;
             if (loggedIn)
             {
                 selectelUUID = await _selectelAuth.GetContainerUUID("dosdoc");
-                foreach (var poster in result)
+                foreach (var poster in list)
                 {
                     poster.FileURL = string.Concat("https://", selectelUUID, ".selstorage.ru/", poster.FileId);
                 }
             }
+
+            var result = new GetPostersByCategoryResponse()
+            {
+                Offset = request.Offset,
+                Limit = request.Limit,
+                data = list,
+                Total = total
+            };
 
             return result;
         }
