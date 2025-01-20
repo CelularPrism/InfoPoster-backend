@@ -7,11 +7,11 @@ namespace InfoPoster_backend.Handlers.Posters
 {
     public class GetPostersByCategoryRequest : IRequest<GetPostersByCategoryResponse>
     {
-        public DateTime startDate { get; set; }
+        public DateTime startDate { get; set; } = DateTime.UtcNow;
         public DateTime endDate { get; set; }
         public Guid categoryId { get; set; }
-        public int Limit { get; set; }
-        public int Offset { get; set; }
+        public int Limit { get; set; } = 10;
+        public int Offset { get; set; } = 0;
     }
 
     public class GetPostersByCategoryResponse
