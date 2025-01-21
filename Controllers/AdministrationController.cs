@@ -4,6 +4,7 @@ using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Offers;
+using InfoPoster_backend.Models.Posters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -434,51 +435,52 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("offer/all")]
-        //public async Task<IActionResult> GetAllOffers(
-        //    [FromQuery] int sort,
-        //    [FromQuery] OFFER_TYPES? type,
-        //    [FromQuery] Guid? cityId,
-        //    [FromQuery] int? status,
-        //    [FromQuery] DateTime? startDate,
-        //    [FromQuery] DateTime? endDate,
-        //    [FromQuery] Guid? editorId,
-        //    [FromQuery] int page = 0,
-        //    [FromQuery] int countPerPage = 10)
-        //{
-        //    var result = await _mediator.Send(new GetAllOrganizationRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
-        //    return Ok(result);
-        //}
+        [HttpGet("offer/all")]
+        public async Task<IActionResult> GetAllOffers(
+            [FromQuery] int sort,
+            [FromQuery] OFFER_TYPES? type,
+            [FromQuery] Guid? cityId,
+            [FromQuery] POSTER_STATUS? status,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] Guid? editorId,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
+        {
+            var result = await _mediator.Send(new GetAllOffersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
+            return Ok(result);
+        }
 
-        //[HttpGet("offer/available")]
-        //public async Task<IActionResult> GetAvailableOffers(
-        //    [FromQuery] int sort,
-        //    [FromQuery] OFFER_TYPES? type,
-        //    [FromQuery] Guid? cityId,
-        //    [FromQuery] int? status,
-        //    [FromQuery] DateTime? startDate,
-        //    [FromQuery] DateTime? endDate,
-        //    [FromQuery] int page = 0,
-        //    [FromQuery] int countPerPage = 10)
-        //{
-        //    var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
-        //    return Ok(result);
-        //}
+        [HttpGet("offer/available")]
+        public async Task<IActionResult> GetAvailableOffers(
+            [FromQuery] int sort,
+            [FromQuery] OFFER_TYPES? type,
+            [FromQuery] Guid? cityId,
+            [FromQuery] POSTER_STATUS? status,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] Guid? editorId,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
+        {
+            var result = await _mediator.Send(new GetAvailableOffersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
+            return Ok(result);
+        }
 
-        //[HttpGet("offer/rejected")]
-        //public async Task<IActionResult> GetRejectedOffers(
-        //    [FromQuery] int sort,
-        //    [FromQuery] OFFER_TYPES? type,
-        //    [FromQuery] Guid? cityId,
-        //    [FromQuery] int? status,
-        //    [FromQuery] DateTime? startDate,
-        //    [FromQuery] DateTime? endDate,
-        //    [FromQuery] int page = 0,
-        //    [FromQuery] int countPerPage = 10)
-        //{
-        //    var result = await _mediator.Send(new GetRejectedOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
-        //    return Ok(result);
-        //}
+        [HttpGet("offer/rejected")]
+        public async Task<IActionResult> GetRejectedOffers(
+            [FromQuery] int sort,
+            [FromQuery] OFFER_TYPES? type,
+            [FromQuery] Guid? cityId,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] Guid? editorId,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
+        {
+            var result = await _mediator.Send(new GetRejectedOffersRequest() { StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
+            return Ok(result);
+        }
 
         [HttpPost("offer/create")]
         public async Task<IActionResult> CreateOffer([FromForm] CreateOfferRequest request)

@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Cities;
+﻿using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Offers;
 using InfoPoster_backend.Models.Organizations;
@@ -43,6 +44,9 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<OffersMultilangModel>> GetMultilangList(IEnumerable<Guid> offers, string lang) =>
             await _context.OffersMultilang.Where(o => offers.Contains(o.OfferId) && o.Lang == lang).ToListAsync();
+
+        public async Task<List<UserModel>> GetUserList(IEnumerable<Guid> users) =>
+            await _context.Users.Where(o => users.Contains(o.Id)).ToListAsync();
 
         public async Task AddOffer(OffersModel model)
         {

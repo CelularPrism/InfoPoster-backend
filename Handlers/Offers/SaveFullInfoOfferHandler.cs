@@ -14,6 +14,8 @@ namespace InfoPoster_backend.Handlers.Offers
         public DateTime DateStart { get; set; }
         public DateTime? DateEnd { get; set; }
         public string Name { get; set; }
+        public string DateDescription { get; set; }
+        public string SmallDescription { get; set; }
         public string Description { get; set; }
         public string Address { get; set; }
         public string PlaceLink { get; set; }
@@ -41,38 +43,38 @@ namespace InfoPoster_backend.Handlers.Offers
                 return null;
             }
 
-            var multilang = await _repository.GetOfferMultilang(request.Id, request.Lang);
-            if (multilang == null)
-            {
-                multilang = new OffersMultilangModel(request.Id, request.Lang, request.Name, request.Description, request.Address);
-                await _repository.AddOfferMultilang(multilang);
-            } else
-            {
-                multilang.Update(request.Lang, request.Name, request.Description, request.Address);
-                await _repository.UpdateOfferMultilang(multilang);
-            }
-
-            //var multilang = await _repository.GetOfferMultilang(request.Id);
-            //if (multilang == null || multilang.Count == 0)
+            //var multilang = await _repository.GetOfferMultilang(request.Id, request.Lang);
+            //if (multilang == null)
             //{
-            //    multilang = new List<OffersMultilangModel>();
-            //    OffersMultilangModel ml;
-            //    foreach (var lang in Constants.SystemLangs)
-            //    {
-            //        ml = new OffersMultilangModel(request.Id, request.Lang, request.Name, request.Description, request.Address);
-            //        multilang.Add(ml);
-            //    }
-
+            //    multilang = new OffersMultilangModel(request.Id, request.Lang, request.Name, request.Description, request.Address);
             //    await _repository.AddOfferMultilang(multilang);
-            //}
-            //else
+            //} else
             //{
-            //    foreach (var ml in multilang)
-            //    {
-            //        ml.Update(request.Lang, request.Name, request.Description, request.Address);
-            //    }
+            //    multilang.Update(request.Lang, request.Name, request.Description, request.Address);
             //    await _repository.UpdateOfferMultilang(multilang);
             //}
+
+            var multilang = await _repository.GetOfferMultilang(request.Id);
+            if (multilang == null || multilang.Count == 0)
+            {
+                multilang = new List<OffersMultilangModel>();
+                OffersMultilangModel ml;
+                foreach (var lang in Constants.SystemLangs)
+                {
+                    ml = new OffersMultilangModel(request.Id, request.Lang, request.Name, request.DateDescription, request.SmallDescription, request.Description, request.Address);
+                    multilang.Add(ml);
+                }
+
+                await _repository.AddOfferMultilang(multilang);
+            }
+            else
+            {
+                foreach (var ml in multilang)
+                {
+                    ml.Update(request.Lang, request.Name, request.DateDescription, request.SmallDescription, request.Description, request.Address);
+                }
+                await _repository.UpdateOfferMultilang(multilang);
+            }
 
             if (string.IsNullOrEmpty(offer.Name) || request.Lang == Constants.DefaultLang)
                 offer.Name = request.Name;

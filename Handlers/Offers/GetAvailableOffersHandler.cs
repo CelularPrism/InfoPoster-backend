@@ -1,14 +1,14 @@
 ﻿using InfoPoster_backend.Models.Offers;
-using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Tools;
 using MediatR;
+using System.Security.Principal;
 
 namespace InfoPoster_backend.Handlers.Offers
 {
-    public class GetAllOffersRequest : IRequest<GetAllOffersResponse>
+    public class GetAvailableOffersRequest : IRequest<GetAllOffersResponse>
     {
         public int Sort { get; set; }
         public OFFER_TYPES? Type { get; set; }
@@ -21,54 +21,22 @@ namespace InfoPoster_backend.Handlers.Offers
         public int CountPerPage { get; set; }
     }
 
-    public class GetAllOffersResponse
-    {
-        public List<AllOfferModel> Offers { get; set; }
-        public int Count { get; set; }
-        public int Page { get; set; }
-        public int CountPerPage { get; set; }
-    }
-
-    public class AllOfferModel
-    {
-        public AllOfferModel() { }
-
-        public AllOfferModel(OffersModel offer, OffersMultilangModel multilang, string userName)
-        {
-            Id = offer.Id;
-            Name = multilang.Name;
-            CreatedAt = offer.CreatedAt;
-            Type = offer.Type;
-            UserId = offer.UserId;
-            CreatedBy = userName;
-            Status = offer.Status;
-        }
-
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public OFFER_TYPES Type { get; set; }
-        public Guid UserId { get; set; }
-        public string CreatedBy { get; set; }
-        public POSTER_STATUS Status { get; set; }
-        public Guid? CityId { get; set; }
-        public string CityName { get; set; }
-    }
-
-    public class GetAllOffersHandler : IRequestHandler<GetAllOffersRequest, GetAllOffersResponse> 
+    public class GetAvailableOffersHandler : IRequestHandler<GetAvailableOffersRequest, GetAllOffersResponse>
     {
         private readonly OfferRepository _repository;
+        private readonly AccountRepository _account;
         private readonly Guid _user;
         private readonly string _lang;
 
-        public GetAllOffersHandler(OfferRepository repository, LoginService loginService, IHttpContextAccessor accessor)
+        public GetAvailableOffersHandler(OfferRepository repository, AccountRepository account, LoginService loginService, IHttpContextAccessor accessor)
         {
             _repository = repository;
+            _account = account;
             _user = loginService.GetUserId();
             _lang = accessor.HttpContext.Items[Constants.HTTP_ITEM_ClientLang].ToString();
         }
 
-        public async Task<GetAllOffersResponse> Handle(GetAllOffersRequest request, CancellationToken cancellationToken = default)
+        public async Task<GetAllOffersResponse> Handle(GetAvailableOffersRequest request, CancellationToken cancellationToken = default)
         {
             var availableStatuses = new List<POSTER_STATUS>()
             {
@@ -76,7 +44,8 @@ namespace InfoPoster_backend.Handlers.Offers
                 POSTER_STATUS.PUBLISHED,
                 POSTER_STATUS.DRAFT,
                 POSTER_STATUS.REJECTED,
-                POSTER_STATUS.REVIEWING
+                POSTER_STATUS.REVIEWING,
+                POSTER_STATUS.DELETED
             };
 
             if (request.Status != null)
@@ -86,8 +55,9 @@ namespace InfoPoster_backend.Handlers.Offers
                     request.Status.Value
                 };
             }
+            var roles = await _account.GetUserRoles(_user);
 
-            var offers = await _repository.GetOfferList(availableStatuses, request.Type, request.StartDate, request.EndDate, request.UserId, request.CityId);
+            var offers = await _repository.GetOfferList(availableStatuses, request.Type, request.StartDate, request.EndDate, roles.Any(r => r == Constants.ROLE_ADMIN) ? null : _user, request.CityId);
             var result = new GetAllOffersResponse()
             {
                 Count = offers.Count,

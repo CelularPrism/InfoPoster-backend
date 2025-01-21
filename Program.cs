@@ -125,18 +125,12 @@ namespace InfoPoster_backend
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "wwwroot";
-
-                //if (app.Environment.IsDevelopment())
-                //{
-                //    spa.UseAngularCliServer(npmScript: "start");
-                //}
             });
 
             app.UseAuthorization();
             app.UseMiddleware<DefaultLangMiddleware>();
 
             app.MapControllers();
-            //app.MapGet("/", () => "Hello world");
 
             app.Run();
         }

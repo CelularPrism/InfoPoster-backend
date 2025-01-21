@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Cities;
+﻿using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Offers;
 using InfoPoster_backend.Models.Posters;
 using Microsoft.EntityFrameworkCore;
@@ -36,5 +37,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<CityMultilangModel> CitiesMultilang { get; set; }
         public DbSet<OffersModel> Offers { get; set; }
         public DbSet<OffersMultilangModel> OffersMultilang { get; set; }
+        public DbSet<UserModel> Users { get; set; }
     }
 }
