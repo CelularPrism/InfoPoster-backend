@@ -11,6 +11,7 @@ namespace InfoPoster_backend.Models.Posters
             Name = multilang.Name;
             Description = multilang.Description;
             ReleaseDate = poster.ReleaseDate;
+            ReleaseDateEnd = poster.ReleaseDateEnd;
             CategoryId = fullInfo.CategoryId;
             Place = multilang.Place;
             City = fullInfo.City;
@@ -29,6 +30,7 @@ namespace InfoPoster_backend.Models.Posters
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? ReleaseDateEnd { get; set; }
         public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public string Place { get; set; }

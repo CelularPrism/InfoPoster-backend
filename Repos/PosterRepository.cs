@@ -93,6 +93,7 @@ namespace InfoPoster_backend.Repos
                                                                                                                           CreatedAt = p.CreatedAt,
                                                                                                                           Name = p.Name,
                                                                                                                           ReleaseDate = p.ReleaseDate,
+                                                                                                                          ReleaseDateEnd = p.ReleaseDateEnd,
                                                                                                                           Status = p.Status,
                                                                                                                           UpdatedAt = p.UpdatedAt,
                                                                                                                           UserId = p.UserId

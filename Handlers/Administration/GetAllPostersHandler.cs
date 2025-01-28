@@ -36,6 +36,7 @@ namespace InfoPoster_backend.Handlers.Administration
             Id = poster.Id;
             Name = multilang.Name;
             ReleaseDate = poster.ReleaseDate;
+            ReleaseDateEnd = poster.ReleaseDateEnd;
             CategoryId = poster.CategoryId;
             UserId = poster.UserId;
             CreatedBy = userName;
@@ -47,6 +48,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Name { get; set; }
         [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? ReleaseDateEnd { get; set; }
         public Guid CategoryId { get; set; }
         public Guid UserId { get; set; }
         public string CreatedBy { get; set; }
@@ -139,7 +141,8 @@ namespace InfoPoster_backend.Handlers.Administration
                 UserId = o.UserId,
                 Status = o.Status,
                 UpdatedAt = o.UpdatedAt,
-                ReleaseDate = o.ReleaseDate
+                ReleaseDate = o.ReleaseDate,
+                ReleaseDateEnd = o.ReleaseDateEnd
             }).ToList();
 
             if (request.Sort == 0)

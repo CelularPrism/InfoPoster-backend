@@ -21,6 +21,7 @@ namespace InfoPoster_backend.Handlers.Posters
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? ReleaseDateEnd { get; set; }
         public Guid? CategoryId { get; set; }
         public string Place { get; set; }
         public Guid? City { get; set; }
@@ -197,7 +198,8 @@ namespace InfoPoster_backend.Handlers.Posters
             if (string.IsNullOrEmpty(poster.Name))
                 poster.Name = request.Name;
 
-            poster.ReleaseDate = request.ReleaseDate.HasValue ? request.ReleaseDate.Value.Date : null;
+            poster.ReleaseDate = request.ReleaseDate;
+            poster.ReleaseDateEnd = request.ReleaseDateEnd;
 
             var categories = await _repository.GetCategories();
 
