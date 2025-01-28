@@ -60,7 +60,7 @@ namespace InfoPoster_backend.Repos
                                                                                                     Type = c.Category.Type,
                                                                                                 }).ToListAsync();
 
-        public async Task<CategoryModel> GetCategory(Guid categoryId) => await _organization.Categories.Join(_organization.CategoriesMultilang,
+        public async Task<CategoryModel> GetCategory(Guid? categoryId) => await _organization.Categories.Join(_organization.CategoriesMultilang,
                                                                                                       c => c.Id,
                                                                                                       m => m.CategoryId,
                                                                                                       (c, m) => new { Category = c, Multilang = m })
@@ -85,7 +85,7 @@ namespace InfoPoster_backend.Repos
                                                                                                     ImageSrc = c.Subcategory.ImageSrc
                                                                                                 }).ToListAsync();
 
-        public async Task<SubcategoryModel> GetSubcategory(Guid subcategoryId) => await _organization.Subcategories.Join(_organization.SubcategoriesMultilang,
+        public async Task<SubcategoryModel> GetSubcategory(Guid? subcategoryId) => await _organization.Subcategories.Join(_organization.SubcategoriesMultilang,
                                                                                                       c => c.Id,
                                                                                                       m => m.SubcategoryId,
                                                                                                       (c, m) => new { Subcategory = c, Multilang = m })
@@ -122,7 +122,6 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<OrganizationModel>> GetOrganizationList(string lang, Guid adminId, List<int> statuses, Guid? categoryId, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
-            var isAdmin = await _organization.User_To_Roles.AnyAsync(u => u.UserId == adminId && u.RoleId == Constants.ROLE_ADMIN);
             //var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||
             //                                                   o.Status == (int)POSTER_STATUS.PUBLISHED ||
             //                                                   o.Status == (int)POSTER_STATUS.DRAFT ||

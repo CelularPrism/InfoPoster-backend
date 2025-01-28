@@ -312,7 +312,7 @@ namespace InfoPoster_backend.Repos
 
         public async Task<(List<PosterResponseModel>, int)> GetListNoTracking(int limit, int offset, DateTime start, DateTime end, Guid categoryId, string lang = "en")
         {
-            var query = _context.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED && p.ReleaseDate >= start);
+            var query = _context.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED && p.ReleaseDate >= start.Date);
             var total = query.Count();
 
             query = query.Skip(offset).Take(limit);

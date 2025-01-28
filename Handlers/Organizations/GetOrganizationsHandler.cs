@@ -1,7 +1,9 @@
 ﻿using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Organizations;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
+using InfoPoster_backend.Tools;
 using MediatR;
 using System.Diagnostics;
 
@@ -10,9 +12,9 @@ namespace InfoPoster_backend.Handlers.Organizations
     public class GetOrganizationsRequest : IRequest<GetOrganizationsResponse>
     {
         public DateTime startDate { get; set; }
-        public DateTime endDate { get; set; }
-        public Guid categoryId { get; set; } = Guid.Empty;
-        public Guid subcategoryId { get; set; } = Guid.Empty;
+        public DateTime endDate { get; set; } = DateTime.UtcNow;
+        public Guid? categoryId { get; set; }
+        public Guid? subcategoryId { get; set; }
         public int Limit { get; set; }
         public int Offset { get; set; }
     }
@@ -46,20 +48,31 @@ namespace InfoPoster_backend.Handlers.Organizations
         private readonly OrganizationRepository _repository;
         private readonly FileRepository _file;
         private readonly SelectelAuthService _selectelAuth;
+        private readonly Guid _city;
 
-        public GetOrganizationsHandler(OrganizationRepository organizationRepository, FileRepository file, SelectelAuthService selectelAuth)
+        public GetOrganizationsHandler(OrganizationRepository organizationRepository, FileRepository file, SelectelAuthService selectelAuth, IHttpContextAccessor accessor)
         {
             _repository = organizationRepository;
             _file = file;
             _selectelAuth = selectelAuth;
+            _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
         public async Task<GetOrganizationsResponse> Handle(GetOrganizationsRequest request, CancellationToken cancellationToken = default)
         {
-            var organizationList = await _repository.GetOrganizationList();
+            var organizationList = await _repository.GetOrganizationList(string.Empty, Guid.Empty, new List<int>() { (int)POSTER_STATUS.PUBLISHED }, request.categoryId, request.startDate, request.endDate, null, _city);
+            if (request.subcategoryId != null)
+            {
+                organizationList = organizationList.Where(o => o.SubcategoryId == request.subcategoryId).ToList();
+            }
+
+            organizationList = organizationList.OrderByDescending(o => o.CreatedAt).Skip(request.Offset).Take(request.Limit).ToList();
+
+            var organizationIds = organizationList.Select(org => org.Id).AsEnumerable();
+            var multilang = await _repository.GetMultilang(organizationIds);
 
             var data = new List<InfoOrganization>();
-            if (request.categoryId != Guid.Empty && request.subcategoryId != Guid.Empty) 
+            if (request.categoryId != null && request.subcategoryId != null) 
             {
                 var category = await _repository.GetCategory(request.categoryId);
                 var subcategory = await _repository.GetSubcategory(request.subcategoryId);
@@ -72,12 +85,12 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  SubcategoryId = subcategory.Id,
                                                  SubcategoryName = subcategory.Name,
                                                  Id = o.Id,
-                                                 Name = o.Name,
+                                                 Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
                                                  PriceLevel = _repository.GetPriceLevel(o.Id),
                                                  Desciption = _repository.GetDescription(o.Id),
                                              }).ToList();
-            } else if (request.subcategoryId != Guid.Empty)
+            } else if (request.subcategoryId != null)
             {
                 var subcategory = await _repository.GetSubcategory(request.subcategoryId);
                 var categories = await _repository.GetCategories();
@@ -90,12 +103,12 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  SubcategoryId = subcategory.Id,
                                                  SubcategoryName = subcategory.Name,
                                                  Id = o.Id,
-                                                 Name = o.Name,
+                                                 Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
                                                  PriceLevel = _repository.GetPriceLevel(o.Id),
                                                  Desciption = _repository.GetDescription(o.Id),
                                              }).ToList();
-            } else if (request.categoryId != Guid.Empty)
+            } else if (request.categoryId != null)
             {
                 var subcategories = await _repository.GetSubcategories();
                 var category = await _repository.GetCategory(request.categoryId);
@@ -108,7 +121,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  SubcategoryId = o.SubcategoryId,
                                                  SubcategoryName = subcategories.Where(c => c.Id == o.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
                                                  Id = o.Id,
-                                                 Name = o.Name,
+                                                 Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
                                                  PriceLevel = _repository.GetPriceLevel(o.Id),
                                                  Desciption = _repository.GetDescription(o.Id),
@@ -125,7 +138,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                 SubcategoryId = o.SubcategoryId,
                                                 SubcategoryName = subcategories.Where(c => c.Id == o.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
                                                 Id = o.Id,
-                                                Name = o.Name,
+                                                Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                 CreatedAt = o.CreatedAt,
                                                 PriceLevel = _repository.GetPriceLevel(o.Id),
                                                 Desciption = _repository.GetDescription(o.Id),
@@ -150,7 +163,6 @@ namespace InfoPoster_backend.Handlers.Organizations
                 }
             }
             var total = data.Count;
-            data = data.OrderByDescending(o => o.CreatedAt).Skip(request.Offset).Take(request.Limit).ToList();
 
             var result = new GetOrganizationsResponse()
             {

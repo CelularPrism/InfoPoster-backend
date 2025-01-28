@@ -498,5 +498,26 @@ namespace InfoPoster_backend.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("offer/full-info")]
+        public async Task<IActionResult> GetFullInfoOffer([FromQuery] Guid id, [FromQuery] string lang)
+        {
+            var result = await _mediator.Send(new GetFullInfoOfferRequest() { Id = id, Lang = lang });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/draft")]
+        public async Task<IActionResult> DraftOffer([FromForm] Guid id)
+        {
+            var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.DRAFT });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/enable")]
+        public async Task<IActionResult> PublishOffer([FromForm] Guid id)
+        {
+            var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.PUBLISHED });
+            return Ok(result);
+        }
     }
 }

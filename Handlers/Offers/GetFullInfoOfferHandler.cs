@@ -46,6 +46,10 @@ namespace InfoPoster_backend.Handlers.Offers
             }
 
             var ml = await _repository.GetOfferMultilang(request.Id, request.Lang);
+            if (ml == null)
+            {
+                ml = new OffersMultilangModel();
+            }
 
             var result = new GetFullInfoOfferResponse()
             {
