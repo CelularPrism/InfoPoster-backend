@@ -23,6 +23,7 @@ namespace InfoPoster_backend.Handlers.Posters
         public DateTime? ReleaseDate { get; set; }
         public DateTime? ReleaseDateEnd { get; set; }
         public Guid? CategoryId { get; set; }
+        public Guid? SubcategoryId { get; set; }
         public string Place { get; set; }
         public Guid? City { get; set; }
         public string TimeStart { get; set; }
@@ -202,6 +203,7 @@ namespace InfoPoster_backend.Handlers.Posters
             poster.ReleaseDateEnd = request.ReleaseDateEnd;
 
             var categories = await _repository.GetCategories();
+            var subcategories = await _repository.GetSubcategories();
 
             if (poster.CategoryId != request.CategoryId)
             {
@@ -212,7 +214,15 @@ namespace InfoPoster_backend.Handlers.Posters
                 poster.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
             }
 
-            
+            if (poster.SubcategoryId != request.SubcategoryId)
+            {
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "SubcategoryId",
+                    subcategories.Where(c => c.Id == poster.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
+                    subcategories.Where(c => c.Id == request.SubcategoryId).Select(c => c.Name).FirstOrDefault(), _user));
+
+                poster.SubcategoryId = request.SubcategoryId == null ? Guid.Empty : (Guid)request.SubcategoryId;
+            }
+
             poster.UpdatedAt = DateTime.UtcNow;
 
             await _repository.AddChangeHistory(changeHistory);

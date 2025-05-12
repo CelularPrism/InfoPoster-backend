@@ -48,7 +48,7 @@ namespace InfoPoster_backend.Handlers.Posters
             {
                 var fullInfo = await _repository.GetFullInfoPoster(request.Id);
 
-                if (poster.CategoryId == Guid.Empty || fullInfo.City == null || fullInfo.City == Guid.Empty || string.IsNullOrEmpty(fullInfo.AgeRestriction) || string.IsNullOrEmpty(fullInfo.TimeStart))
+                if (poster.CategoryId == Guid.Empty || poster.SubcategoryId == Guid.Empty || fullInfo.City == null || fullInfo.City == Guid.Empty || string.IsNullOrEmpty(fullInfo.AgeRestriction) || string.IsNullOrEmpty(fullInfo.TimeStart))
                 {
                     return new ChangePosterStatusResponse()
                     {

@@ -8,6 +8,7 @@ namespace InfoPoster_backend.Handlers.Administration
     {
         public int Sort { get; set; }
         public Guid? CategoryId { get; set; }
+        public Guid? SubcategoryId { get; set; }
         public Guid? CityId { get; set; }
         public int? Status { get; set; }
         public DateTime? StartDate { get; set; }
@@ -35,7 +36,7 @@ namespace InfoPoster_backend.Handlers.Administration
             if (userId == Guid.Empty)
                 return null;
 
-            var posters = await _repository.GetRejectedListNoTracking(_lang, userId, request.CategoryId, request.Status, request.StartDate, request.EndDate, userId, request.CityId);
+            var posters = await _repository.GetRejectedListNoTracking(_lang, userId, request.CategoryId, request.SubcategoryId, request.Status, request.StartDate, request.EndDate, userId, request.CityId);
             var cities = await _repository.GetCities();
             var categories = await _repository.GetCategories();
             var subcategories = await _repository.GetSubcategories();
@@ -77,6 +78,8 @@ namespace InfoPoster_backend.Handlers.Administration
                                          c => c.Id,
                                          (f, c) => c.Name)
                                    .FirstOrDefault(),
+                SubcategoryId = o.SubcategoryId,
+                SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault(),
                 CreatedAt = o.CreatedAt,
                 Status = o.Status,
                 UpdatedAt = o.UpdatedAt,

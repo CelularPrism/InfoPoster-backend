@@ -8,6 +8,7 @@
             Name = multilang.Name;
             Description = multilang.Description.Length < 100 ? multilang.Description : multilang.Description.Substring(0, 100);
             CategoryId = poster.CategoryId != null ? (Guid)poster.CategoryId : Guid.Empty;
+            SubcategoryId = poster.SubcategoryId;
             Place = multilang.Place;
             ReleaseDate = poster.ReleaseDate;
             ReleaseDateEnd = poster.ReleaseDateEnd;
@@ -19,7 +20,9 @@
         public DateTime? ReleaseDate { get; set; }
         public DateTime? ReleaseDateEnd { get; set; }
         public Guid CategoryId { get; set; }
+        public Guid SubcategoryId { get; set; }
         public string CategoryName { get; set; }
+        public string SubcategoryName { get; set; }
         public string Place { get; set; }
         public double Price { get; set; }
         public Guid? FileId { get; set; }

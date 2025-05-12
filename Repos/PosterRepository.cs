@@ -110,7 +110,7 @@ namespace InfoPoster_backend.Repos
                                                        (f, s) => s)
                                                  .FirstOrDefaultAsync();
 
-        public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, List<int> statuses, Guid? categoryId, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, List<int> statuses, Guid? categoryId, Guid? subcategoryId, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
             var isAdmin = await _context.User_To_Roles.AnyAsync(u => u.UserId == adminId && u.RoleId == Constants.ROLE_ADMIN);
             //var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
@@ -119,26 +119,31 @@ namespace InfoPoster_backend.Repos
             //                                        p.Status == (isAdmin ? (int)POSTER_STATUS.REVIEWING : (int)POSTER_STATUS.DELETED));
             var query = _context.Posters.Where(p => statuses.Contains(p.Status));
 
-            query = FilterPosters(query, categoryId, null, startDate, endDate, userId, cityId);
+            query = FilterPosters(query, categoryId, subcategoryId, null, startDate, endDate, userId, cityId);
             var result = await query.ToListAsync();
             return result;
         }
 
-        public async Task<List<PosterModel>> GetRejectedListNoTracking(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        public async Task<List<PosterModel>> GetRejectedListNoTracking(string lang, Guid adminId, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
             var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.REJECTED);
 
-            query = FilterPosters(query, categoryId, null, startDate, endDate, userId, cityId);
+            query = FilterPosters(query, categoryId, subcategoryId, status, startDate, endDate, userId, cityId);
             var result = await query.ToListAsync();
             return result;
         }
 
-        private IQueryable<PosterModel> FilterPosters(IQueryable<PosterModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        private IQueryable<PosterModel> FilterPosters(IQueryable<PosterModel> query, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
 
             if (categoryId != null)
             {
                 query = query.Where(q => q.CategoryId == categoryId);
+            }
+
+            if (subcategoryId != null)
+            {
+                query = query.Where(q => q.SubcategoryId == subcategoryId);
             }
 
             if (status != null)
@@ -185,7 +190,7 @@ namespace InfoPoster_backend.Repos
         public async Task<List<CityModel>> GetCities() =>
             await _context.CitiesMultilang.Where(c => c.Lang == _lang).Select(c => new CityModel() { Id = c.CityId, Name = c.Name }).ToListAsync();
 
-        public async Task<List<AdministrationPostersResponse>> GetListNoTracking(Guid userId, string lang, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate)
+        public async Task<List<AdministrationPostersResponse>> GetListNoTracking(Guid userId, string lang, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate)
         {
             var isAdmin = await _context.User_To_Roles.AnyAsync(u => u.UserId == userId && u.RoleId == Constants.ROLE_ADMIN);
 
@@ -195,6 +200,11 @@ namespace InfoPoster_backend.Repos
                 if (categoryId != null)
                 {
                     query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                if (subcategoryId != null)
+                {
+                    query = query.Where(p => p.SubcategoryId == subcategoryId);
                 }
 
                 if (status != null)
@@ -227,6 +237,7 @@ namespace InfoPoster_backend.Repos
                 var result = list.Select(p => new AdministrationPostersResponse(p.p.p, p.p.m, p.UserName)
                 {
                     CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
+                    SubcategoryName = _context.SubcategoriesMultilang.Where(s => s.SubcategoryId == p.p.p.SubcategoryId && s.lang == "en").Select(s => s.Name).FirstOrDefault(),
                     CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
                     CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault()
                 }).OrderBy(p => p.ReleaseDate)
@@ -240,6 +251,11 @@ namespace InfoPoster_backend.Repos
                 if (categoryId != null)
                 {
                     query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                if (subcategoryId != null)
+                {
+                    query = query.Where(p => p.SubcategoryId == subcategoryId);
                 }
 
                 if (status != null)
@@ -272,6 +288,7 @@ namespace InfoPoster_backend.Repos
                 var result = list.Select(p => new AdministrationPostersResponse(p.p.p, p.p.m, p.UserName)
                 {
                     CategoryName = _context.CategoriesMultilang.Where(c => c.CategoryId == p.p.p.CategoryId && c.lang == "en").Select(c => c.Name).FirstOrDefault(),
+                    SubcategoryName = _context.SubcategoriesMultilang.Where(s => s.SubcategoryId == p.p.p.SubcategoryId && s.lang == "en").Select(s => s.Name).FirstOrDefault(),
                     CityName = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).Join(_context.Cities, f => f, c => c.Id, (f, c) => c.Name).FirstOrDefault(),
                     CityId = _context.PostersFullInfo.Where(f => f.PosterId == p.p.p.Id).Select(f => f.City).FirstOrDefault()
                 }).OrderBy(p => p.ReleaseDate)
@@ -301,6 +318,7 @@ namespace InfoPoster_backend.Repos
             var result = list.Select(p => new PosterResponseModel(p.p.p, p.m)
             {
                 CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                SubcategoryName = categories.Where(c => c.CategoryId == p.p.p.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
                 FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
                                                  _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
                                                  _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
@@ -332,10 +350,12 @@ namespace InfoPoster_backend.Repos
                                   .ToListAsync();
 
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == lang).ToListAsync();
+            var subcategories = await _context.SubcategoriesMultilang.Where(s => s.lang == lang).ToListAsync();
 
             var result = list.Select(p => new PosterResponseModel(p.p.p, p.m)
             {
                 CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                SubcategoryName = subcategories.Where(s => s.SubcategoryId == p.p.p.SubcategoryId).Select(s => s.Name).FirstOrDefault(),
                 FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
                                                          _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
                                                          _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
