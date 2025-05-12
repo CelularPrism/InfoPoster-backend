@@ -178,6 +178,38 @@ namespace InfoPoster_backend.Repos
             return query;
         }
 
+        public async Task<List<PosterResponseModel>> GetPosters(IEnumerable<Guid> posters)
+        {
+            var list = await _context.Posters.Where(p => posters.Contains(p.Id))
+                                  .Join(_context.PostersFullInfo,
+                                        p => p.Id,
+                                        f => f.PosterId,
+                                        (p, f) => new { p, f })
+                                  .Join(_context.PostersMultilang,
+                                        p => p.p.Id,
+                                        m => m.PosterId,
+                                        (p, m) => new { p, m })
+                                  .Where(p => p.m.Lang == _lang)
+                                  .OrderBy(p => p.p.p.ReleaseDate)
+                                  .AsNoTracking()
+                                  .ToListAsync();
+            var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var result = list.Select(p => new PosterResponseModel(p.p.p, p.m)
+            {
+                CategoryName = categories.Where(c => c.CategoryId == p.p.p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                SubcategoryName = categories.Where(c => c.CategoryId == p.p.p.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
+                FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
+                                                 _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
+                                                 _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
+                Price = p.p.f.Price,
+            })
+                             .OrderBy(p => p.ReleaseDate)
+                             .ToList();
+
+            return result;
+        }
+
         public async Task<List<PosterMultilangModel>> GetMultilang(IEnumerable<Guid> posters) =>
             await _context.PostersMultilang.Where(m => m.Lang == _lang && posters.Contains(m.PosterId)).ToListAsync();
 
@@ -298,7 +330,7 @@ namespace InfoPoster_backend.Repos
             }
         }
 
-        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, string lang = "en")
+        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, int? count, string lang = "en")
         {
             var list = await _context.Posters
                                   .Join(_context.PostersFullInfo,
@@ -311,9 +343,15 @@ namespace InfoPoster_backend.Repos
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
                                   .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED)
+                                  .OrderBy(p => p.p.p.ReleaseDate)
                                   .AsNoTracking()
                                   .ToListAsync();
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == lang).ToListAsync();
+
+            if (count != null)
+            {
+                list = list.Take((int)count).ToList();
+            }
 
             var result = list.Select(p => new PosterResponseModel(p.p.p, p.m)
             {
@@ -452,6 +490,28 @@ namespace InfoPoster_backend.Repos
 
         public async Task<RejectedComments> GetLastRejectedComment(Guid posterId) =>
             await _context.RejectedComments.Where(r => r.ApplicationId == posterId).OrderByDescending(r => r.CreatedAt).FirstOrDefaultAsync();
+
+        public async Task<List<PosterViewLogModel>> GetPublishedViewLogs(DateTime startDate, DateTime endDate)
+        {
+            var posters = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED &&
+                                                      (p.ReleaseDate >= startDate || p.ReleaseDateEnd >= startDate) &&
+                                                      (p.ReleaseDate <= endDate || p.ReleaseDateEnd <= endDate))
+                                          .Join(_context.PostersFullInfo,
+                                                p => p.Id,
+                                                f => f.PosterId,
+                                                (p, f) => f)
+                                          .Where(p => p.City == _city)
+                                          .Select(p => p.PosterId).AsEnumerable();
+
+            var result = await _context.PosterViewLogs.Where(l => posters.Contains(l.PosterId)).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<ApplicationChangeHistory>> GetStatusHistory(DateTime startDate, string status)
+        {
+            var history = await _context.ApplicationChangeHistory.Where(h => h.FieldName == "Status" && h.NewValue == status && h.ChangedAt >= startDate).OrderByDescending(h => h.ChangedAt).ToListAsync();
+            return history;
+        }
 
         public async Task AddPoster(PosterModel model, Guid userId)
         {

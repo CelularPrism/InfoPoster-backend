@@ -107,7 +107,7 @@ namespace InfoPoster_backend.Handlers.Administration
                 };
             }
 
-            var posters = await _repository.GetListNoTracking(_lang, userId, request.CategoryId, request.SubcategoryId, request.Status, request.StartDate, request.EndDate, isAdmin ? null : userId, request.CityId);
+            var posters = await _repository.GetListNoTracking(_lang, userId, availableStatuses, request.CategoryId, request.SubcategoryId, request.StartDate, request.EndDate, isAdmin ? null : userId, request.CityId);
 
             var cities = await _repository.GetCities();
             var categories = await _repository.GetCategories();

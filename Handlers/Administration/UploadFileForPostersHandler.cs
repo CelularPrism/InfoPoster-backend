@@ -54,7 +54,7 @@ namespace InfoPoster_backend.Handlers.Administration
                         Id = Guid.NewGuid(),
                         ReleaseDateEnd = element.ReleaseDateEnd,
                         ReleaseDate = element.ReleaseDateStart,
-                        CategoryId = element.CategoryId,
+                        CategoryId = element.CategoryId == null ? Guid.Empty : (Guid)element.CategoryId,
                         CreatedAt = DateTime.UtcNow,
                         Name = element.Name,
                         Status = (int)POSTER_STATUS.DRAFT,

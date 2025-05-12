@@ -28,7 +28,7 @@ namespace InfoPoster_backend.Handlers.Posters
 
         public async Task<List<PosterResponseModel>> Handle(GetPostersRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _repository.GetListNoTracking(request.startDate, request.endDate, _lang);
+            var result = await _repository.GetListNoTracking(request.startDate, request.endDate, null, _lang);
 
             var loggedIn = await _selectelAuth.Login();
             if (loggedIn)

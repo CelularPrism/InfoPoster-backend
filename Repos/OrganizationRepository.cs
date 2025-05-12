@@ -9,6 +9,7 @@ using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace InfoPoster_backend.Repos
 {
@@ -292,6 +293,29 @@ namespace InfoPoster_backend.Repos
             }
         }
 
+        public async Task<List<OrganizationResponseModel>> GetOrganizationList(List<Guid> organizations)
+        {
+            var result = await _organization.Organizations.Where(o => organizations.Contains(o.Id))
+                                                 .Join(_organization.OrganizationsFullInfo,
+                                                       o => o.Id,
+                                                       f => f.OrganizationId,
+                                                       (o, f) => new OrganizationResponseModel()
+                                                       {
+                                                           Id = o.Id,
+                                                           Name = o.Name,
+                                                           CategoryId = o.CategoryId,
+                                                           CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == o.CategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           SubcategoryId = o.SubcategoryId,
+                                                           SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == o.SubcategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           CreatedAt = o.CreatedAt,
+                                                           Status = o.Status,
+                                                           CityId = f.City,
+                                                           CityName = _organization.CitiesMultilang.Where(c => c.CityId == f.City && c.Lang == _lang).Select(c => c.Name).FirstOrDefault()
+                                                       })
+                                                 .OrderByDescending(o => o.CreatedAt).ToListAsync();
+            return result;
+        }
+
         public async Task<OrganizationFullInfoModel> GetOrganizationFullInfo(Guid organizationId) =>
             await _organization.OrganizationsFullInfo.FirstOrDefaultAsync(f => f.OrganizationId == organizationId);
 
@@ -456,6 +480,20 @@ namespace InfoPoster_backend.Repos
         public async Task<RejectedComments> GetLastRejectedComment(Guid organizationId) =>
             await _organization.RejectedComments.Where(r => r.ApplicationId == organizationId).OrderByDescending(r => r.CreatedAt).FirstOrDefaultAsync();
 
+        public async Task<List<PosterViewLogModel>> GetPublishedViewLogs()
+        {
+            var organizations = _organization.Organizations.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED)
+                                          .Join(_organization.OrganizationsFullInfo,
+                                                p => p.Id,
+                                                f => f.OrganizationId,
+                                                (p, f) => f)
+                                          .Where(p => p.City == _city)
+                                          .Select(p => p.OrganizationId).AsEnumerable();
+
+            var result = await _organization.PosterViewLogs.Where(l => organizations.Contains(l.PosterId)).ToListAsync();
+            return result;
+        }
+
         public async Task AddOrganization(OrganizationModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()
@@ -579,6 +617,12 @@ namespace InfoPoster_backend.Repos
         public async Task AddRejectedComment(RejectedComments model)
         {
             await _organization.RejectedComments.AddAsync(model);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddViewLog(PosterViewLogModel model)
+        {
+            await _organization.PosterViewLogs.AddAsync(model);
             await _organization.SaveChangesAsync();
         }
     }

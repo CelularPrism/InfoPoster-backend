@@ -65,5 +65,26 @@ namespace InfoPoster_backend.Controllers
             var result = await _mediator.Send(new GetCitiesRequest());
             return Ok(result);
         }
+
+        [HttpGet("upcoming")]
+        public async Task<IActionResult> GetUpcoming()
+        {
+            var result = await _mediator.Send(new GetUpcomingPostersRequest());
+            return Ok(result);
+        }
+
+        [HttpGet("popular")]
+        public async Task<IActionResult> GetPopular()
+        {
+            var result = await _mediator.Send(new GetPopularPostersRequest());
+            return Ok(result);
+        }
+
+        [HttpGet("recently-added")]
+        public async Task<IActionResult> GetRecentlyAdded()
+        {
+            var result = await _mediator.Send(new GetRecentlyAddedPostersRequest());
+            return Ok(result);
+        }
     }
 }

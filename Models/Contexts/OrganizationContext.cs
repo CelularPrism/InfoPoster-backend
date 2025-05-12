@@ -2,6 +2,7 @@
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Organizations.Menu;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,5 +45,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<ApplicationHistoryModel> ApplicationHistory { get; set; }
         public DbSet<ApplicationChangeHistory> ApplicationChangeHistory { get; set; }
         public DbSet<RejectedComments> RejectedComments { get; set; }
+        public DbSet<PosterViewLogModel> PosterViewLogs { get; set; }
     }
 }

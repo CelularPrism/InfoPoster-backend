@@ -120,6 +120,14 @@ namespace InfoPoster_backend.Handlers.Organizations
                 }
                 result.MenuUrls = result.MenuUrls.OrderByDescending(f => f.IsPrimary).ToList();
             }
+
+            await _repository.AddViewLog(new Models.Posters.PosterViewLogModel()
+            {
+                Date = DateTime.UtcNow,
+                Id = Guid.NewGuid(),
+                PosterId = result.Id
+            });
+
             return result;
         }
     }

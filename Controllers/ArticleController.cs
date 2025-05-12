@@ -61,5 +61,12 @@ namespace InfoPoster_backend.Controllers
                 return BadRequest();
             return Ok(result);
         }
+
+        [HttpGet("get")]
+        public async Task<IActionResult> GetPublishedArticleList()
+        {
+            var result = await _mediator.Send(new GetArticleListRequest() { Page = 0, CountPerPage = 3 });
+            return Ok(result.Data);
+        }
     }
 }

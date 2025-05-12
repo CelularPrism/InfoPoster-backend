@@ -72,5 +72,12 @@ namespace InfoPoster_backend.Controllers
             var result = await _mediator.Send(request);
             return Ok(result);
         }
+
+        [HttpGet("popular")]
+        public async Task<IActionResult> GetPopularOrganizations()
+        {
+            var result = await _mediator.Send(new GetPopularOrganizationsRequest());
+            return Ok(result);
+        }
     }
 }
