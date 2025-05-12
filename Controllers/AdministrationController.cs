@@ -226,6 +226,16 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpPost("poster/upload/file")]
+        public async Task<IActionResult> UploadFileForPosters([FromForm] IFormFile file)
+        {
+            var result = await _mediator.Send(new UploadFileForPostersRequest() { File = file });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
         [HttpGet("menu")]
         public async Task<IActionResult> GetMenuList()
         {

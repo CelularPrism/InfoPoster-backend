@@ -37,7 +37,7 @@ namespace InfoPoster_backend.Handlers.Administration
             Name = multilang.Name;
             ReleaseDate = poster.ReleaseDate;
             ReleaseDateEnd = poster.ReleaseDateEnd;
-            CategoryId = poster.CategoryId;
+            CategoryId = poster.CategoryId != null ? (Guid)poster.CategoryId : Guid.Empty;
             UserId = poster.UserId;
             CreatedBy = userName;
             Status = poster.Status;
@@ -126,7 +126,7 @@ namespace InfoPoster_backend.Handlers.Administration
             var orgList = posters.Select(o => new AllPostersResponse()
             {
                 Id = o.Id,
-                CategoryId = o.CategoryId,
+                CategoryId = o.CategoryId != null ? (Guid)o.CategoryId : Guid.Empty,
                 CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
                 Name = multilang.Where(m => m.PosterId == o.Id).Select(m => m.Name).FirstOrDefault(),
                 CityId = fullInfo.Where(f => f.OrganizationId == o.Id).Select(f => f.City).FirstOrDefault(),

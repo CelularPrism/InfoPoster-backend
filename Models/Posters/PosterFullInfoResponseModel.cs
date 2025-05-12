@@ -12,7 +12,7 @@ namespace InfoPoster_backend.Models.Posters
             Description = multilang.Description;
             ReleaseDate = poster.ReleaseDate;
             ReleaseDateEnd = poster.ReleaseDateEnd;
-            CategoryId = fullInfo.CategoryId;
+            CategoryId = fullInfo.CategoryId != null ? (Guid)fullInfo.CategoryId : Guid.Empty;
             Place = multilang.Place;
             City = fullInfo.City;
             TimeStart = fullInfo.TimeStart;

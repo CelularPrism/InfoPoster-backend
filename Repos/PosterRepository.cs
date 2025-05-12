@@ -313,7 +313,7 @@ namespace InfoPoster_backend.Repos
 
         public async Task<(List<PosterResponseModel>, int)> GetListNoTracking(int limit, int offset, DateTime start, DateTime end, Guid categoryId, string lang = "en")
         {
-            var query = _context.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED && p.ReleaseDate >= start.Date);
+            var query = _context.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= start.Date || p.ReleaseDateEnd <= start.Date));
             var total = query.Count();
 
             query = query.Skip(offset).Take(limit);
@@ -446,6 +446,19 @@ namespace InfoPoster_backend.Repos
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddPoster(List<PosterModel> model, Guid userId)
+        {
+            var history = model.Select(m => new ApplicationHistoryModel()
+            {
+                ApplicationId = m.Id,
+                UserId = userId
+            }).ToList();
+
+            await _context.ApplicationHistory.AddRangeAsync(history);
+            await _context.Posters.AddRangeAsync(model);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task AddContact(List<ContactModel> model, Guid posterId)
         {
             var oldContacts = await _context.Contacts.Where(c => c.ApplicationId == posterId).ToListAsync();
@@ -461,6 +474,12 @@ namespace InfoPoster_backend.Repos
         public async Task AddPosterFullInfo(PosterFullInfoModel model)
         {
             await _context.PostersFullInfo.AddAsync(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddPosterFullInfo(List<PosterFullInfoModel> model)
+        {
+            await _context.PostersFullInfo.AddRangeAsync(model);
             await _context.SaveChangesAsync();
         }
 

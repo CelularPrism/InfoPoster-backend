@@ -7,7 +7,7 @@
             Id = poster.Id;
             Name = multilang.Name;
             Description = multilang.Description.Length < 100 ? multilang.Description : multilang.Description.Substring(0, 100);
-            CategoryId = poster.CategoryId;
+            CategoryId = poster.CategoryId != null ? (Guid)poster.CategoryId : Guid.Empty;
             Place = multilang.Place;
             ReleaseDate = poster.ReleaseDate;
             ReleaseDateEnd = poster.ReleaseDateEnd;

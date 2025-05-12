@@ -32,7 +32,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime CreatedAt { get; set; }
         public string Name { get; set; }
-        public string Desciption { get; set; }
+        public string Description { get; set; }
         public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public Guid SubcategoryId { get; set; }
@@ -88,7 +88,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
                                                  PriceLevel = _repository.GetPriceLevel(o.Id),
-                                                 Desciption = _repository.GetDescription(o.Id),
+                                                 Description = _repository.GetDescription(o.Id),
                                              }).ToList();
             } else if (request.subcategoryId != null)
             {
@@ -106,7 +106,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
                                                  PriceLevel = _repository.GetPriceLevel(o.Id),
-                                                 Desciption = _repository.GetDescription(o.Id),
+                                                 Description = _repository.GetDescription(o.Id),
                                              }).ToList();
             } else if (request.categoryId != null)
             {
@@ -124,7 +124,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                  Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
                                                  PriceLevel = _repository.GetPriceLevel(o.Id),
-                                                 Desciption = _repository.GetDescription(o.Id),
+                                                 Description = _repository.GetDescription(o.Id),
                                              }).ToList();
             } else
             {
@@ -141,7 +141,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                                                 Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                 CreatedAt = o.CreatedAt,
                                                 PriceLevel = _repository.GetPriceLevel(o.Id),
-                                                Desciption = _repository.GetDescription(o.Id),
+                                                Description = _repository.GetDescription(o.Id),
                                          }).ToList();
             }
 
