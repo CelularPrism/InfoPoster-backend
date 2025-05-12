@@ -19,6 +19,7 @@ namespace InfoPoster_backend.Models.Posters
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? ReleaseDateEnd { get; set; }
         public string Name { get; set; }
         public Guid CategoryId { get; set; }
         public Guid SubcategoryId { get; set; }

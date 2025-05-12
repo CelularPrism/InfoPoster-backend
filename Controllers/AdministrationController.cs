@@ -1,7 +1,10 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Offers;
 using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Offers;
+using InfoPoster_backend.Models.Posters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +43,7 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("categories/get")]
         public async Task<IActionResult> GetCategories(CategoryType type)
         {
-            var result = await _mediator.Send(new GetCategoriesRequest() { type = type });
+            var result = await _mediator.Send(new GetCategoriesRequest() { type = type, IsAdmin = true });
             return Ok(result);
         }
 
@@ -54,6 +57,7 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("subcategories/get")]
         public async Task<IActionResult> GetSubcategories([FromQuery] GetSubcategoriesRequest request)
         {
+            request.IsAdmin = true;
             var result = await _mediator.Send(request);
             return Ok(result);
         }
@@ -152,10 +156,24 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpPost("poster/reject")]
+        public async Task<IActionResult> RejectPoster([FromForm] Guid posterId, [FromForm] string comment)
+        {
+            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.REJECTED, Comment = comment });
+            return Ok(result);
+        }
+
         [HttpPost("poster/disable")]
         public async Task<IActionResult> DisablePoster([FromForm] Guid posterId, [FromForm] string comment)
         {
             var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.REJECTED, Comment = comment });
+            return Ok(result);
+        }
+
+        [HttpPost("poster/draft")]
+        public async Task<IActionResult> DraftPoster([FromForm] Guid posterId)
+        {
+            var result = await _mediator.Send(new ChangePosterStatusRequest() { Id = posterId, Status = Models.Posters.POSTER_STATUS.DRAFT });
             return Ok(result);
         }
 
@@ -280,7 +298,7 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
+            var result = await _mediator.Send(new GetRejectedOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
             return Ok(result);
         }
 
@@ -317,8 +335,22 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [HttpPost("organization/disable")]
+        [HttpPost("organization/draft")]
+        public async Task<IActionResult> DraftOrganization([FromForm] Guid organizationId)
+        {
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.DRAFT });
+            return Ok(result);
+        }
+
+        [HttpPost("organization/reject")]
         public async Task<IActionResult> DisableOrganization([FromForm] Guid organizationId, [FromForm] string comment)
+        {
+            var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.REJECTED, Comment = comment });
+            return Ok(result);
+        }
+
+        [HttpPost("organization/disable")]
+        public async Task<IActionResult> RejectOrganization([FromForm] Guid organizationId, [FromForm] string comment)
         {
             var result = await _mediator.Send(new ChangeOrganizationStatusRequest() { Id = organizationId, Status = Models.Posters.POSTER_STATUS.REJECTED, Comment = comment });
             return Ok(result);
@@ -401,6 +433,91 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> DeleteFile([FromQuery] Guid fileId, Guid applicationId)
         {
             var result = await _mediator.Send(new DeleteFileRequest() { FileId = fileId, ApplicationId = applicationId });
+            return Ok(result);
+        }
+
+        [HttpGet("offer/all")]
+        public async Task<IActionResult> GetAllOffers(
+            [FromQuery] int sort,
+            [FromQuery] OFFER_TYPES? type,
+            [FromQuery] Guid? cityId,
+            [FromQuery] POSTER_STATUS? status,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] Guid? editorId,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
+        {
+            var result = await _mediator.Send(new GetAllOffersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
+            return Ok(result);
+        }
+
+        [HttpGet("offer/available")]
+        public async Task<IActionResult> GetAvailableOffers(
+            [FromQuery] int sort,
+            [FromQuery] OFFER_TYPES? type,
+            [FromQuery] Guid? cityId,
+            [FromQuery] POSTER_STATUS? status,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] Guid? editorId,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
+        {
+            var result = await _mediator.Send(new GetAvailableOffersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
+            return Ok(result);
+        }
+
+        [HttpGet("offer/rejected")]
+        public async Task<IActionResult> GetRejectedOffers(
+            [FromQuery] int sort,
+            [FromQuery] OFFER_TYPES? type,
+            [FromQuery] Guid? cityId,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] Guid? editorId,
+            [FromQuery] int page = 0,
+            [FromQuery] int countPerPage = 10)
+        {
+            var result = await _mediator.Send(new GetRejectedOffersRequest() { StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/create")]
+        public async Task<IActionResult> CreateOffer([FromForm] CreateOfferRequest request)
+        {
+            var result = await _mediator.Send(request);
+            return Ok(result);
+        }
+
+        [HttpPost("offer/full-info/save")]
+        public async Task<IActionResult> SaveFullInfoOffer([FromForm] SaveFullInfoOfferRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+                return BadRequest();
+
+            return Ok(result);
+        }
+
+        [HttpGet("offer/full-info")]
+        public async Task<IActionResult> GetFullInfoOffer([FromQuery] Guid id, [FromQuery] string lang)
+        {
+            var result = await _mediator.Send(new GetFullInfoOfferRequest() { Id = id, Lang = lang });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/draft")]
+        public async Task<IActionResult> DraftOffer([FromForm] Guid id)
+        {
+            var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.DRAFT });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/enable")]
+        public async Task<IActionResult> PublishOffer([FromForm] Guid id)
+        {
+            var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.PUBLISHED });
             return Ok(result);
         }
     }

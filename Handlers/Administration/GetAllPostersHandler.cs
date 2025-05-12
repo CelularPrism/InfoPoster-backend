@@ -37,6 +37,7 @@ namespace InfoPoster_backend.Handlers.Administration
             Id = poster.Id;
             Name = multilang.Name;
             ReleaseDate = poster.ReleaseDate;
+            ReleaseDateEnd = poster.ReleaseDateEnd;
             CategoryId = poster.CategoryId;
             UserId = poster.UserId;
             CreatedBy = userName;
@@ -48,6 +49,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Name { get; set; }
         [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? ReleaseDateEnd { get; set; }
         public Guid CategoryId { get; set; }
         public Guid SubcategoryId { get; set; }
         public Guid UserId { get; set; }
@@ -76,7 +78,24 @@ namespace InfoPoster_backend.Handlers.Administration
 
         public async Task<GetAllPostersResponse> Handle(GetAllPostersRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetListNoTracking(_lang, _user, request.CategoryId, request.SubcategoryId, request.Status, request.StartDate, request.EndDate, request.UserId, request.CityId);
+            var availableStatuses = new List<int>()
+            {
+                (int)POSTER_STATUS.PENDING,
+                (int)POSTER_STATUS.PUBLISHED,
+                (int)POSTER_STATUS.DRAFT,
+                (int)POSTER_STATUS.REJECTED,
+                (int)POSTER_STATUS.REVIEWING
+            };
+
+            if (request.Status != null)
+            {
+                availableStatuses = new List<int>()
+                {
+                    (int)request.Status
+                };
+            }
+
+            var posters = await _repository.GetListNoTracking(_lang, _user, availableStatuses, request.CategoryId, request.SubcategoryId, request.StartDate, request.EndDate, request.UserId, request.CityId);
             var cities = await _repository.GetCities();
             var categories = await _repository.GetCategories();
             var subcategories = await _repository.GetSubcategories();
@@ -127,7 +146,8 @@ namespace InfoPoster_backend.Handlers.Administration
                 UserId = o.UserId,
                 Status = o.Status,
                 UpdatedAt = o.UpdatedAt,
-                ReleaseDate = o.ReleaseDate
+                ReleaseDate = o.ReleaseDate,
+                ReleaseDateEnd = o.ReleaseDateEnd
             }).ToList();
 
             if (request.Sort == 0)

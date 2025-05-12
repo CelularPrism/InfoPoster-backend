@@ -1,5 +1,7 @@
-﻿using InfoPoster_backend.Repos;
+﻿using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -42,20 +44,46 @@ namespace InfoPoster_backend.Handlers.Organizations
     public class GetOrganizationListHandler : IRequestHandler<GetOrganizationListRequest, GetOrganizationListResponse>
     {
         private readonly OrganizationRepository _repository;
+        private readonly AccountRepository _accountRepository;
         private readonly LoginService _loginService;
         private readonly string _lang;
 
-        public GetOrganizationListHandler(OrganizationRepository repository, LoginService loginService, IHttpContextAccessor accessor)
+        public GetOrganizationListHandler(OrganizationRepository repository, LoginService loginService, AccountRepository accountRepository, IHttpContextAccessor accessor)
         {
             _repository = repository;
             _loginService = loginService;
+            _accountRepository = accountRepository;
             _lang = accessor.HttpContext.Items["ClientLang"].ToString().ToLower();
         }
 
         public async Task<GetOrganizationListResponse> Handle(GetOrganizationListRequest request, CancellationToken cancellationToken = default)
         {
             var userId = _loginService.GetUserId();
-            var organizations = await _repository.GetOrganizationList(_lang, userId, request.CategoryId, request.Status, request.StartDate, request.EndDate, userId, request.CityId);
+            var roles = await _accountRepository.GetUserRoles(userId);
+            var isAdmin = roles.Any(u => u == Constants.ROLE_ADMIN);
+            var availableStatuses = new List<int>()
+            {
+                (int)POSTER_STATUS.PENDING,
+                (int)POSTER_STATUS.PENDING,
+                (int)POSTER_STATUS.PUBLISHED,
+                (int)POSTER_STATUS.DRAFT,
+                (int)POSTER_STATUS.REVIEWING
+            };
+
+            if (!isAdmin)
+            {
+                availableStatuses.Add((int)POSTER_STATUS.DELETED);
+            }
+
+            if (request.Status != null)
+            {
+                availableStatuses = new List<int>()
+                {
+                    (int)request.Status
+                };
+            }
+
+            var organizations = await _repository.GetOrganizationList(_lang, userId, availableStatuses, request.CategoryId, request.StartDate, request.EndDate, isAdmin ? null : userId, request.CityId);
             var cities = await _repository.GetCities(_lang);
             var categories = await _repository.GetCategories();
             var subcategories = await _repository.GetSubcategories();

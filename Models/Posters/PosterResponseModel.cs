@@ -10,13 +10,15 @@
             CategoryId = poster.CategoryId;
             SubcategoryId = poster.SubcategoryId;
             Place = multilang.Place;
-
+            ReleaseDate = poster.ReleaseDate;
+            ReleaseDateEnd = poster.ReleaseDateEnd;
         }
 
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public DateTime ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
+        public DateTime? ReleaseDateEnd { get; set; }
         public Guid CategoryId { get; set; }
         public Guid SubcategoryId { get; set; }
         public string CategoryName { get; set; }

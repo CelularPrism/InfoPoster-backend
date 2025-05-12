@@ -37,7 +37,17 @@ namespace InfoPoster_backend.Repos
             await _context.Posters.Where(p => p.Status == status).CountAsync();
 
         public async Task<List<CategoryModel>> GetCategories() =>
-            await _context.Categories.ToListAsync();
+            await _context.CategoriesMultilang.Where(c => c.lang == _lang)
+                                              .Join(_context.Categories,
+                                                    c => c.CategoryId,
+                                                    category => category.Id,
+                                                    (c, cat) => new CategoryModel()
+                                                    {
+                                                        Id = cat.Id,
+                                                        ImageSrc = cat.ImageSrc,
+                                                        Name = c.Name,
+                                                        Type = cat.Type
+                                                    }).ToListAsync();
 
         public async Task<List<SubcategoryModel>> GetSubcategories() => await _context.Subcategories.Join(_context.SubcategoriesMultilang,
                                                                                                       c => c.Id,
@@ -72,6 +82,26 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PlaceModel>> GetPlaces(Guid organizationId) =>
             await _context.Places.Where(p => p.ApplicationId == organizationId && p.Lang == _lang).ToListAsync();
 
+        public async Task<List<PosterModel>> SearchPosters(string searchText) => await _context.PostersMultilang.Where(p => p.Name.Contains(searchText) && p.Lang == _lang)
+                                                                                                                .Join(_context.Posters,
+                                                                                                                      ml => ml.PosterId,
+                                                                                                                      p => p.Id,
+                                                                                                                      (ml, p) => new PosterModel()
+                                                                                                                      {
+                                                                                                                          Id = ml.PosterId,
+                                                                                                                          CategoryId = p.CategoryId,
+                                                                                                                          CreatedAt = p.CreatedAt,
+                                                                                                                          Name = p.Name,
+                                                                                                                          ReleaseDate = p.ReleaseDate,
+                                                                                                                          ReleaseDateEnd = p.ReleaseDateEnd,
+                                                                                                                          Status = p.Status,
+                                                                                                                          UpdatedAt = p.UpdatedAt,
+                                                                                                                          UserId = p.UserId
+                                                                                                                      })
+                                                                                                                .OrderByDescending(p => p.ReleaseDate)
+                                                                                                                .Take(5)
+                                                                                                                .AsNoTracking().ToListAsync();
+
         public async Task<SelectelFileURLModel> GetSelectelFile(Guid organizationId) =>
             await _context.FileToApplication.Where(f => f.ApplicationId == organizationId)
                                                  .Join(_context.SelectelFileURLs,
@@ -80,15 +110,16 @@ namespace InfoPoster_backend.Repos
                                                        (f, s) => s)
                                                  .FirstOrDefaultAsync();
 
-        public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        public async Task<List<PosterModel>> GetListNoTracking(string lang, Guid adminId, List<int> statuses, Guid? categoryId, Guid? subcategoryId, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
             var isAdmin = await _context.User_To_Roles.AnyAsync(u => u.UserId == adminId && u.RoleId == Constants.ROLE_ADMIN);
-            var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
-                                                    p.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                    p.Status == (int)POSTER_STATUS.DRAFT ||
-                                                    (isAdmin ? p.Status == (int)POSTER_STATUS.REVIEWING : true));
+            //var query = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PENDING ||
+            //                                        p.Status == (int)POSTER_STATUS.PUBLISHED ||
+            //                                        p.Status == (int)POSTER_STATUS.DRAFT ||
+            //                                        p.Status == (isAdmin ? (int)POSTER_STATUS.REVIEWING : (int)POSTER_STATUS.DELETED));
+            var query = _context.Posters.Where(p => statuses.Contains(p.Status));
 
-            query = FilterPosters(query, categoryId, subcategoryId, status, startDate, endDate, userId, cityId);
+            query = FilterPosters(query, categoryId, subcategoryId, null, startDate, endDate, userId, cityId);
             var result = await query.ToListAsync();
             return result;
         }
@@ -298,10 +329,14 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<PosterResponseModel>> GetListNoTracking(DateTime start, DateTime end, Guid categoryId, string lang = "en")
+        public async Task<(List<PosterResponseModel>, int)> GetListNoTracking(int limit, int offset, DateTime start, DateTime end, Guid categoryId, string lang = "en")
         {
-            var list = await _context.Posters.Where(p => p.CategoryId == categoryId)
-                                  .Join(_context.PostersFullInfo,
+            var query = _context.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED && p.ReleaseDate >= start.Date);
+            var total = query.Count();
+
+            query = query.Skip(offset).Take(limit);
+
+            var list = await query.Join(_context.PostersFullInfo,
                                         p => p.Id,
                                         f => f.PosterId,
                                         (p, f) => new { p, f })
@@ -310,7 +345,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED)
+                                  .Where(p => p.m.Lang == lang)
                                   .AsNoTracking()
                                   .ToListAsync();
 
@@ -326,9 +361,9 @@ namespace InfoPoster_backend.Repos
                                                          _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
                 Price = p.p.f.Price,
             })
-                             .OrderBy(p => p.ReleaseDate)
-                             .ToList();
-            return result;
+            .OrderBy(p => p.ReleaseDate)
+            .ToList();
+            return (result, total);
         }
 
         public async Task<List<PosterResponseModel>> GetListBySubcategoryNoTracking(DateTime start, DateTime end, Guid subcategoryId, string lang = "en")

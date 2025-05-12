@@ -1,3 +1,4 @@
+using InfoPoster_backend.Extensions;
 using InfoPoster_backend.Middlewares;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Repos;
@@ -7,6 +8,7 @@ using InfoPoster_backend.Services.Selectel_API;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MySqlConnector;
 using System.Security.Cryptography;
 
 namespace InfoPoster_backend
@@ -15,6 +17,7 @@ namespace InfoPoster_backend
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
             var connection = builder.Configuration["ConnectionStrings:DefaultConnection"];
             builder.Services.AddScoped<IJWTService, JWTService>();
@@ -25,6 +28,8 @@ namespace InfoPoster_backend
             builder.Services.AddDbContext<PostersContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
             builder.Services.AddDbContext<AccountContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
             builder.Services.AddDbContext<OrganizationContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
+            builder.Services.AddDbContext<OfferContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
+            builder.Services.AddDbContext<ArticleContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
 
             builder.Services.AddScoped<CategoryRepository>();
             builder.Services.AddScoped<AccountRepository>();
@@ -32,6 +37,8 @@ namespace InfoPoster_backend
             builder.Services.AddScoped<OrganizationRepository>();
             builder.Services.AddScoped<FileRepository>();
             builder.Services.AddScoped<StatisticRepository>();
+            builder.Services.AddScoped<OfferRepository>();
+            builder.Services.AddScoped<ArticleRepository>();
 
             builder.Services.AddSpaStaticFiles(configuration =>
             {
@@ -93,6 +100,7 @@ namespace InfoPoster_backend
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.ConfigureExceptionHandler();
             app.UseHttpsRedirection();
 
             app.Use((context, next) =>
@@ -117,18 +125,12 @@ namespace InfoPoster_backend
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "wwwroot";
-
-                //if (app.Environment.IsDevelopment())
-                //{
-                //    spa.UseAngularCliServer(npmScript: "start");
-                //}
             });
 
             app.UseAuthorization();
             app.UseMiddleware<DefaultLangMiddleware>();
 
             app.MapControllers();
-            //app.MapGet("/", () => "Hello world");
 
             app.Run();
         }

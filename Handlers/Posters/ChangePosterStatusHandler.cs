@@ -58,7 +58,7 @@ namespace InfoPoster_backend.Handlers.Posters
                     };
                 }
 
-                if (poster.ReleaseDate < DateTime.UtcNow.Date)
+                if (poster.ReleaseDate < DateTime.UtcNow.Date || poster.ReleaseDateEnd < poster.ReleaseDate)
                 {
                     return new ChangePosterStatusResponse()
                     {

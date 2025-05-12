@@ -23,6 +23,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Description { get; set; }
         [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? ReleaseDateEnd { get; set; }
         public Guid CategoryId { get; set; }
         public string Place { get; set; }
         public Guid? City { get; set; }
@@ -112,6 +113,7 @@ namespace InfoPoster_backend.Handlers.Administration
             var files = await _repository.GetFileUrls(request.Id);
 
             result.ReleaseDate = poster.ReleaseDate;
+            result.ReleaseDateEnd = poster.ReleaseDateEnd;
             //result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
             result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
             result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();

@@ -38,6 +38,15 @@ namespace InfoPoster_backend.Repos
 
         public async Task<bool> CheckAdmin(Guid userId) => await _organization.User_To_Roles.AnyAsync(us => us.UserId == userId && us.RoleId == Constants.ROLE_ADMIN);
 
+        public async Task<List<OrganizationMultilangModel>> SearchOrganizations(string searchText) => await _organization.OrganizationsMultilang.Where(p => p.Name.Contains(searchText) && p.Lang == _lang).Take(5).AsNoTracking().ToListAsync();
+
+        public async Task<int> GetCountByCity(Guid city) => await _organization.OrganizationsFullInfo.Where(f => f.City == city)
+                                                                                                     .Join(_organization.Organizations,
+                                                                                                           f => f.OrganizationId,
+                                                                                                           org => org.Id,
+                                                                                                           (f, org) => org)
+                                                                                                     .Where(org => org.Status == (int)POSTER_STATUS.PUBLISHED).CountAsync();
+
         public async Task<List<CategoryModel>> GetCategories() => await _organization.Categories.Join(_organization.CategoriesMultilang,
                                                                                                       c => c.Id,
                                                                                                       m => m.CategoryId,
@@ -51,7 +60,7 @@ namespace InfoPoster_backend.Repos
                                                                                                     Type = c.Category.Type,
                                                                                                 }).ToListAsync();
 
-        public async Task<CategoryModel> GetCategory(Guid categoryId) => await _organization.Categories.Join(_organization.CategoriesMultilang,
+        public async Task<CategoryModel> GetCategory(Guid? categoryId) => await _organization.Categories.Join(_organization.CategoriesMultilang,
                                                                                                       c => c.Id,
                                                                                                       m => m.CategoryId,
                                                                                                       (c, m) => new { Category = c, Multilang = m })
@@ -76,7 +85,7 @@ namespace InfoPoster_backend.Repos
                                                                                                     ImageSrc = c.Subcategory.ImageSrc
                                                                                                 }).ToListAsync();
 
-        public async Task<SubcategoryModel> GetSubcategory(Guid subcategoryId) => await _organization.Subcategories.Join(_organization.SubcategoriesMultilang,
+        public async Task<SubcategoryModel> GetSubcategory(Guid? subcategoryId) => await _organization.Subcategories.Join(_organization.SubcategoriesMultilang,
                                                                                                       c => c.Id,
                                                                                                       m => m.SubcategoryId,
                                                                                                       (c, m) => new { Subcategory = c, Multilang = m })
@@ -111,15 +120,16 @@ namespace InfoPoster_backend.Repos
                                                                      UserId = o.Organization.UserId
                                                                  }).ToListAsync();
 
-        public async Task<List<OrganizationModel>> GetOrganizationList(string lang, Guid adminId, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        public async Task<List<OrganizationModel>> GetOrganizationList(string lang, Guid adminId, List<int> statuses, Guid? categoryId, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
-            var isAdmin = await _organization.User_To_Roles.AnyAsync(u => u.UserId == adminId && u.RoleId == Constants.ROLE_ADMIN);
-            var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||
-                                                               o.Status == (int)POSTER_STATUS.PUBLISHED ||
-                                                               o.Status == (int)POSTER_STATUS.DRAFT ||
-                                                               (isAdmin ? o.Status == (int)POSTER_STATUS.REVIEWING : true));
+            //var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||
+            //                                                   o.Status == (int)POSTER_STATUS.PUBLISHED ||
+            //                                                   o.Status == (int)POSTER_STATUS.DRAFT ||
+            //                                                   o.Status == (isAdmin ? (int)POSTER_STATUS.REVIEWING : (int)POSTER_STATUS.DELETED));
 
-            query = FilterOrganization(query, categoryId, status, startDate, endDate, userId, cityId);
+            var query = _organization.Organizations.Where(o => statuses.Contains(o.Status));
+
+            query = FilterOrganization(query, categoryId, null, startDate, endDate, userId, cityId);
 
             var result = await query.ToListAsync();
             return result;
@@ -300,6 +310,9 @@ namespace InfoPoster_backend.Repos
         public async Task<List<CityModel>> GetCities(string lang) =>
             await _organization.CitiesMultilang.Where(c => c.Lang == lang).Select(c => new CityModel() { Id = c.CityId, Name = c.Name }).ToListAsync();
 
+        public async Task<string> GetCityName(Guid city) =>
+            await _organization.CitiesMultilang.Where(c => c.Lang == _lang && c.CityId == city).Select(c => c.Name).FirstOrDefaultAsync();
+
         public async Task<SelectelFileURLModel> GetSelectelFile(Guid organizationId) =>
             await _organization.FileToApplication.Where(f => f.ApplicationId == organizationId)
                                                  .Join(_organization.SelectelFileURLs,
@@ -416,8 +429,8 @@ namespace InfoPoster_backend.Repos
                                                      .Join(_organization.OrganizationsMultilang,
                                                             f => f.OrganizationId,
                                                             ml => ml.OrganizationId,
-                                                            (f, ml) => new { f.OrganizationId, ml.Name })
-                                                     .Where(f => f.Name.Contains(searchText) || f.OrganizationId.ToString() == searchText)
+                                                            (f, ml) => new { f.OrganizationId, ml.Name, ml.Lang })
+                                                     .Where(f => (f.Name.Contains(searchText) || f.OrganizationId.ToString() == searchText) && f.Lang == _lang)
                                                      .Join(_organization.Organizations,
                                                             ml => ml.OrganizationId,
                                                             org => org.Id,

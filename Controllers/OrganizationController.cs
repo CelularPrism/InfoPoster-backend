@@ -24,6 +24,20 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("count")]
+        public async Task<IActionResult> GetOrganizationsCount()
+        {
+            var result = await _mediator.Send(new GetOrganizationsCountRequest());
+            return Ok(result);
+        }
+
+        [HttpGet("actual")]
+        public async Task<IActionResult> GetActualOrganizations()
+        {
+            var result = await _mediator.Send(new GetOrganizationsRequest() { startDate = DateTime.MinValue, endDate = DateTime.MaxValue, Limit = 10, Offset = 0 });
+            return Ok(result);
+        }
+
         [HttpGet("by-category")]
         public async Task<IActionResult> GetOrganizationsByCategory([FromQuery] GetOrganizationsRequest request)
         {

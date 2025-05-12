@@ -7,6 +7,7 @@ namespace InfoPoster_backend.Handlers.Posters
     public class GetCategoriesRequest : IRequest<List<CategoryResponseModel>>
     {
         public CategoryType type { get; set; }
+        public bool IsAdmin { get; set; } = false;
     }
 
     public class GetCategoriesHandler : IRequestHandler<GetCategoriesRequest, List<CategoryResponseModel>>
@@ -21,6 +22,6 @@ namespace InfoPoster_backend.Handlers.Posters
         }
 
         public async Task<List<CategoryResponseModel>> Handle(GetCategoriesRequest request, CancellationToken cancellationToken = default) =>
-            await _repository.GetCategoriesNoTracking((int)request.type, _lang);
+            await _repository.GetCategoriesNoTracking(request.type, _lang, request.IsAdmin);
     }
 }

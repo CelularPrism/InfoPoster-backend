@@ -7,6 +7,7 @@ namespace InfoPoster_backend.Handlers.Posters
     public class GetSubcategoriesRequest : IRequest<SubcategoryResponseModel>
     {
         public Guid categoryId { get; set; }
+        public bool IsAdmin { get; set; } = false;
     }
 
     public class GetSubcategoriesHandler : IRequestHandler<GetSubcategoriesRequest, SubcategoryResponseModel>
@@ -21,6 +22,6 @@ namespace InfoPoster_backend.Handlers.Posters
         }
 
         public async Task<SubcategoryResponseModel> Handle(GetSubcategoriesRequest request, CancellationToken cancellationToken = default) =>
-            await _repository.GetSubcategoriesNoTracking(request.categoryId, _lang);
+            await _repository.GetSubcategoriesNoTracking(request.categoryId, _lang, request.IsAdmin);
     }
 }

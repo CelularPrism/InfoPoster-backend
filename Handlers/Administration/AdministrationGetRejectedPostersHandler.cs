@@ -83,7 +83,8 @@ namespace InfoPoster_backend.Handlers.Administration
                 CreatedAt = o.CreatedAt,
                 Status = o.Status,
                 UpdatedAt = o.UpdatedAt,
-                ReleaseDate = o.ReleaseDate
+                ReleaseDate = o.ReleaseDate,
+                ReleaseDateEnd = o.ReleaseDateEnd
             }).ToList();
 
             if (request.Sort == 0)
