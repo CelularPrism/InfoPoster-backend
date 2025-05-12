@@ -99,6 +99,7 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetAllPosters(
             [FromQuery] int sort, 
             [FromQuery] Guid? categoryId, 
+            [FromQuery] Guid? subcategoryId, 
             [FromQuery] Guid? cityId, 
             [FromQuery] int? status, 
             [FromQuery] DateTime? startDate, 
@@ -107,7 +108,7 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetAllPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
+            var result = await _mediator.Send(new GetAllPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, SubcategoryId = subcategoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
             return Ok(result);
         }
 
