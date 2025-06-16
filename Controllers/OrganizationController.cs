@@ -79,5 +79,12 @@ namespace InfoPoster_backend.Controllers
             var result = await _mediator.Send(new GetPopularOrganizationsRequest());
             return Ok(result);
         }
+
+        [HttpGet("popular/by-subcategory")]
+        public async Task<IActionResult> GetPopularBySubcategory([FromQuery] Guid subcategoryId)
+        {
+            var response = await _mediator.Send(new GetOrganizationsRequest() { subcategoryId = subcategoryId });
+            return Ok(response.data);
+        }
     }
 }

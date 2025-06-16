@@ -38,20 +38,6 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("categories")]
-        //public async Task<IActionResult> GetCategories(CategoryType type)
-        //{
-        //    var result = await _mediator.Send(new GetCategoriesRequest() { type = type });
-        //    return Ok(result);
-        //}
-
-        //[HttpGet("subcategories")]
-        //public async Task<IActionResult> GetSubcategories([FromQuery] GetSubcategoriesRequest request)
-        //{
-        //    var result = await _mediator.Send(request);
-        //    return Ok(result);
-        //}
-
         [HttpGet("full-info")]
         public async Task<IActionResult> GetFullInfoPoster([FromQuery] GetFullInfoPosterRequest request)
         {
@@ -78,6 +64,13 @@ namespace InfoPoster_backend.Controllers
         {
             var result = await _mediator.Send(new GetPopularPostersRequest());
             return Ok(result);
+        }
+
+        [HttpGet("popular/by-subcategory")]
+        public async Task<IActionResult> GetPopularBySubcategory([FromQuery] Guid subcategoryId)
+        {
+            var response = await _mediator.Send(new GetPostersBySubcategoryRequest() { Limit = 9, Offset = 0, startDate = DateTime.UtcNow, endDate = DateTime.UtcNow.AddYears(1), subcategoryId = subcategoryId });
+            return Ok(response.data);
         }
 
         [HttpGet("recently-added")]

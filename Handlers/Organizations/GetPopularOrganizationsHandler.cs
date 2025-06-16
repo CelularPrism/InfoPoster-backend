@@ -5,7 +5,10 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
 {
-    public class GetPopularOrganizationsRequest : IRequest<List<OrganizationResponseModel>> { }
+    public class GetPopularOrganizationsRequest : IRequest<List<OrganizationResponseModel>>
+    {
+        public Guid? SubcategoryId { get; set; } = null;
+    }
 
     public class GetPopularOrganizationsHandler : IRequestHandler<GetPopularOrganizationsRequest, List<OrganizationResponseModel>>
     {
@@ -20,7 +23,15 @@ namespace InfoPoster_backend.Handlers.Organizations
 
         public async Task<List<OrganizationResponseModel>> Handle(GetPopularOrganizationsRequest request, CancellationToken cancellationToken = default)
         {
-            var logs = await _repository.GetPublishedViewLogs();
+            var logs = new List<PosterViewLogModel>();
+            if (request.SubcategoryId != null && request.SubcategoryId != Guid.Empty)
+            {
+                logs = await _repository.GetPublishedViewLogsBySubcategories((Guid)request.SubcategoryId);
+            } else
+            {
+                logs = await _repository.GetPublishedViewLogs();
+            }
+            
             var list = logs.GroupBy(l => l.PosterId).Select(l => new { Organization = l.Key, Count = l.Count() }).OrderByDescending(l => l.Count).Take(9).Select(l => l.Organization).ToList();
             var result = await _repository.GetOrganizationList(list);
 

@@ -494,6 +494,20 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
+        public async Task<List<PosterViewLogModel>> GetPublishedViewLogsBySubcategories(Guid subcategoryId)
+        {
+            var organizations = _organization.Organizations.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && p.SubcategoryId == subcategoryId)
+                                          .Join(_organization.OrganizationsFullInfo,
+                                                p => p.Id,
+                                                f => f.OrganizationId,
+                                                (p, f) => f)
+                                          .Where(p => p.City == _city)
+                                          .Select(p => p.OrganizationId).AsEnumerable();
+
+            var result = await _organization.PosterViewLogs.Where(l => organizations.Contains(l.PosterId)).ToListAsync();
+            return result;
+        }
+
         public async Task AddOrganization(OrganizationModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()

@@ -43,11 +43,11 @@ namespace InfoPoster_backend.Repos
             {
                 if (type == CategoryType.EVENT)
                 {
-                    categories = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && p.CategoryId != null).GroupBy(p => p.CategoryId).Select(p => (Guid)p.Key).ToListAsync();
+                    categories = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= DateTime.UtcNow || p.ReleaseDateEnd > DateTime.UtcNow)).GroupBy(p => p.CategoryId).Select(p => (Guid)p.Key).ToListAsync();
                 }
                 else
                 {
-                    categories = await _organizations.Organizations.Where(o => !isAdmin ? o.Status == (int)POSTER_STATUS.PUBLISHED : true).GroupBy(p => p.CategoryId).Select(p => p.Key).ToListAsync();
+                    categories = await _organizations.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(p => p.CategoryId).Select(p => p.Key).ToListAsync();
                 }
             }
                                     
@@ -67,25 +67,29 @@ namespace InfoPoster_backend.Repos
 
         public async Task<SubcategoryResponseModel> GetSubcategoriesNoTracking(Guid categoryId, string lang = "en", bool isAdmin = false)
         {
-            var availableSubcategories = new List<Guid>(); 
+            var o = new { Id = Guid.NewGuid(), Count = 1 };
+            var availableSubcategories = new[] { o }.ToList();
             if (isAdmin)
             {
-                availableSubcategories = await _posters.Subcategories.Where(c => c.CategoryId == categoryId).GroupBy(o => o.Id).Select(o => o.Key).ToListAsync();
+                availableSubcategories = await _posters.Subcategories.Where(c => c.CategoryId == categoryId).GroupBy(o => o.Id).Select(o => new { Id = o.Key, Count = o.Count() }).ToListAsync();
             } else
             {
-                availableSubcategories = await _posters.Organizations.Where(c => c.CategoryId == categoryId && c.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(o => o.SubcategoryId).Select(o => o.Key).ToListAsync();
+                availableSubcategories  = await _posters.Organizations.Where(c => c.CategoryId == categoryId && c.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(o => o.SubcategoryId).Select(o => new { Id = o.Key, Count = o.Count() }).ToListAsync();
+                var posterSubcategories = await _posters.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(p => p.SubcategoryId).Select(p => new { Id = p.Key, Count = p.Count() }).ToListAsync();
+
+                availableSubcategories.AddRange(posterSubcategories);
             }
 
             var subcategories = availableSubcategories.Join(_posters.Subcategories,
-                                                            o => o,
+                                                            o => o.Id,
                                                             s => s.Id,
-                                                            (o, s) => s)
+                                                            (o, s) => (o, s))
                                                       .Join(_posters.SubcategoriesMultilang,
-                                                            c => c.Id,
+                                                            c => c.s.Id,
                                                             ml => ml.SubcategoryId,
                                                             (c, ml) => new { c, ml })
                                                       .Where(ml => ml.ml.lang == lang)
-                                                      .Select(ml => new SubcategoryModel() { Id = ml.c.Id, Name = ml.ml.Name, CategoryId = ml.c.Id, ImageSrc = ml.c.ImageSrc })
+                                                      .Select(ml => new SubcategoryPopularModel() { Id = ml.c.s.Id, Name = ml.ml.Name, CategoryId = ml.c.s.Id, ImageSrc = ml.c.s.ImageSrc, CountApplications = ml.c.o.Count })
                                                       .OrderByDescending(c => c.Name)
                                                       .ToList();
 

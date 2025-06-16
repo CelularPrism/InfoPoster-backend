@@ -369,7 +369,7 @@ namespace InfoPoster_backend.Repos
 
         public async Task<(List<PosterResponseModel>, int)> GetListNoTracking(int limit, int offset, DateTime start, DateTime end, Guid categoryId, string lang = "en")
         {
-            var query = _context.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= start.Date || p.ReleaseDateEnd <= start.Date));
+            var query = _context.Posters.Where(p => (p.CategoryId == categoryId || p.SubcategoryId == categoryId) && p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= start.Date || p.ReleaseDateEnd <= start.Date));
             var total = query.Count();
 
             query = query.Skip(offset).Take(limit);
@@ -494,6 +494,23 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PosterViewLogModel>> GetPublishedViewLogs(DateTime startDate, DateTime endDate)
         {
             var posters = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED &&
+                                                      (p.ReleaseDate >= startDate || p.ReleaseDateEnd >= startDate) &&
+                                                      (p.ReleaseDate <= endDate || p.ReleaseDateEnd <= endDate))
+                                          .Join(_context.PostersFullInfo,
+                                                p => p.Id,
+                                                f => f.PosterId,
+                                                (p, f) => f)
+                                          .Where(p => p.City == _city)
+                                          .Select(p => p.PosterId).AsEnumerable();
+
+            var result = await _context.PosterViewLogs.Where(l => posters.Contains(l.PosterId)).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<PosterViewLogModel>> GetPublishedViewLogsBySubcategory(DateTime startDate, DateTime endDate, Guid subcategoryId)
+        {
+            var posters = _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED &&
+                                                      p.SubcategoryId == subcategoryId &&
                                                       (p.ReleaseDate >= startDate || p.ReleaseDateEnd >= startDate) &&
                                                       (p.ReleaseDate <= endDate || p.ReleaseDateEnd <= endDate))
                                           .Join(_context.PostersFullInfo,

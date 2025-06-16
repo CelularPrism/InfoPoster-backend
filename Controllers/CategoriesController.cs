@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InfoPoster_backend
+namespace InfoPoster_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -28,6 +28,8 @@ namespace InfoPoster_backend
         public async Task<IActionResult> GetSubcategories([FromQuery] GetSubcategoriesRequest request)
         {
             var result = await _mediator.Send(request);
+            result.Subcategories = result.Subcategories.OrderByDescending(s => s.CountApplications).ToList();
+
             return Ok(result);
         }
     }

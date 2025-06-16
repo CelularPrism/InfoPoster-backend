@@ -11,12 +11,12 @@ namespace InfoPoster_backend.Handlers.Organizations
 {
     public class GetOrganizationsRequest : IRequest<GetOrganizationsResponse>
     {
-        public DateTime startDate { get; set; }
+        public DateTime startDate { get; set; } = DateTime.MinValue;
         public DateTime endDate { get; set; } = DateTime.UtcNow;
         public Guid? categoryId { get; set; }
         public Guid? subcategoryId { get; set; }
-        public int Limit { get; set; }
-        public int Offset { get; set; }
+        public int Limit { get; set; } = 9;
+        public int Offset { get; set; } = 0;
     }
 
     public class GetOrganizationsResponse

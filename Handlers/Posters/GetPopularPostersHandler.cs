@@ -5,7 +5,10 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
 {
-    public class GetPopularPostersRequest : IRequest<List<PosterResponseModel>> { }
+    public class GetPopularPostersRequest : IRequest<List<PosterResponseModel>> 
+    {
+        public Guid? SubcategoryId { get; set; } = null;
+    }
 
     public class GetPopularPostersHandler : IRequestHandler<GetPopularPostersRequest, List<PosterResponseModel>>
     {
@@ -20,7 +23,16 @@ namespace InfoPoster_backend.Handlers.Posters
 
         public async Task<List<PosterResponseModel>> Handle(GetPopularPostersRequest request, CancellationToken cancellationToken = default)
         {
-            var logs = await _repository.GetPublishedViewLogs(DateTime.UtcNow.Date, DateTime.UtcNow.AddYears(1));
+            var logs = new List<PosterViewLogModel>();
+
+            if (request.SubcategoryId != null && request.SubcategoryId != Guid.Empty)
+            {
+                logs = await _repository.GetPublishedViewLogsBySubcategory(DateTime.UtcNow.Date, DateTime.UtcNow.AddYears(1), (Guid)request.SubcategoryId);
+            } else
+            {
+                logs = await _repository.GetPublishedViewLogs(DateTime.UtcNow.Date, DateTime.UtcNow.AddYears(1));
+            }
+
             var popularPosters = logs.GroupBy(l => l.PosterId).Select(l => new
             {
                 PosterId = l.Key,

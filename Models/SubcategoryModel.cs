@@ -22,6 +22,15 @@ namespace InfoPoster_backend.Models
     public class SubcategoryResponseModel
     {
         public string CategoryName { get; set; }
-        public List<SubcategoryModel> Subcategories { get; set; }
+        public List<SubcategoryPopularModel> Subcategories { get; set; }
+    }
+
+    public class SubcategoryPopularModel
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid CategoryId { get; set; }
+        public string Name { get; set; }
+        public string ImageSrc { get; set; }
+        public int CountApplications { get; set; }
     }
 }
