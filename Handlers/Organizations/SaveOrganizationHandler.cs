@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Organizations.Menu;
@@ -18,8 +19,7 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid OrganizationId { get; set; }
         public string Lang { get; set; }
         public string Name { get; set; }
-        public Guid? CategoryId { get; set; }
-        public Guid? SubcategoryId { get; set; }
+        public string SubcategoryId { get; set; }
         public string PriceLevel { get; set; }
         public string Capacity { get; set; }
         public Guid? City { get; set; }
@@ -190,23 +190,40 @@ namespace InfoPoster_backend.Handlers.Organizations
             var categories = await _repository.GetCategories();
             var subcategories = await _repository.GetSubcategories();
 
-            if (organization.CategoryId != request.CategoryId)
-            {
-                changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "CategoryId", 
-                    categories.Where(c => c.Id == organization.CategoryId).Select(c => c.Name).FirstOrDefault(), 
-                    categories.Where(c => c.Id == request.CategoryId).Select(c => c.Name).FirstOrDefault(), _user));
+            var orgCategories = await _repository.GetCategories(organization.Id);
 
-                organization.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
+            if (!string.IsNullOrEmpty(request.SubcategoryId))
+            {
+                var newSubcat = request.SubcategoryId.Split(',');
+                var newCategories = new List<ApplicationCategoryModel>();
+
+                foreach (var subcat in newSubcat)
+                {
+                    var cat = subcategories.Where(s => s.Id == Guid.Parse(subcat)).Select(s => s.CategoryId).FirstOrDefault();
+                    changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "CategoryId", string.Empty,
+                        categories.Where(c => c.Id == cat).Select(c => c.Name).FirstOrDefault(), _user));
+
+                    changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "SubcategoryId", string.Empty,
+                        subcategories.Where(c => c.Id == Guid.Parse(subcat)).Select(c => c.Name).FirstOrDefault(), _user));
+
+                    newCategories.Add(new ApplicationCategoryModel()
+                    {
+                        ApplicationId = request.OrganizationId,
+                        SubcategoryId = Guid.Parse(subcat),
+                        CategoryId = cat
+                    });
+                }
+
+                await _repository.RemoveCategories(orgCategories);
+                await _repository.AddCategories(newCategories);
+
+                //organization.CategoryId = request.CategoryId == null ? Guid.Empty : (Guid)request.CategoryId;
             }
 
-            if (organization.SubcategoryId != request.SubcategoryId)
-            {
-                changeHistory.Add(new ApplicationChangeHistory(articleId, request.OrganizationId, "SubcategoryId",
-                    subcategories.Where(c => c.Id == organization.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
-                    subcategories.Where(c => c.Id == request.SubcategoryId).Select(c => c.Name).FirstOrDefault(), _user));
-
-                organization.SubcategoryId = request.SubcategoryId == null ? Guid.Empty : (Guid)request.SubcategoryId;
-            }
+            //if (organization.SubcategoryId != request.SubcategoryId)
+            //{
+            //    organization.SubcategoryId = request.SubcategoryId == null ? Guid.Empty : (Guid)request.SubcategoryId;
+            //}
 
             await _repository.AddHistory(changeHistory);
             await _repository.UpdateOrganization(organization, _user, articleId);

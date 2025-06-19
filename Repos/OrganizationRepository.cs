@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
@@ -60,6 +61,10 @@ namespace InfoPoster_backend.Repos
                                                                                                     ImageSrc = c.Category.ImageSrc,
                                                                                                     Type = c.Category.Type,
                                                                                                 }).ToListAsync();
+
+        public async Task<List<ApplicationCategoryModel>> GetCategories(Guid organizationId) => await _organization.ApplicationCategories.Where(c => c.ApplicationId == organizationId).ToListAsync();
+
+        public async Task<List<ApplicationCategoryModel>> GetApplicationCategories() => await _organization.ApplicationCategories.AsNoTracking().ToListAsync();
 
         public async Task<CategoryModel> GetCategory(Guid? categoryId) => await _organization.Categories.Join(_organization.CategoriesMultilang,
                                                                                                       c => c.Id,
@@ -146,44 +151,10 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        private IQueryable<OrganizationModel> FilterOrganization(IQueryable<OrganizationModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
-        {
-            if (categoryId != null)
-            {
-                query = query.Where(q => q.CategoryId == categoryId);
-            }
-
-            if (status != null)
-            {
-                query = query.Where(q => q.Status == status);
-            }
-
-            if (startDate != null)
-            {
-                query = query.Where(q => q.CreatedAt >= startDate);
-            }
-
-            if (endDate != null)
-            {
-                query = query.Where(q => q.CreatedAt <= endDate);
-            }
-
-            if (userId != null)
-            {
-                query = query.Where(q => q.UserId == userId);
-            }
-
-            if (cityId != null)
-            {
-                query = query.Join(_organization.OrganizationsFullInfo,
-                                   q => q.Id,
-                                   f => f.OrganizationId,
-                                   (q, f) => new { Organization = q, CityId = f.City })
-                             .Where(q => q.CityId == cityId)
-                             .Select(q => q.Organization);
-            }
-            return query;
-        }
+        public async Task<PopularityModel> GetPopularity(Guid id, Guid categoryId, Guid subcategoryId) =>
+            await _organization.PopularityApplications.FirstOrDefaultAsync(p => p.ApplicationId == id &&
+                                                                                p.CategoryId == categoryId &&
+                                                                                p.SubcategoryId == subcategoryId);
 
         public async Task<List<OrganizationMultilangModel>> GetMultilang(IEnumerable<Guid> organizations) =>
             await _organization.OrganizationsMultilang.Where(m => m.Lang == _lang && organizations.Contains(m.OrganizationId)).ToListAsync();
@@ -638,6 +609,69 @@ namespace InfoPoster_backend.Repos
         {
             await _organization.PosterViewLogs.AddAsync(model);
             await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddCategories(List<ApplicationCategoryModel> list)
+        {
+            await _organization.ApplicationCategories.AddRangeAsync(list);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task RemoveCategories(List<ApplicationCategoryModel> list)
+        {
+            _organization.ApplicationCategories.RemoveRange(list);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddPopularity(PopularityModel model)
+        {
+            await _organization.PopularityApplications.AddAsync(model);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task UpdatePopularity(PopularityModel model)
+        {
+            _organization.PopularityApplications.Update(model);
+            await _organization.SaveChangesAsync();
+        }
+
+        private IQueryable<OrganizationModel> FilterOrganization(IQueryable<OrganizationModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        {
+            if (categoryId != null)
+            {
+                query = query.Where(q => q.CategoryId == categoryId);
+            }
+
+            if (status != null)
+            {
+                query = query.Where(q => q.Status == status);
+            }
+
+            if (startDate != null)
+            {
+                query = query.Where(q => q.CreatedAt >= startDate);
+            }
+
+            if (endDate != null)
+            {
+                query = query.Where(q => q.CreatedAt <= endDate);
+            }
+
+            if (userId != null)
+            {
+                query = query.Where(q => q.UserId == userId);
+            }
+
+            if (cityId != null)
+            {
+                query = query.Join(_organization.OrganizationsFullInfo,
+                                   q => q.Id,
+                                   f => f.OrganizationId,
+                                   (q, f) => new { Organization = q, CityId = f.City })
+                             .Where(q => q.CityId == cityId)
+                             .Select(q => q.Organization);
+            }
+            return query;
         }
     }
 }

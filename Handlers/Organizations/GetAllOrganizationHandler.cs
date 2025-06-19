@@ -1,4 +1,6 @@
-﻿using InfoPoster_backend.Models.Organizations;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Administration;
+using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
@@ -32,13 +34,14 @@ namespace InfoPoster_backend.Handlers.Organizations
     {
         public AllOrganizationModel() { }
 
-        public AllOrganizationModel(OrganizationModel organization, OrganizationMultilangModel multilang, string userName)
+        public AllOrganizationModel(OrganizationModel organization, OrganizationMultilangModel multilang, string userName, List<ApplicationCategoryModel> categories)
         {
+            var categs = categories.GroupBy(c => c.CategoryId).Select(c => c.Key).ToList();
+            var subcategs = categories.GroupBy(c => c.SubcategoryId).Select(c => c.Key).ToList();
+
             Id = organization.Id;
             Name = multilang.Name;
             CreatedAt = organization.CreatedAt;
-            CategoryId = organization.CategoryId;
-            SubategoryId = organization.SubcategoryId;
             UserId = organization.UserId;
             CreatedBy = userName;
             Status = organization.Status;
@@ -47,15 +50,15 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid Id { get; set; }
         public string Name { get; set; }
         public DateTime CreatedAt { get; set; }
-        public Guid CategoryId { get; set; }
-        public Guid SubategoryId { get; set; }
+        public List<IdNameModel> Category { get; set; }
+        public List<IdNameModel> Subategory { get; set; }
         public Guid UserId { get; set; }
         public string CreatedBy { get; set; }
         public int Status { get; set; }
-        public string CategoryName { get; set; }
+        //public string CategoryName { get; set; }
         public Guid? CityId { get; set; }
         public string CityName { get; set; }
-        public string SubcategoryName { get; set; }
+        //public string SubcategoryName { get; set; }
     }
 
     public class GetAllOrganizationHandler : IRequestHandler<GetAllOrganizationRequest, GetAllOrganizationResponse>
@@ -118,12 +121,16 @@ namespace InfoPoster_backend.Handlers.Organizations
             var multilang = await _repository.GetMultilang(idEnum);
             var fullInfo = await _repository.GetFullInfo(idEnum);
             var users = await _repository.GetUsers(userEnum);
+            var orgCategories = await _repository.GetApplicationCategories();
 
             var orgList = organizations.Select(o => new AllOrganizationModel()
             {
                 Id = o.Id,
-                CategoryId = o.CategoryId,
-                CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                Category = orgCategories.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.CategoryId).Select(c => new IdNameModel()
+                {
+                    Id = c.Key,
+                    Name = categories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                }).ToList(),
                 Name = multilang.Where(m => m.OrganizationId == o.Id).Select(m => m.Name).FirstOrDefault(),
                 CityId = fullInfo.Where(f => f.OrganizationId == o.Id).Select(f => f.City).FirstOrDefault(),
                 CityName = fullInfo.Where(f => f.OrganizationId == o.Id)
@@ -136,8 +143,10 @@ namespace InfoPoster_backend.Handlers.Organizations
                 CreatedBy = users.Where(u => u.Id == o.UserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault(),
                 UserId = o.UserId,
                 Status = o.Status,
-                SubategoryId = o.SubcategoryId,
-                SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault(),
+                Subategory = orgCategories.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.SubcategoryId).Select(c => new IdNameModel() {
+                    Id = c.Key,
+                    Name = subcategories.Where(subcat => subcat.Id == c.Key).Select(subcat => subcat.Name).FirstOrDefault() 
+                }).ToList(),
             }).ToList();
 
             if (request.Sort == 0)

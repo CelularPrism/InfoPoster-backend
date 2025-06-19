@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Posters;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
 using InfoPoster_backend.Tools;
@@ -30,10 +31,8 @@ namespace InfoPoster_backend.Handlers.Organizations
     public class OrganizationResponseModel
     {
         public Guid Id { get; set; }
-        public Guid CategoryId { get; set; }
-        public string CategoryName { get; set; }
-        public Guid SubcategoryId { get; set; }
-        public string SubcategoryName { get; set; }
+        public List<IdNameModel> Category { get; set; }
+        public List<IdNameModel> Subcategory { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Name { get; set; }
         public int Status { get; set; }
@@ -69,6 +68,8 @@ namespace InfoPoster_backend.Handlers.Organizations
                 (int)POSTER_STATUS.DRAFT,
                 (int)POSTER_STATUS.REVIEWING
             };
+
+            var categsTask = _repository.GetApplicationCategories();
 
             if (!isAdmin)
             {
@@ -107,11 +108,14 @@ namespace InfoPoster_backend.Handlers.Organizations
             var idEnum = organizations.Select(x => x.Id);
             var multilang = await _repository.GetMultilang(idEnum);
             var fullInfo = await _repository.GetFullInfo(idEnum);
+            var categs = await categsTask;
 
             var orgList = organizations.Select(o => new OrganizationResponseModel()
             {
-                CategoryId = o.CategoryId,
-                CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                Category = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.CategoryId).Select(g => new IdNameModel() {
+                    Id = g.Key,
+                    Name = categories.Where(c => c.Id == g.Key).Select(c => c.Name).FirstOrDefault()
+                }).OrderBy(c => c.Name).ToList(),
                 CityId = fullInfo.Where(f => f.OrganizationId == o.Id).Select(f => f.City).FirstOrDefault(),
                 CityName = fullInfo.Where(f => f.OrganizationId == o.Id)
                                    .Join(cities,
@@ -123,8 +127,11 @@ namespace InfoPoster_backend.Handlers.Organizations
                 Id = o.Id,
                 Name = multilang.Where(m => m.OrganizationId == o.Id).Select(m => m.Name).FirstOrDefault(),
                 Status = o.Status,
-                SubcategoryId = o.SubcategoryId,
-                SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                Subcategory = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.SubcategoryId).Select(g => new IdNameModel()
+                {
+                    Id = g.Key,
+                    Name = subcategories.Where(c => c.Id == g.Key).Select(c => c.Name).FirstOrDefault()
+                }).OrderBy(c => c.Name).ToList(),
             }).ToList();
 
             if (request.Sort == 0)

@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Posters;
@@ -44,5 +45,7 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<CityMultilangModel> CitiesMultilang { get; set; }
         public DbSet<ApplicationChangeHistory> ApplicationChangeHistory { get; set; }
         public DbSet<RejectedComments> RejectedComments { get; set; }
+        public DbSet<PopularityModel> PopularityApplications { get; set; }
+        public DbSet<ApplicationCategoryModel> ApplicationCategories { get; set; }
     }
 }
