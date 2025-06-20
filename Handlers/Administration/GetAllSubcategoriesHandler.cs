@@ -18,7 +18,12 @@ namespace InfoPoster_backend.Handlers.Administration
             _repository = repository;
         }
 
-        public async Task<List<SubcategoryModel>> Handle(GetAllSubcategoriesRequest request, CancellationToken cancellationToken = default) =>
-            await _repository.GetSubcategories((int)request.type);
+        public async Task<List<SubcategoryModel>> Handle(GetAllSubcategoriesRequest request, CancellationToken cancellationToken = default)
+        {
+            if (request.IsAdmin)
+                return await _repository.GetSubcategories((int)request.type);
+            else
+                return await _repository.GetPublishedSubcategories((int)request.type);
+        }
     }
 }
