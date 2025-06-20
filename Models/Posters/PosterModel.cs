@@ -22,7 +22,7 @@ namespace InfoPoster_backend.Models.Posters
         public DateTime? ReleaseDateEnd { get; set; }
         public string Name { get; set; }
         public Guid CategoryId { get; set; }
-        public Guid SubcategoryId { get; set; }
+        public Guid? SubcategoryId { get; set; }
         public int Status { get; set; }
         public Guid UserId { get; set; }
     }

@@ -139,7 +139,7 @@ namespace InfoPoster_backend.Handlers.Administration
                                          c => c.Id,
                                          (f, c) => c.Name)
                                    .FirstOrDefault(),
-                SubcategoryId = o.SubcategoryId,
+                SubcategoryId = o.SubcategoryId != null ? (Guid)o.SubcategoryId : Guid.Empty,
                 SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault(),
                 CreatedAt = o.CreatedAt,
                 CreatedBy = users.Where(u => u.Id == o.UserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault(),

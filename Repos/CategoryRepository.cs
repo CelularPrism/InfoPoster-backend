@@ -75,7 +75,7 @@ namespace InfoPoster_backend.Repos
             } else
             {
                 availableSubcategories  = await _posters.Organizations.Where(c => c.CategoryId == categoryId && c.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(o => o.SubcategoryId).Select(o => new { Id = o.Key, Count = o.Count() }).ToListAsync();
-                var posterSubcategories = await _posters.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(p => p.SubcategoryId).Select(p => new { Id = p.Key, Count = p.Count() }).ToListAsync();
+                var posterSubcategories = await _posters.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(p => p.SubcategoryId).Select(p => new { Id = p.Key != null ? (Guid)p.Key : Guid.Empty, Count = p.Count() }).ToListAsync();
 
                 availableSubcategories.AddRange(posterSubcategories);
             }

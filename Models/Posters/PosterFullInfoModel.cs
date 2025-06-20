@@ -38,11 +38,11 @@ namespace InfoPoster_backend.Models.Posters
                 TimeStart = request.TimeStart;
             }
 
-            if (Price != request.Price)
-            {
-                history.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Price", Price.ToString(), request.Price.ToString(), userId));
-                Price = request.Price;
-            }
+            //if (Price != request.Price)
+            //{
+            //    history.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Price", Price.ToString(), request.Price.ToString(), userId));
+            //    Price = request.Price;
+            //}
 
             if (PlaceLink != request.PlaceLink)
             {
