@@ -24,7 +24,7 @@
         public string CategoryName { get; set; }
         public string SubcategoryName { get; set; }
         public string Place { get; set; }
-        public double Price { get; set; }
+        //public double Price { get; set; }
         public Guid? FileId { get; set; }
         public string FileURL { get; set; }
     }
