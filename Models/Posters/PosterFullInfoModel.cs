@@ -38,11 +38,11 @@ namespace InfoPoster_backend.Models.Posters
                 TimeStart = request.TimeStart;
             }
 
-            if (Price != request.Price)
-            {
-                history.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Price", Price.ToString(), request.Price.ToString(), userId));
-                Price = request.Price;
-            }
+            //if (Price != request.Price)
+            //{
+            //    history.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Price", Price.ToString(), request.Price.ToString(), userId));
+            //    Price = request.Price;
+            //}
 
             if (PlaceLink != request.PlaceLink)
             {
@@ -64,7 +64,7 @@ namespace InfoPoster_backend.Models.Posters
         public Guid? City { get; set; }
         public Guid? OrganizationId { get; set; }
         public string TimeStart { get; set; }
-        public double Price { get; set; }
+        //public double Price { get; set; }
         public string PlaceLink { get; set; }
         public string AgeRestriction { get; set; }
     }

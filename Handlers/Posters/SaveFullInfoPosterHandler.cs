@@ -27,21 +27,25 @@ namespace InfoPoster_backend.Handlers.Posters
         public string Place { get; set; }
         public Guid? City { get; set; }
         public string TimeStart { get; set; }
-        public double Price { get; set; }
+        //public double Price { get; set; }
         public string Adress { get; set; }
         public string PlaceLink { get; set; }
-        public List<PlaceRequestModel> Parking { get; set; }
+        //public List<PlaceRequestModel> Parking { get; set; }
         public string Tags { get; set; }
-        public string SocialLinks { get; set; }
+        //public string SocialLinks { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public List<string> VideoUrls { get; set; }
+        //public List<string> VideoUrls { get; set; }
         public string FirstName { get; set; }
         public Guid? AttachedOrganizationId { get; set; }
         public string Tickets { get; set; }
         public string Contacts { get; set; }
         public string InternalContacts { get; set; }
+        public string YouTube { get; set; }
+        public string Facebook { get; set; }
+        public string Instagram { get; set; }
+        public string TikTok { get; set; }
     }
 
     public class SaveFullInfoPosterResponse
@@ -151,50 +155,50 @@ namespace InfoPoster_backend.Handlers.Posters
                 await _repository.UpdateContact(contact);
             }
 
-            var files = new List<FileURLModel>();
-            var filesOld = await _repository.GetFileUrls(request.PosterId);
+            //var files = new List<FileURLModel>();
+            //var filesOld = await _repository.GetFileUrls(request.PosterId);
 
-            if (request.VideoUrls != null)
-            {
-                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "VideoUrls",
-                    "Count = " + filesOld.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Count(),
-                    "Count = " + request.VideoUrls.Count, _user));
+            //if (request.VideoUrls != null)
+            //{
+            //    changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "VideoUrls",
+            //        "Count = " + filesOld.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Count(),
+            //        "Count = " + request.VideoUrls.Count, _user));
 
-                foreach (var video in request.VideoUrls)
-                {
-                    files.Add(new FileURLModel(request.PosterId, video, (int)FILE_CATEGORIES.VIDEO));
-                }
-            }
-            if (!string.IsNullOrEmpty(request.SocialLinks))
-            {
-                var links = request.SocialLinks;
-                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "SocialLinks", string.Empty, string.Empty, _user));
-                files.Add(new FileURLModel(request.PosterId, links, (int)FILE_CATEGORIES.SOCIAL_LINKS));
-            }
+            //    foreach (var video in request.VideoUrls)
+            //    {
+            //        files.Add(new FileURLModel(request.PosterId, video, (int)FILE_CATEGORIES.VIDEO));
+            //    }
+            //}
+            //if (!string.IsNullOrEmpty(request.SocialLinks))
+            //{
+            //    var links = request.SocialLinks;
+            //    changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "SocialLinks", string.Empty, string.Empty, _user));
+            //    files.Add(new FileURLModel(request.PosterId, links, (int)FILE_CATEGORIES.SOCIAL_LINKS));
+            //}
 
-            await _repository.SaveFiles(files, request.PosterId);
+            //await _repository.SaveFiles(files, request.PosterId);
 
-            if (request.Parking != null && request.Parking.Count > 0)
-            {
-                var places = await _repository.GetPlaceList(request.PosterId);
-                if (places != null || places.Count > 0)
-                {
-                    await _repository.RemovePlaceList(places);
-                }
-                places = new List<PlaceModel>();
-                foreach (var lang in Constants.SystemLangs)
-                {
-                    request.Parking = request.Parking.Select(p => new PlaceRequestModel()
-                    {
-                        Info = p.Info,
-                        Lang = lang,
-                        PlaceLink = p.PlaceLink,
-                    }).ToList();
-                    places.AddRange(request.Parking.Select(p => new PlaceModel(p, request.PosterId)).ToList());
-                }
-                await _repository.AddPlaces(places);
-                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Parking", string.Empty, string.Empty, _user));
-            }
+            //if (request.Parking != null && request.Parking.Count > 0)
+            //{
+            //    var places = await _repository.GetPlaceList(request.PosterId);
+            //    if (places != null || places.Count > 0)
+            //    {
+            //        await _repository.RemovePlaceList(places);
+            //    }
+            //    places = new List<PlaceModel>();
+            //    foreach (var lang in Constants.SystemLangs)
+            //    {
+            //        request.Parking = request.Parking.Select(p => new PlaceRequestModel()
+            //        {
+            //            Info = p.Info,
+            //            Lang = lang,
+            //            PlaceLink = p.PlaceLink,
+            //        }).ToList();
+            //        places.AddRange(request.Parking.Select(p => new PlaceModel(p, request.PosterId)).ToList());
+            //    }
+            //    await _repository.AddPlaces(places);
+            //    changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Parking", string.Empty, string.Empty, _user));
+            //}
 
             if (string.IsNullOrEmpty(poster.Name))
                 poster.Name = request.Name;

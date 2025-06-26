@@ -41,7 +41,7 @@ namespace InfoPoster_backend.Handlers.Administration
             CreatedAt = poster.CreatedAt;
             UpdatedAt = poster.UpdatedAt;
             CategoryId = poster.CategoryId != null ? (Guid)poster.CategoryId : Guid.Empty;
-            SubcategoryId = poster.SubcategoryId;
+            SubcategoryId = poster.SubcategoryId != null ? (Guid)poster.SubcategoryId : Guid.Empty;
             CreatedBy = userName;
             Status = poster.Status;
         }
@@ -150,7 +150,7 @@ namespace InfoPoster_backend.Handlers.Administration
                                          c => c.Id,
                                          (f, c) => c.Name)
                                    .FirstOrDefault(),
-                SubcategoryId = o.SubcategoryId,
+                SubcategoryId = o.SubcategoryId != null ? (Guid)o.SubcategoryId : Guid.Empty,
                 SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault(),
                 CreatedAt = o.CreatedAt,
                 Status = o.Status,

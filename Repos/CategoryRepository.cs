@@ -19,6 +19,20 @@ namespace InfoPoster_backend.Repos
             _lang = accessor.HttpContext.Items[Constants.HTTP_ITEM_ClientLang].ToString();
         }
 
+        public async Task<List<SubcategoryModel>> GetSubcategories(int type) =>
+            await _posters.Categories.Where(c => c.Type == type).Join(_posters.Subcategories,
+                                                                      c => c.Id,
+                                                                      s => s.CategoryId,
+                                                                      (c, s) => s).ToListAsync();
+
+        public async Task<List<SubcategoryModel>> GetPublishedSubcategories(int type)
+        {
+            return await _posters.Categories.Where(c => c.Type == type).Join(_posters.Subcategories,
+                                                                            c => c.Id,
+                                                                            s => s.CategoryId,
+                                                                            (c, s) => s).ToListAsync();
+        }
+
         public async Task<List<CategoryModel>> SearchCategories(string searchText) => await _posters.CategoriesMultilang.Where(c => c.Name.Contains(searchText) && c.lang == _lang)
                                                                                                                         .Join(_posters.Categories,
                                                                                                                               ml => ml.CategoryId,
@@ -77,7 +91,7 @@ namespace InfoPoster_backend.Repos
             } else
             {
                 availableSubcategories  = await _posters.Organizations.Where(c => c.CategoryId == categoryId && c.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(o => o.SubcategoryId).Select(o => new { Id = o.Key, Count = o.Count() }).ToListAsync();
-                var posterSubcategories = await _posters.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(p => p.SubcategoryId).Select(p => new { Id = p.Key, Count = p.Count() }).ToListAsync();
+                var posterSubcategories = await _posters.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(p => p.SubcategoryId).Select(p => new { Id = p.Key != null ? (Guid)p.Key : Guid.Empty, Count = p.Count() }).ToListAsync();
 
                 availableSubcategories.AddRange(posterSubcategories);
             }

@@ -28,18 +28,19 @@ namespace InfoPoster_backend.Handlers.Administration
         public string Place { get; set; }
         public Guid? City { get; set; }
         public string TimeStart { get; set; }
-        public double Price { get; set; }
+        //public double Price { get; set; }
         public string Adress { get; set; }
         public string PlaceLink { get; set; }
-        public List<PlaceModel> Parking { get; set; }
+        //public List<PlaceModel> Parking { get; set; }
         public string Tags { get; set; }
-        public string SocialLinks { get; set; }
+        //public string SocialLinks { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
-        public List<string> VideoUrls { get; set; }
+        //public List<string> VideoUrls { get; set; }
         public Guid? AttachedOrganizationId { get; set; }
         public string AttachedOrganizationName { get; set; }
         public string Tickets { get; set; }
+        public string Phone { get; set; }
         public string Contacts { get; set; }
         public string InternalContacts { get; set; }
         public int Status { get; set; }
@@ -81,7 +82,7 @@ namespace InfoPoster_backend.Handlers.Administration
                 result.PlaceLink = !string.IsNullOrEmpty(fullInfo.PlaceLink) ? fullInfo.PlaceLink : string.Empty;
                 result.TimeStart = !string.IsNullOrEmpty(fullInfo.TimeStart) ? fullInfo.TimeStart : string.Empty;
                 result.PosterId = fullInfo.PosterId;
-                result.Price = fullInfo.Price;
+                //result.Price = fullInfo.Price;
                 result.City = fullInfo.City;
             } else
             {
@@ -98,6 +99,7 @@ namespace InfoPoster_backend.Handlers.Administration
                 result.Place = !string.IsNullOrEmpty(ml.Place) ? ml.Place : string.Empty;
                 result.SiteLink = !string.IsNullOrEmpty(ml.SiteLink) ? ml.SiteLink : string.Empty;
                 result.Tickets = !string.IsNullOrEmpty(ml.Tickets) ? ml.Tickets : string.Empty;
+                result.Phone = ml.Phone;
             } else
             {
                 result.Lang = request.Lang;
@@ -115,14 +117,14 @@ namespace InfoPoster_backend.Handlers.Administration
             result.ReleaseDate = poster.ReleaseDate;
             result.ReleaseDateEnd = poster.ReleaseDateEnd;
             //result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
-            result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
-            result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
+            //result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
+            //result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
 
-            var places = await _repository.GetPlaces(request.Id);
-            if (places.Count > 0)
-            {
-                result.Parking = places;
-            }
+            //var places = await _repository.GetPlaces(request.Id);
+            //if (places.Count > 0)
+            //{
+            //    result.Parking = places;
+            //}
             var comment = await _repository.GetLastRejectedComment(request.Id);
             if (comment != null)
                 result.Comment = comment.Text;

@@ -54,6 +54,13 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("subcategories/all")]
+        public async Task<IActionResult> GetAllSubcategories(CategoryType type)
+        {
+            var result = await _mediator.Send(new GetAllSubcategoriesRequest() { type = type, IsAdmin = true });
+            return Ok(result);
+        }
+
         [HttpGet("subcategories/get")]
         public async Task<IActionResult> GetSubcategories([FromQuery] GetSubcategoriesRequest request)
         {
