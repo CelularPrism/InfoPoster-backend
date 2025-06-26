@@ -151,10 +151,10 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<PopularityModel> GetPopularity(Guid id, Guid categoryId, Guid subcategoryId) =>
-            await _organization.PopularityApplications.FirstOrDefaultAsync(p => p.ApplicationId == id &&
-                                                                                p.CategoryId == categoryId &&
-                                                                                p.SubcategoryId == subcategoryId);
+        //public async Task<PopularityModel> GetPopularity(Guid id, Guid categoryId, Guid subcategoryId) =>
+        //    await _organization.PopularityApplications.FirstOrDefaultAsync(p => p.ApplicationId == id &&
+        //                                                                        p.CategoryId == categoryId &&
+        //                                                                        p.SubcategoryId == subcategoryId);
 
         public async Task<List<OrganizationMultilangModel>> GetMultilang(IEnumerable<Guid> organizations) =>
             await _organization.OrganizationsMultilang.Where(m => m.Lang == _lang && organizations.Contains(m.OrganizationId)).ToListAsync();
@@ -204,10 +204,26 @@ namespace InfoPoster_backend.Repos
                                                        {
                                                            Id = o.Id,
                                                            Name = o.Name,
-                                                           CategoryId = o.CategoryId,
-                                                           CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == o.CategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
-                                                           SubcategoryId = o.SubcategoryId,
-                                                           SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == o.SubcategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           Category = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.CategoriesMultilang,
+                                                                                                                                                   c => c.CategoryId,
+                                                                                                                                                   ml => ml.CategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.CategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
+                                                           Subcategory = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.SubcategoriesMultilang,
+                                                                                                                                                   c => c.SubcategoryId,
+                                                                                                                                                   ml => ml.SubcategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.SubcategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
                                                            CreatedAt = o.CreatedAt,
                                                            Status = o.Status,
                                                            CityId = f.City,
@@ -250,10 +266,26 @@ namespace InfoPoster_backend.Repos
                                                        {
                                                            Id = o.Id,
                                                            Name = o.Name,
-                                                           CategoryId = o.CategoryId,
-                                                           CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == o.CategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
-                                                           SubcategoryId = o.SubcategoryId,
-                                                           SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == o.SubcategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           Category = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.CategoriesMultilang,
+                                                                                                                                                   c => c.CategoryId,
+                                                                                                                                                   ml => ml.CategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.CategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
+                                                           Subcategory = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.SubcategoriesMultilang,
+                                                                                                                                                   c => c.SubcategoryId,
+                                                                                                                                                   ml => ml.SubcategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.SubcategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
                                                            CreatedAt = o.CreatedAt,
                                                            Status = o.Status,
                                                            CityId = f.City,
@@ -274,10 +306,26 @@ namespace InfoPoster_backend.Repos
                                                        {
                                                            Id = o.Id,
                                                            Name = o.Name,
-                                                           CategoryId = o.CategoryId,
-                                                           CategoryName = _organization.CategoriesMultilang.Where(c => c.CategoryId == o.CategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
-                                                           SubcategoryId = o.SubcategoryId,
-                                                           SubcategoryName = _organization.SubcategoriesMultilang.Where(c => c.SubcategoryId == o.SubcategoryId && c.lang == _lang).Select(c => c.Name).FirstOrDefault(),
+                                                           Category = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.CategoriesMultilang,
+                                                                                                                                                   c => c.CategoryId,
+                                                                                                                                                   ml => ml.CategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.CategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
+                                                           Subcategory = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.SubcategoriesMultilang,
+                                                                                                                                                   c => c.SubcategoryId,
+                                                                                                                                                   ml => ml.SubcategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.SubcategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
                                                            CreatedAt = o.CreatedAt,
                                                            Status = o.Status,
                                                            CityId = f.City,
@@ -623,17 +671,17 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
-        public async Task AddPopularity(PopularityModel model)
-        {
-            await _organization.PopularityApplications.AddAsync(model);
-            await _organization.SaveChangesAsync();
-        }
+        //public async Task AddPopularity(PopularityModel model)
+        //{
+        //    await _organization.PopularityApplications.AddAsync(model);
+        //    await _organization.SaveChangesAsync();
+        //}
 
-        public async Task UpdatePopularity(PopularityModel model)
-        {
-            _organization.PopularityApplications.Update(model);
-            await _organization.SaveChangesAsync();
-        }
+        //public async Task UpdatePopularity(PopularityModel model)
+        //{
+        //    _organization.PopularityApplications.Update(model);
+        //    await _organization.SaveChangesAsync();
+        //}
 
         private IQueryable<OrganizationModel> FilterOrganization(IQueryable<OrganizationModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {

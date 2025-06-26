@@ -31,24 +31,24 @@ namespace InfoPoster_backend.Handlers.Administration
             if (organization == null)
                 return false;
 
-            var oldPopularity = await _repository.GetPopularity(request.OrganizationId, request.CategoryId, request.SubcategoryId);
-            var oldValue = oldPopularity != null ? string.Empty : oldPopularity.Popularity.ToString();
+            //var oldPopularity = await _repository.GetPopularity(request.OrganizationId, request.CategoryId, request.SubcategoryId);
+            //var oldValue = oldPopularity != null ? string.Empty : oldPopularity.Popularity.ToString();
 
-            var popularity = oldPopularity != null ? oldPopularity : new PopularityModel();
-            popularity.ApplicationId = request.OrganizationId;
-            popularity.CategoryId = request.CategoryId;
-            popularity.SubcategoryId = request.SubcategoryId;
-            popularity.Popularity = request.Popularity;
+            //var popularity = oldPopularity != null ? oldPopularity : new PopularityModel();
+            //popularity.ApplicationId = request.OrganizationId;
+            //popularity.CategoryId = request.CategoryId;
+            //popularity.SubcategoryId = request.SubcategoryId;
+            //popularity.Popularity = request.Popularity;
 
-            var changeHistory = new List<ApplicationChangeHistory>() {
-                new ApplicationChangeHistory(Guid.NewGuid(), organization.Id, "Popularity", oldValue, request.Popularity.ToString(), _user)
-            };
+            //var changeHistory = new List<ApplicationChangeHistory>() {
+            //    new ApplicationChangeHistory(Guid.NewGuid(), organization.Id, "Popularity", oldValue, request.Popularity.ToString(), _user)
+            //};
 
-            await _repository.AddHistory(changeHistory);
-            if (oldPopularity != null)
-                await _repository.UpdatePopularity(popularity);
-            else
-                await _repository.AddPopularity(popularity);
+            //await _repository.AddHistory(changeHistory);
+            //if (oldPopularity != null)
+            //    await _repository.UpdatePopularity(popularity);
+            //else
+            //    await _repository.AddPopularity(popularity);
 
             return true;
         }

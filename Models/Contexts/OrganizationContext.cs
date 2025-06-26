@@ -47,7 +47,7 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<ApplicationChangeHistory> ApplicationChangeHistory { get; set; }
         public DbSet<RejectedComments> RejectedComments { get; set; }
         public DbSet<PosterViewLogModel> PosterViewLogs { get; set; }
-        public DbSet<PopularityModel> PopularityApplications { get; set; }
+        //public DbSet<PopularityModel> PopularityApplications { get; set; }
         public DbSet<ApplicationCategoryModel> ApplicationCategories { get; set; }
     }
 }
