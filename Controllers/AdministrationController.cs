@@ -137,7 +137,7 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpPost("poster/full-info/save")]
-        public async Task<IActionResult> SaveFullInfoPoster([FromForm] SaveFullInfoPosterRequest request)
+        public async Task<IActionResult> SaveFullInfoPoster([FromBody] SaveFullInfoPosterRequest request)
         {
             try
             {

@@ -88,7 +88,6 @@ namespace InfoPoster_backend.Handlers.Administration
             var availableStatuses = new List<int>()
             {
                 (int)POSTER_STATUS.PENDING,
-                (int)POSTER_STATUS.PENDING,
                 (int)POSTER_STATUS.PUBLISHED,
                 (int)POSTER_STATUS.DRAFT,
                 (int)POSTER_STATUS.REVIEWING
