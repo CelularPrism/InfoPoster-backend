@@ -20,6 +20,19 @@ namespace InfoPoster_backend
 
             var builder = WebApplication.CreateBuilder(args);
             var connection = builder.Configuration["ConnectionStrings:DefaultConnection"];
+
+            //var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+            //builder.Services.AddCors(options =>
+            //{
+            //    options.AddPolicy(name: MyAllowSpecificOrigins,
+            //                      policy =>
+            //                      {
+            //                          policy.WithOrigins("http://localhost:4200")
+            //                                .AllowAnyHeader()
+            //                                .AllowAnyMethod();
+            //                      });
+            //});
+
             builder.Services.AddScoped<IJWTService, JWTService>();
             builder.Services.AddScoped<LoginService>();
             builder.Services.AddScoped<EmailService>();
@@ -127,6 +140,7 @@ namespace InfoPoster_backend
                 spa.Options.SourcePath = "wwwroot";
             });
 
+            //app.UseCors(MyAllowSpecificOrigins);
             app.UseAuthorization();
             app.UseMiddleware<DefaultLangMiddleware>();
 
