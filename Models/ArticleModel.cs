@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Posters;
+﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Models.Posters;
 
 namespace InfoPoster_backend.Models
 {
@@ -23,5 +24,6 @@ namespace InfoPoster_backend.Models
         public Guid UserId { get; set; }
         public string UserName { get; set; }
         public int Status { get; set; }
+        public List<GetFileResponse> GaleryUrls { get; set; }
     }
 }

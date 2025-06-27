@@ -25,6 +25,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public DateTime? ReleaseDate { get; set; }
         public DateTime? ReleaseDateEnd { get; set; }
         public Guid CategoryId { get; set; }
+        public Guid SubcategoryId { get; set; }
         public string Place { get; set; }
         public Guid? City { get; set; }
         public string TimeStart { get; set; }
@@ -79,6 +80,7 @@ namespace InfoPoster_backend.Handlers.Administration
 
                 result.AgeRestriction = !string.IsNullOrEmpty(fullInfo.AgeRestriction) ? fullInfo.AgeRestriction : string.Empty;
                 result.CategoryId = fullInfo.CategoryId != null ? (Guid)fullInfo.CategoryId : Guid.Empty;
+                result.SubcategoryId = poster.SubcategoryId != null ? (Guid)poster.SubcategoryId : Guid.Empty;
                 result.PlaceLink = !string.IsNullOrEmpty(fullInfo.PlaceLink) ? fullInfo.PlaceLink : string.Empty;
                 result.TimeStart = !string.IsNullOrEmpty(fullInfo.TimeStart) ? fullInfo.TimeStart : string.Empty;
                 result.PosterId = fullInfo.PosterId;
