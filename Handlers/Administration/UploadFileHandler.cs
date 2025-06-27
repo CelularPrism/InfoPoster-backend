@@ -12,7 +12,7 @@ namespace InfoPoster_backend.Handlers.Administration
         public Guid ApplicationId { get; set; }
         public string Base64 { get; set; }
         public string Type { get; set; }
-        public int Place { get; set; }
+        public int Place { get; set; } = 0;
         public bool IsPrimary { get; set; }
     }
 
