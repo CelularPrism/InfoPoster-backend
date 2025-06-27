@@ -16,7 +16,7 @@ namespace InfoPoster_backend.Models.Posters
             Place = multilang.Place;
             City = fullInfo.City;
             TimeStart = fullInfo.TimeStart;
-            Price = fullInfo.Price;
+            //Price = fullInfo.Price;
             Adress = multilang.Adress;
             PlaceLink = fullInfo.PlaceLink;
             Phone = multilang.Phone;
@@ -36,18 +36,18 @@ namespace InfoPoster_backend.Models.Posters
         public string Place { get; set; }
         public Guid? City { get; set; }
         public string TimeStart { get; set; }
-        public double Price { get; set; }
+        //public double Price { get; set; }
         public string Adress { get; set; }
         public string PlaceLink { get; set; }
-        public List<PlaceModel> Parking { get; set; }
+        //public List<PlaceModel> Parking { get; set; }
         public string Tags { get; set; }
-        public string SocialLinks { get; set; }
+        //public string SocialLinks { get; set; }
         public string Phone { get; set; }
         public string SiteLink { get; set; }
         public string AgeRestriction { get; set; }
         public string Tickets { get; set; }
         public List<GetFileResponse> GaleryUrls { get; set; }
-        public List<string> VideoUrls { get; set; }
+        //public List<string> VideoUrls { get; set; }
         public Guid? AttachedOrganizationId { get; set; }
         public string AttachedOrganizationName { get; set; }
         public string Contacts { get; set; }

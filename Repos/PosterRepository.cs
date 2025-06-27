@@ -202,7 +202,7 @@ namespace InfoPoster_backend.Repos
                 FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
                                                  _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
                                                  _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
-                Price = p.p.f.Price,
+                //Price = p.p.f.Price,
             })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
@@ -360,7 +360,7 @@ namespace InfoPoster_backend.Repos
                 FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
                                                  _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
                                                  _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
-                Price = p.p.f.Price,
+                //Price = p.p.f.Price,
             })
                              .OrderBy(p => p.ReleaseDate)
                              .ToList();
@@ -397,7 +397,7 @@ namespace InfoPoster_backend.Repos
                 FileId = _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Any() ?
                                                          _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id && f.IsPrimary).Select(f => f.FileId).FirstOrDefault() :
                                                          _context.FileToApplication.Where(f => f.ApplicationId == p.p.p.Id).Select(f => f.FileId).FirstOrDefault(),
-                Price = p.p.f.Price,
+                //Price = p.p.f.Price,
             })
             .OrderBy(p => p.ReleaseDate)
             .ToList();
@@ -450,14 +450,14 @@ namespace InfoPoster_backend.Repos
                                                .AsNoTracking()
                                                .ToListAsync();
 
-            poster.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
-            poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
+            //poster.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
+            //poster.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
 
-            var places = await _context.Places.Where(p => p.ApplicationId == Id && p.Lang == lang)
-                                              .AsNoTracking()
-                                              .ToListAsync();
+            //var places = await _context.Places.Where(p => p.ApplicationId == Id && p.Lang == lang)
+            //                                  .AsNoTracking()
+            //                                  .ToListAsync();
 
-            poster.Parking = places;
+            //poster.Parking = places;
             poster.AttachedOrganizationName = await _context.OrganizationsMultilang.Where(m => m.OrganizationId == model.FullInfo.OrganizationId && m.Lang == _lang).Select(m => m.Name).FirstOrDefaultAsync();
             poster.Contacts = await _context.Contacts.Where(c => c.ApplicationId == Id && c.Lang == _lang).Select(c => c.Contacts).FirstOrDefaultAsync();
 

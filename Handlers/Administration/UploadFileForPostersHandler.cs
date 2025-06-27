@@ -70,7 +70,7 @@ namespace InfoPoster_backend.Handlers.Administration
                         City = element.City,
                         PlaceLink = element.PlaceLink,
                         PosterId = poster.Id,
-                        Price = element.Price,
+                        //Price = element.Price,
                         TimeStart = element.TimeStart
                     };
 
