@@ -5,6 +5,9 @@ using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Offers;
 using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
+using InfoPoster_backend.Tools;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,10 +20,14 @@ namespace InfoPoster_backend.Controllers
     public class AdministrationController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly AccountRepository _account;
+        private readonly Guid _user;
 
-        public AdministrationController(IMediator mediator)
+        public AdministrationController(IMediator mediator, AccountRepository account, LoginService loginService)
         {
             _mediator = mediator;
+            _account = account;
+            _user = loginService.GetUserId();
         }
 
         [HttpGet("users")]
@@ -119,8 +126,18 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetAllPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, SubcategoryId = subcategoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
-            return Ok(result);
+            var roles = await _account.GetUserRoles(_user);
+            var isNotModerator = roles.Any(u => u == Constants.ROLE_ADMIN || u == Constants.ROLE_EDITOR);
+
+            if (isNotModerator)
+            {
+                var result = await _mediator.Send(new AdministrationGetPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, Page = page - 1, CountPerPage = countPerPage });
+                return Ok(result);
+            } else
+            {
+                var result = await _mediator.Send(new GetAllPostersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, SubcategoryId = subcategoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
+                return Ok(result);
+            }
         }
 
         [HttpPost("poster/create")]
