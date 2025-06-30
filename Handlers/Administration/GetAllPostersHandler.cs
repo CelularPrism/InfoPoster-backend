@@ -132,8 +132,8 @@ namespace InfoPoster_backend.Handlers.Administration
                 CategoryId = o.CategoryId != null ? (Guid)o.CategoryId : Guid.Empty,
                 CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
                 Name = multilang.Where(m => m.PosterId == o.Id).Select(m => m.Name).FirstOrDefault(),
-                CityId = fullInfo.Where(f => f.OrganizationId == o.Id).Select(f => f.City).FirstOrDefault(),
-                CityName = fullInfo.Where(f => f.OrganizationId == o.Id)
+                CityId = fullInfo.Where(f => f.PosterId == o.Id).Select(f => f.City).FirstOrDefault(),
+                CityName = fullInfo.Where(f => f.PosterId == o.Id)
                                    .Join(cities,
                                          f => f.City,
                                          c => c.Id,

@@ -15,20 +15,21 @@ namespace InfoPoster_backend.Repos
 
         public async Task<ArticleModel> GetArticle(Guid id) => await _context.Articles.FirstOrDefaultAsync(x => x.Id == id);
 
-        public async Task<List<ArticleResponse>> GetArticleList() => await _context.Articles.Join(_context.Users,
-                                                                                                  a => a.UserId,
-                                                                                                  u => u.Id,
-                                                                                                  (a, u) => new ArticleResponse()
-                                                                                                  {
-                                                                                                      Id = a.Id,
-                                                                                                      UserId = a.UserId,
-                                                                                                      Body = a.Body,
-                                                                                                      Lang = a.Lang,
-                                                                                                      Title = a.Title,
-                                                                                                      UserName = u.FirstName + " " + u.LastName,
-                                                                                                      Status = (int)a.Status,
-                                                                                                      CreatedAt = a.CreatedAt
-                                                                                                  }).ToListAsync();
+        public async Task<List<ArticleResponse>> GetArticleList(Guid userId) => await _context.Articles.Where(a => a.UserId == userId)
+                                                                                                       .Join(_context.Users,
+                                                                                                            a => a.UserId,
+                                                                                                            u => u.Id,
+                                                                                                            (a, u) => new ArticleResponse()
+                                                                                                            {
+                                                                                                                Id = a.Id,
+                                                                                                                UserId = a.UserId,
+                                                                                                                Body = a.Body,
+                                                                                                                Lang = a.Lang,
+                                                                                                                Title = a.Title,
+                                                                                                                UserName = u.FirstName + " " + u.LastName,
+                                                                                                                Status = (int)a.Status,
+                                                                                                                CreatedAt = a.CreatedAt
+                                                                                                            }).ToListAsync();
 
         public async Task AddArticle(ArticleModel model)
         {
