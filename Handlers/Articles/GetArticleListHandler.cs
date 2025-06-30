@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Login;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Articles
@@ -21,15 +22,17 @@ namespace InfoPoster_backend.Handlers.Articles
     public class GetArticleListHandler : IRequestHandler<GetArticleListRequest, GetArticleListResponse>
     {
         private readonly ArticleRepository _repository;
+        private readonly Guid _user;
 
-        public GetArticleListHandler(ArticleRepository repository)
+        public GetArticleListHandler(ArticleRepository repository, LoginService loginService)
         {
             _repository = repository;
+            _user = loginService.GetUserId();
         }
 
         public async Task<GetArticleListResponse> Handle(GetArticleListRequest request, CancellationToken cancellationToken = default)
         {
-            var list = await _repository.GetArticleList();
+            var list = await _repository.GetArticleList(_user);
             var total = list.Count;
             list = list.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).Select(a => new ArticleResponse()
             {

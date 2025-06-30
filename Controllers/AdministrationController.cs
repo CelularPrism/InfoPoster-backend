@@ -302,8 +302,19 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetAllOrganizationRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
-            return Ok(result);
+            var roles = await _account.GetUserRoles(_user);
+            var isNotModerator = roles.Any(u => u == Constants.ROLE_ADMIN || u == Constants.ROLE_EDITOR);
+
+            if (isNotModerator)
+            {
+                var result = await _mediator.Send(new GetOrganizationListRequest() { Sort = sort, CategoryId = categoryId, CityId = cityId, EndDate = endDate, StartDate = startDate, Status = status, Page = page - 1, CountPerPage = countPerPage });
+                return Ok(result);
+            }
+            else
+            {
+                var result = await _mediator.Send(new GetAllOrganizationRequest() { Status = status, StartDate = startDate, EndDate = endDate, CategoryId = categoryId, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage });
+                return Ok(result);
+            }
         }
 
         [HttpGet("organization/available")]
