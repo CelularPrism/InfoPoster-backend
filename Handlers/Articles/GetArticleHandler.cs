@@ -48,7 +48,7 @@ namespace InfoPoster_backend.Handlers.Articles
             var loggedIn = await _selectelAuthService.Login();
             var files = await _file.GetSelectelFiles(request.Id, (int)FILE_PLACES.GALLERY);
             var primaryFile = await _file.GetPrimaryFile(request.Id, (int)FILE_PLACES.GALLERY);
-            if (loggedIn)
+            if (loggedIn && files.Any())
             {
                 var selectelUUID = await _selectelAuthService.GetContainerUUID("dosdoc");
                 var imageSrc = string.Empty;
