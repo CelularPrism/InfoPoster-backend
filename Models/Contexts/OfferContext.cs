@@ -38,5 +38,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<OffersModel> Offers { get; set; }
         public DbSet<OffersMultilangModel> OffersMultilang { get; set; }
         public DbSet<UserModel> Users { get; set; }
+        public DbSet<RejectedComments> RejectedComments { get; set; }
     }
 }

@@ -493,8 +493,19 @@ namespace InfoPoster_backend.Controllers
             [FromQuery] int page = 0,
             [FromQuery] int countPerPage = 10)
         {
-            var result = await _mediator.Send(new GetAllOffersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
-            return Ok(result);
+            var roles = await _account.GetUserRoles(_user);
+            var isNotModerator = roles.Any(u => u == Constants.ROLE_ADMIN || u == Constants.ROLE_EDITOR);
+
+            if (isNotModerator)
+            {
+                var result = await _mediator.Send(new GetAvailableOffersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
+                return Ok(result);
+            }
+            else
+            {
+                var result = await _mediator.Send(new GetAllOffersRequest() { Status = status, StartDate = startDate, EndDate = endDate, CityId = cityId, Sort = sort, UserId = editorId, Page = page - 1, CountPerPage = countPerPage, Type = type });
+                return Ok(result);
+            }
         }
 
         [HttpGet("offer/available")]
@@ -556,6 +567,27 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> DraftOffer([FromForm] Guid id)
         {
             var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.DRAFT });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/delete")]
+        public async Task<IActionResult> DeleteOffer([FromForm] Guid id)
+        {
+            var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.DELETED });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/review")]
+        public async Task<IActionResult> ReviewOffer([FromForm] Guid id)
+        {
+            var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.REVIEWING });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/reject")]
+        public async Task<IActionResult> RejectOffer([FromForm] Guid id, [FromForm] string comment)
+        {
+            var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.REJECTED, Comment = comment });
             return Ok(result);
         }
 

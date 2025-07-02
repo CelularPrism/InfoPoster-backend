@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Account;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Account;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Offers;
@@ -48,6 +49,9 @@ namespace InfoPoster_backend.Repos
         public async Task<List<UserModel>> GetUserList(IEnumerable<Guid> users) =>
             await _context.Users.Where(o => users.Contains(o.Id)).ToListAsync();
 
+        public async Task<RejectedComments> GetLastRejectedComment(Guid offerId) =>
+            await _context.RejectedComments.Where(r => r.ApplicationId == offerId).OrderByDescending(r => r.CreatedAt).FirstOrDefaultAsync();
+
         public async Task AddOffer(OffersModel model)
         {
             await _context.Offers.AddAsync(model);
@@ -81,6 +85,12 @@ namespace InfoPoster_backend.Repos
         public async Task UpdateOfferMultilang(List<OffersMultilangModel> model)
         {
             _context.OffersMultilang.UpdateRange(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddRejectedComment(RejectedComments model)
+        {
+            await _context.RejectedComments.AddAsync(model);
             await _context.SaveChangesAsync();
         }
 

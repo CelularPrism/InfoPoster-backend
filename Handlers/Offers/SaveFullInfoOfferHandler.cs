@@ -13,12 +13,9 @@ namespace InfoPoster_backend.Handlers.Offers
         public Guid CityId { get; set; }
         public DateTime DateStart { get; set; }
         public DateTime? DateEnd { get; set; }
+        public OFFER_TYPES Type { get; set; }
         public string Name { get; set; }
-        public string DateDescription { get; set; }
-        public string SmallDescription { get; set; }
         public string Description { get; set; }
-        public string Address { get; set; }
-        public string PlaceLink { get; set; }
         public string Lang { get; set; }
     }
 
@@ -61,7 +58,7 @@ namespace InfoPoster_backend.Handlers.Offers
                 OffersMultilangModel ml;
                 foreach (var lang in Constants.SystemLangs)
                 {
-                    ml = new OffersMultilangModel(request.Id, request.Lang, request.Name, request.DateDescription, request.SmallDescription, request.Description, request.Address);
+                    ml = new OffersMultilangModel(request.Id, request.Lang, request.Name, request.Description);
                     multilang.Add(ml);
                 }
 
@@ -71,7 +68,7 @@ namespace InfoPoster_backend.Handlers.Offers
             {
                 foreach (var ml in multilang)
                 {
-                    ml.Update(request.Lang, request.Name, request.DateDescription, request.SmallDescription, request.Description, request.Address);
+                    ml.Update(request.Lang, request.Name, request.Description);
                 }
                 await _repository.UpdateOfferMultilang(multilang);
             }
@@ -81,7 +78,7 @@ namespace InfoPoster_backend.Handlers.Offers
 
             offer.DateStart = request.DateStart;
             offer.DateEnd = request.DateEnd;
-            offer.PlaceLink = request.PlaceLink;
+            //offer.PlaceLink = request.PlaceLink;
             offer.CityId = request.CityId;
             await _repository.UpdateOffer(offer);
 

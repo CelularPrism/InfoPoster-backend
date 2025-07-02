@@ -23,10 +23,8 @@ namespace InfoPoster_backend.Handlers.Offers
         public int Status { get; set; }
         public string Lang { get; set; }
         public string Name { get; set; }
-        public string DateDescription { get; set; }
-        public string SmallDescription { get; set; }
         public string Description { get; set; }
-        public string Address { get; set; }
+        public string Comment { get; set; }
     }
 
     public class GetFullInfoOfferHandler : IRequestHandler<GetFullInfoOfferRequest, GetFullInfoOfferResponse>
@@ -51,14 +49,13 @@ namespace InfoPoster_backend.Handlers.Offers
                 ml = new OffersMultilangModel();
             }
 
+            var comment = await _repository.GetLastRejectedComment(offer.Id);
+
             var result = new GetFullInfoOfferResponse()
             {
                 Id = offer.Id,
                 Lang = ml.Lang,
                 Name = ml.Name,
-                DateDescription = ml.DateDescription,
-                SmallDescription = ml.SmallDescription,
-                Address = ml.Address,
                 CityId = offer.CityId,
                 CreatedAt = offer.CreatedAt,
                 DateEnd = offer.DateEnd,
@@ -67,6 +64,7 @@ namespace InfoPoster_backend.Handlers.Offers
                 Status = (int)offer.Status,
                 Type = (int)offer.Type,
                 UserId = offer.UserId,
+                Comment = comment != null ? comment.Text : string.Empty
             };
             return result;
         }

@@ -5,7 +5,7 @@ namespace InfoPoster_backend.Models.Offers
     public enum OFFER_TYPES
     {
         STOCK,
-        DISCOUNT
+        SPECIAL_OFFER
     }
 
     public class OffersModel
@@ -19,6 +19,6 @@ namespace InfoPoster_backend.Models.Offers
         public OFFER_TYPES Type { get; set; }
         public POSTER_STATUS Status { get; set; }
         public string Name { get; set; }
-        public string PlaceLink { get; set; }
+        //public string PlaceLink { get; set; }
     }
 }
