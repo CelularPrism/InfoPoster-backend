@@ -57,11 +57,13 @@ namespace InfoPoster_backend.Repos
             {
                 if (type == CategoryType.EVENT)
                 {
-                    categories = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= DateTime.UtcNow || p.ReleaseDateEnd > DateTime.UtcNow)).GroupBy(p => p.CategoryId).Select(p => (Guid)p.Key).ToListAsync();
+                    var posters = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= DateTime.UtcNow || p.ReleaseDateEnd > DateTime.UtcNow)).Select(p => p.Id).ToListAsync();
+                    categories = await _organizations.ApplicationCategories.Where(c => posters.Contains(c.ApplicationId)).GroupBy(c => c.CategoryId).Select(c => c.Key).ToListAsync();
                 }
                 else
                 {
-                    categories = await _organizations.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(p => p.CategoryId).Select(p => p.Key).ToListAsync();
+                    var orgs = await _organizations.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(p => p.Id).ToListAsync();
+                    categories = await _organizations.ApplicationCategories.Where(c => orgs.Contains(c.ApplicationId)).GroupBy(c => c.CategoryId).Select(c => c.Key).ToListAsync();
                 }
             }
                                     

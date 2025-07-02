@@ -49,8 +49,9 @@ namespace InfoPoster_backend.Handlers.Organizations
             if (request.Status == POSTER_STATUS.PUBLISHED)
             {
                 var fullInfo = await _repository.GetOrganizationFullInfo(request.Id);
+                var categs = await _repository.GetCategories(request.Id);
 
-                if (organization.CategoryId == Guid.Empty || organization.SubcategoryId == Guid.Empty || fullInfo.City == null || fullInfo.City == Guid.Empty || string.IsNullOrEmpty(fullInfo.Capacity) || string.IsNullOrEmpty(fullInfo.AgeRestriction) || string.IsNullOrEmpty(fullInfo.PriceLevel))
+                if (categs.Count == 0 || fullInfo.City == null || fullInfo.City == Guid.Empty || string.IsNullOrEmpty(fullInfo.Capacity) || string.IsNullOrEmpty(fullInfo.AgeRestriction) || string.IsNullOrEmpty(fullInfo.PriceLevel))
                 {
                     return new ChangeOrganizationStatusResponse()
                     {

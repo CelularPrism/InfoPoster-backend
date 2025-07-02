@@ -451,6 +451,16 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpPost("organization/popularity/set")]
+        public async Task<IActionResult> SetPopularityOrganization([FromForm] SetPopularityOrganizationRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == false)
+                return BadRequest();
+
+            return Ok();
+        }
+
         [HttpPost("file/upload")]
         public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
         {

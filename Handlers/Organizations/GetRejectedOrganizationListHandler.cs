@@ -32,6 +32,7 @@ namespace InfoPoster_backend.Handlers.Organizations
 
         public async Task<GetOrganizationListResponse> Handle(GetRejectedOrganizationListRequest request, CancellationToken cancellationToken = default)
         {
+            var categsTask = _repository.GetApplicationCategories();
             var userId = _loginService.GetUserId();
             var organizations = await _repository.GetRejectedOrganizationList(_lang, userId, request.CategoryId, request.Status, request.StartDate, request.EndDate, userId, request.CityId);
             var cities = await _repository.GetCities(_lang);
@@ -57,11 +58,15 @@ namespace InfoPoster_backend.Handlers.Organizations
             var idEnum = organizations.Select(x => x.Id);
             var multilang = await _repository.GetMultilang(idEnum);
             var fullInfo = await _repository.GetFullInfo(idEnum);
+            var categs = await categsTask;
 
             var orgList = organizations.Select(o => new OrganizationResponseModel()
             {
-                CategoryId = o.CategoryId,
-                CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                Category = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.CategoryId).Select(g => new Models.IdNameModel()
+                {
+                    Id = g.Key,
+                    Name = categories.Where(c => c.Id == g.Key).Select(c => c.Name).FirstOrDefault()
+                }).OrderBy(c => c.Name).ToList(),
                 CityId = fullInfo.Where(f => f.OrganizationId == o.Id).Select(f => f.City).FirstOrDefault(),
                 CityName = fullInfo.Where(f => f.OrganizationId == o.Id)
                                    .Join(cities,
@@ -73,8 +78,11 @@ namespace InfoPoster_backend.Handlers.Organizations
                 Id = o.Id,
                 Name = multilang.Where(m => m.OrganizationId == o.Id).Select(m => m.Name).FirstOrDefault(),
                 Status = o.Status,
-                SubcategoryId = o.SubcategoryId,
-                SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                Subcategory = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.SubcategoryId).Select(g => new Models.IdNameModel()
+                {
+                    Id = g.Key,
+                    Name = subcategories.Where(c => c.Id == g.Key).Select(c => c.Name).FirstOrDefault()
+                }).OrderBy(c => c.Name).ToList(),
             }).ToList();
 
             if (request.Sort == 0)

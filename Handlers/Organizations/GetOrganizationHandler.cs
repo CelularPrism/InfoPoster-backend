@@ -17,8 +17,8 @@ namespace InfoPoster_backend.Handlers.Organizations
         public Guid OrganizationId { get; set; }
         public string Lang { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public Guid CategoryId { get; set; }
-        public Guid SubcategoryId { get; set; }
+        public List<Guid> CategoryId { get; set; }
+        public List<Guid> SubcategoryId { get; set; }
         public string PriceLevel { get; set; } = string.Empty;
         public string Capacity { get; set; } = string.Empty;
         public Guid? City { get; set; }
@@ -111,9 +111,13 @@ namespace InfoPoster_backend.Handlers.Organizations
 
             result.MenuCategories = await _repository.GetMenuList(request.Id, _lang);
 
+            var categoriesApp = await _repository.GetCategories(request.Id);
+            var categories = categoriesApp.GroupBy(c => c.CategoryId).Select(c => c.Key).ToList();
+            var subcategories = categoriesApp.GroupBy(c => c.SubcategoryId).Select(c => c.Key).ToList();
+
             result.OrganizationId = organization.Id;
-            result.CategoryId = organization.CategoryId;
-            result.SubcategoryId = organization.SubcategoryId;
+            result.CategoryId = categories;
+            result.SubcategoryId = subcategories;
             var comment = await _repository.GetLastRejectedComment(request.Id);
             if (comment != null)
                 result.Comment = comment.Text;

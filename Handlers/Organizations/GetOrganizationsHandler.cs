@@ -33,10 +33,8 @@ namespace InfoPoster_backend.Handlers.Organizations
         public DateTime CreatedAt { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public Guid CategoryId { get; set; }
-        public string CategoryName { get; set; }
-        public Guid SubcategoryId { get; set; }
-        public string SubcategoryName { get; set; }
+        public List<IdNameModel> Category { get; set; }
+        public List<IdNameModel> Subcategory { get; set; }
         public string Place { get; set; }
         public Guid? FileId { get; set; }
         public string FileURL { get; set; }
@@ -60,6 +58,7 @@ namespace InfoPoster_backend.Handlers.Organizations
 
         public async Task<GetOrganizationsResponse> Handle(GetOrganizationsRequest request, CancellationToken cancellationToken = default)
         {
+            var categsTask = _repository.GetApplicationCategories();
             var organizationList = await _repository.GetOrganizationList(string.Empty, Guid.Empty, new List<int>() { (int)POSTER_STATUS.PUBLISHED }, request.categoryId, request.startDate, request.endDate, null, _city);
             if (request.subcategoryId != null)
             {
@@ -74,16 +73,25 @@ namespace InfoPoster_backend.Handlers.Organizations
             var data = new List<InfoOrganization>();
             if (request.categoryId != null && request.subcategoryId != null) 
             {
-                var category = await _repository.GetCategory(request.categoryId);
-                var subcategory = await _repository.GetSubcategory(request.subcategoryId);
+                var categories = await _repository.GetCategories();
+                var subcategories = await _repository.GetSubcategories();
 
-                data = organizationList.Where(o => o.CategoryId == request.categoryId && o.SubcategoryId == request.subcategoryId)
+                var categs = await categsTask;
+                var orgs = categs.Where(c => c.CategoryId == request.categoryId && c.SubcategoryId == request.subcategoryId).Select(c => c.ApplicationId).ToList();
+ 
+                data = organizationList.Where(o => orgs.Contains(o.Id))
                                              .Select(o => new InfoOrganization()
                                              {
-                                                 CategoryId = o.CategoryId,
-                                                 CategoryName = category.Name,
-                                                 SubcategoryId = subcategory.Id,
-                                                 SubcategoryName = subcategory.Name,
+                                                 Category = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.CategoryId).Select(c => new IdNameModel()
+                                                 {
+                                                     Id = c.Key,
+                                                     Name = categories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                                                 }).OrderBy(c => c.Name).ToList(),
+                                                 Subcategory = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.SubcategoryId).Select(c => new IdNameModel()
+                                                 {
+                                                     Id = c.Key,
+                                                     Name = subcategories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                                                 }).OrderBy(c => c.Name).ToList(),
                                                  Id = o.Id,
                                                  Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
@@ -92,16 +100,25 @@ namespace InfoPoster_backend.Handlers.Organizations
                                              }).ToList();
             } else if (request.subcategoryId != null)
             {
-                var subcategory = await _repository.GetSubcategory(request.subcategoryId);
                 var categories = await _repository.GetCategories();
+                var subcategories = await _repository.GetSubcategories();
 
-                data = organizationList.Where(o => o.SubcategoryId == request.subcategoryId)
+                var categs = await categsTask;
+                var orgs = categs.Where(c => c.SubcategoryId == request.subcategoryId).Select(c => c.ApplicationId).ToList();
+
+                data = organizationList.Where(o => orgs.Contains(o.Id))
                                              .Select(o => new InfoOrganization()
                                              {
-                                                 CategoryId = o.CategoryId,
-                                                 CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
-                                                 SubcategoryId = subcategory.Id,
-                                                 SubcategoryName = subcategory.Name,
+                                                 Category = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.CategoryId).Select(c => new IdNameModel()
+                                                 {
+                                                     Id = c.Key,
+                                                     Name = categories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                                                 }).OrderBy(c => c.Name).ToList(),
+                                                 Subcategory = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.SubcategoryId).Select(c => new IdNameModel()
+                                                 {
+                                                     Id = c.Key,
+                                                     Name = subcategories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                                                 }).OrderBy(c => c.Name).ToList(),
                                                  Id = o.Id,
                                                  Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
@@ -110,16 +127,25 @@ namespace InfoPoster_backend.Handlers.Organizations
                                              }).ToList();
             } else if (request.categoryId != null)
             {
+                var categories = await _repository.GetCategories();
                 var subcategories = await _repository.GetSubcategories();
-                var category = await _repository.GetCategory(request.categoryId);
 
-                data = organizationList.Where(o => o.CategoryId == request.categoryId)
+                var categs = await categsTask;
+                var orgs = categs.Where(c => c.CategoryId == request.categoryId).Select(c => c.ApplicationId).ToList();
+
+                data = organizationList.Where(o => orgs.Contains(o.Id))
                                              .Select(o => new InfoOrganization()
                                              {
-                                                 CategoryId = o.CategoryId,
-                                                 CategoryName = category.Name,
-                                                 SubcategoryId = o.SubcategoryId,
-                                                 SubcategoryName = subcategories.Where(c => c.Id == o.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                 Category = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.CategoryId).Select(c => new IdNameModel()
+                                                 {
+                                                     Id = c.Key,
+                                                     Name = categories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                                                 }).OrderBy(c => c.Name).ToList(),
+                                                 Subcategory = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.SubcategoryId).Select(c => new IdNameModel()
+                                                 {
+                                                     Id = c.Key,
+                                                     Name = subcategories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                                                 }).OrderBy(c => c.Name).ToList(),
                                                  Id = o.Id,
                                                  Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                  CreatedAt = o.CreatedAt,
@@ -131,12 +157,20 @@ namespace InfoPoster_backend.Handlers.Organizations
                 var categories = await _repository.GetCategories();
                 var subcategories = await _repository.GetSubcategories();
 
+                var categs = await categsTask;
+
                 data = organizationList.Select(o => new InfoOrganization()
                                          {
-                                                CategoryId = o.CategoryId,
-                                                CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
-                                                SubcategoryId = o.SubcategoryId,
-                                                SubcategoryName = subcategories.Where(c => c.Id == o.SubcategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                 Category = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.CategoryId).Select(c => new IdNameModel()
+                                                 {
+                                                     Id = c.Key,
+                                                     Name = categories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                                                 }).OrderBy(c => c.Name).ToList(),
+                                                 Subcategory = categs.Where(c => c.ApplicationId == o.Id).GroupBy(c => c.SubcategoryId).Select(c => new IdNameModel()
+                                                 {
+                                                     Id = c.Key,
+                                                     Name = subcategories.Where(cat => cat.Id == c.Key).Select(cat => cat.Name).FirstOrDefault()
+                                                 }).OrderBy(c => c.Name).ToList(),
                                                 Id = o.Id,
                                                 Name = multilang.Where(m => m.OrganizationId == o.Id).Select(o => o.Name).FirstOrDefault(),
                                                 CreatedAt = o.CreatedAt,
