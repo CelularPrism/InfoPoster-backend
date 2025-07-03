@@ -43,7 +43,7 @@ namespace InfoPoster_backend.Handlers.Offers
                 }
             }
 
-            if (offer.DateStart == DateTime.MinValue || offer.DateEnd == DateTime.MinValue || !multilang.Any())
+            if (offer.DateStart == DateTime.MinValue || !multilang.Any())
             {
                 return null;
             }

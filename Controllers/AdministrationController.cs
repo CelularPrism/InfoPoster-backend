@@ -361,7 +361,7 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpPost("organization/full-info/save")]
-        public async Task<IActionResult> SaveFullInfoOrganization([FromForm] SaveOrganizationRequest request)
+        public async Task<IActionResult> SaveFullInfoOrganization([FromBody] SaveOrganizationRequest request)
         {
             var result = await _mediator.Send(request);
             if (result == null)
@@ -557,7 +557,7 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpPost("offer/full-info/save")]
-        public async Task<IActionResult> SaveFullInfoOffer([FromForm] SaveFullInfoOfferRequest request)
+        public async Task<IActionResult> SaveFullInfoOffer([FromBody] SaveFullInfoOfferRequest request)
         {
             var result = await _mediator.Send(request);
             if (result == null)
