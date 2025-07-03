@@ -13,7 +13,7 @@ namespace InfoPoster_backend.Handlers.Offers
         public Guid CityId { get; set; }
         public DateTime DateStart { get; set; }
         public DateTime? DateEnd { get; set; }
-        public OFFER_TYPES Type { get; set; }
+        public OFFER_TYPES? Type { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Lang { get; set; }
@@ -75,6 +75,9 @@ namespace InfoPoster_backend.Handlers.Offers
 
             if (string.IsNullOrEmpty(offer.Name) || request.Lang == Constants.DefaultLang)
                 offer.Name = request.Name;
+
+            if (request.Type != null)
+                offer.Type = request.Type.Value;
 
             offer.DateStart = request.DateStart;
             offer.DateEnd = request.DateEnd;

@@ -5,7 +5,7 @@ namespace InfoPoster_backend.Models.Offers
     public enum OFFER_TYPES
     {
         STOCK,
-        SPECIAL_OFFER
+        DISCOUNT
     }
 
     public class OffersModel
