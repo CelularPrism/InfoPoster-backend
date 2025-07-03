@@ -14,11 +14,13 @@ namespace InfoPoster_backend.Repos
     {
         private readonly OfferContext _context;
         private readonly string _lang;
+        private readonly Guid _city;
 
         public OfferRepository(OfferContext context, IHttpContextAccessor accessor)
         {
             _context = context;
             _lang = accessor.HttpContext.Items[Constants.HTTP_ITEM_ClientLang].ToString();
+            _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
         public async Task<OffersModel> GetOffer(Guid id) => await _context.Offers.FirstOrDefaultAsync(o => o.Id == id);
@@ -42,6 +44,46 @@ namespace InfoPoster_backend.Repos
             var result = await query.ToListAsync();
             return result;
         }
+
+        public async Task<List<OffersResponseModel>> GetOffersByCity() =>
+            await _context.Offers.Where(o => o.Status == POSTER_STATUS.PUBLISHED && 
+                                             (o.DateEnd > DateTime.UtcNow.Date || o.DateEnd == null) && 
+                                             o.CityId == _city)
+                                 .Join(_context.OffersMultilang,
+                                       o => o.Id,
+                                       ml => ml.OfferId,
+                                       (o, ml) => new { Offer = o, Multilang = ml })
+                                 .Where(o => o.Multilang.Lang == _lang)
+                                 .Select(o => new OffersResponseModel()
+                                 {
+                                    DateEnd = o.Offer.DateEnd,
+                                    DateStart = o.Offer.DateStart,
+                                    Description = o.Multilang.Description,
+                                    Id = o.Offer.Id,
+                                    Name = o.Multilang.Name,
+                                    Type = o.Offer.Type
+                                 })
+                                 .OrderBy(o => o.DateStart)
+                                 .ToListAsync();
+
+        public async Task<OffersResponseModel> GetOfferResponse(Guid id) =>
+            await _context.Offers.Where(o => o.Id == id)
+                                 .Join(_context.OffersMultilang,
+                                       o => o.Id,
+                                       ml => ml.OfferId,
+                                       (o, ml) => new { Offer = o, Multilang = ml })
+                                 .Where(o => o.Multilang.Lang == _lang)
+                                 .Select(o => new OffersResponseModel()
+                                 {
+                                     DateEnd = o.Offer.DateEnd,
+                                     DateStart = o.Offer.DateStart,
+                                     Description = o.Multilang.Description,
+                                     Id = o.Offer.Id,
+                                     Name = o.Multilang.Name,
+                                     Type = o.Offer.Type
+                                 })
+                                 .OrderBy(o => o.DateStart)
+                                 .FirstOrDefaultAsync();
 
         public async Task<List<OffersMultilangModel>> GetMultilangList(IEnumerable<Guid> offers, string lang) =>
             await _context.OffersMultilang.Where(o => offers.Contains(o.OfferId) && o.Lang == lang).ToListAsync();
