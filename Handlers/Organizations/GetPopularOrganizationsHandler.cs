@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Posters;
+﻿using InfoPoster_backend.Models.Administration;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
 using MediatR;
@@ -7,7 +8,8 @@ namespace InfoPoster_backend.Handlers.Organizations
 {
     public class GetPopularOrganizationsRequest : IRequest<List<OrganizationResponseModel>>
     {
-        public Guid? SubcategoryId { get; set; } = null;
+        public POPULARITY_PLACE Place { get; set; }
+        public Guid? CategoryId { get; set; }
     }
 
     public class GetPopularOrganizationsHandler : IRequestHandler<GetPopularOrganizationsRequest, List<OrganizationResponseModel>>
@@ -23,17 +25,14 @@ namespace InfoPoster_backend.Handlers.Organizations
 
         public async Task<List<OrganizationResponseModel>> Handle(GetPopularOrganizationsRequest request, CancellationToken cancellationToken = default)
         {
-            var logs = new List<PosterViewLogModel>();
-            if (request.SubcategoryId != null && request.SubcategoryId != Guid.Empty)
+            var result = new List<OrganizationResponseModel>();
+            if (request.CategoryId != null && request.CategoryId != Guid.Empty)
             {
-                logs = await _repository.GetPublishedViewLogsBySubcategories((Guid)request.SubcategoryId);
+                result = await _repository.GetPopularOrganizationListByCategory(request.Place, (Guid)request.CategoryId);
             } else
             {
-                logs = await _repository.GetPublishedViewLogs();
+                result = await _repository.GetPopularOrganizationList(request.Place);
             }
-            
-            var list = logs.GroupBy(l => l.PosterId).Select(l => new { Organization = l.Key, Count = l.Count() }).OrderByDescending(l => l.Count).Take(9).Select(l => l.Organization).ToList();
-            var result = await _repository.GetOrganizationList(list);
 
             return result;
         }

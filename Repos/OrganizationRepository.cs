@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
@@ -508,6 +509,68 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
+        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place)
+        {
+            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categories = await _organization.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+            var subcategories = await _organization.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var orgs = await _organization.OrganizationsMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.OrganizationId))
+                                                                   .Join(_organization.Organizations,
+                                                                   ml => ml.OrganizationId,
+                                                                   org => org.Id,
+                                                                   (ml, o) => new OrganizationResponseModel()
+                                                                   {
+                                                                       Id = ml.OrganizationId,
+                                                                       CategoryId = o.CategoryId,
+                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       CreatedAt = o.CreatedAt,
+                                                                       Name = ml.Name,
+                                                                       Status = o.Status,
+                                                                       SubcategoryId = o.SubcategoryId,
+                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                   }).ToListAsync();
+            var result = new List<OrganizationResponseModel>();
+            foreach (var item in popularityOrgs)
+            {
+                var org = orgs.Where(o => o.Id == item).FirstOrDefault();
+                result.Add(org);
+            }
+
+            return result;
+        }
+
+        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationListByCategory(POPULARITY_PLACE place, Guid categoryId)
+        {
+            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place && p.CategoryId == categoryId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categories = await _organization.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+            var subcategories = await _organization.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var orgs = await _organization.OrganizationsMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.OrganizationId))
+                                                                   .Join(_organization.Organizations,
+                                                                   ml => ml.OrganizationId,
+                                                                   org => org.Id,
+                                                                   (ml, o) => new OrganizationResponseModel()
+                                                                   {
+                                                                       Id = ml.OrganizationId,
+                                                                       CategoryId = o.CategoryId,
+                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       CreatedAt = o.CreatedAt,
+                                                                       Name = ml.Name,
+                                                                       Status = o.Status,
+                                                                       SubcategoryId = o.SubcategoryId,
+                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                   }).ToListAsync();
+            var result = new List<OrganizationResponseModel>();
+            foreach (var item in popularityOrgs)
+            {
+                var org = orgs.Where(o => o.Id == item).FirstOrDefault();
+                result.Add(org);
+            }
+
+            return result;
+        }
+
         public async Task AddOrganization(OrganizationModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()
@@ -637,6 +700,18 @@ namespace InfoPoster_backend.Repos
         public async Task AddViewLog(PosterViewLogModel model)
         {
             await _organization.PosterViewLogs.AddAsync(model);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task AddPopularity(PopularityModel popularity)
+        {
+            await _organization.Popularity.AddAsync(popularity);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task RemovePopularity(PopularityModel popularity)
+        {
+            _organization.Popularity.Remove(popularity);
             await _organization.SaveChangesAsync();
         }
     }
