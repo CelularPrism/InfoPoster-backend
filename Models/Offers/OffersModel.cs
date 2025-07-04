@@ -21,4 +21,16 @@ namespace InfoPoster_backend.Models.Offers
         public string Name { get; set; }
         //public string PlaceLink { get; set; }
     }
+
+    public class OffersResponseModel
+    {
+        public Guid Id { get; set; }
+        public DateTime DateStart { get; set; }
+        public DateTime? DateEnd { get; set; }
+        public OFFER_TYPES Type { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public Guid? FileId { get; set; }
+        public string FileURL { get; set; }
+    }
 }

@@ -110,6 +110,9 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetPosterById([FromQuery] Guid id, [FromQuery] string lang)
         {
             var result = await _mediator.Send(new AdministrationGetPosterByIdRequest() { Id = id, Lang = lang });
+            if (result == null)
+                return NotFound();
+
             return Ok(result);
         }
 

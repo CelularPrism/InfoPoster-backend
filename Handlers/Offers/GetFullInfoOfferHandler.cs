@@ -1,7 +1,9 @@
 ﻿using InfoPoster_backend.Models.Offers;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Tools;
 using MediatR;
+using System.Text.Json.Serialization;
 
 namespace InfoPoster_backend.Handlers.Offers
 {
@@ -16,7 +18,9 @@ namespace InfoPoster_backend.Handlers.Offers
         public Guid Id { get; set; }
         public Guid CityId { get; set; }
         public DateTime CreatedAt { get; set; }
+        [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime DateStart { get; set; }
+        [JsonConverter(typeof(OnlyDateConverter))]
         public DateTime? DateEnd { get; set; }
         public Guid UserId { get; set; }
         public int Type { get; set; }

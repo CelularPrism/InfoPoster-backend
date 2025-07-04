@@ -58,7 +58,7 @@ namespace InfoPoster_backend.Handlers.Offers
                 OffersMultilangModel ml;
                 foreach (var lang in Constants.SystemLangs)
                 {
-                    ml = new OffersMultilangModel(request.Id, request.Lang, request.Name, request.Description);
+                    ml = new OffersMultilangModel(request.Id, lang, request.Name, request.Description);
                     multilang.Add(ml);
                 }
 
