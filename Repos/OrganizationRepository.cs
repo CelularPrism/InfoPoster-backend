@@ -542,13 +542,29 @@ namespace InfoPoster_backend.Repos
                                                                    (ml, o) => new OrganizationResponseModel()
                                                                    {
                                                                        Id = ml.OrganizationId,
-                                                                       CategoryId = o.CategoryId,
-                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       Category = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.CategoriesMultilang,
+                                                                                                                                                   c => c.CategoryId,
+                                                                                                                                                   ml => ml.CategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.CategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
+                                                                       Subcategory = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.SubcategoriesMultilang,
+                                                                                                                                                   c => c.SubcategoryId,
+                                                                                                                                                   ml => ml.SubcategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.SubcategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
                                                                        CreatedAt = o.CreatedAt,
                                                                        Name = ml.Name,
-                                                                       Status = o.Status,
-                                                                       SubcategoryId = o.SubcategoryId,
-                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                       Status = o.Status
                                                                    }).ToListAsync();
             var result = new List<OrganizationResponseModel>();
             foreach (var item in popularityOrgs)
@@ -573,13 +589,29 @@ namespace InfoPoster_backend.Repos
                                                                    (ml, o) => new OrganizationResponseModel()
                                                                    {
                                                                        Id = ml.OrganizationId,
-                                                                       CategoryId = o.CategoryId,
-                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       Category = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.CategoriesMultilang,
+                                                                                                                                                   c => c.CategoryId,
+                                                                                                                                                   ml => ml.CategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.CategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
+                                                                       Subcategory = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.SubcategoriesMultilang,
+                                                                                                                                                   c => c.SubcategoryId,
+                                                                                                                                                   ml => ml.SubcategoryId,
+                                                                                                                                                   (c, ml) => ml)
+                                                                                                                                             .Where(ml => ml.lang == _lang)
+                                                                                                                                             .Select(ml => new IdNameModel()
+                                                                                                                                             {
+                                                                                                                                                 Id = ml.SubcategoryId,
+                                                                                                                                                 Name = ml.Name
+                                                                                                                                             }).ToList(),
                                                                        CreatedAt = o.CreatedAt,
                                                                        Name = ml.Name,
-                                                                       Status = o.Status,
-                                                                       SubcategoryId = o.SubcategoryId,
-                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                       Status = o.Status
                                                                    }).ToListAsync();
             var result = new List<OrganizationResponseModel>();
             foreach (var item in popularityOrgs)
@@ -723,6 +755,17 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
+        public async Task AddCategories(List<ApplicationCategoryModel> list)
+        {
+            await _organization.ApplicationCategories.AddRangeAsync(list);
+            await _organization.SaveChangesAsync();
+        }
+
+        public async Task RemoveCategories(List<ApplicationCategoryModel> list)
+        {
+            _organization.ApplicationCategories.RemoveRange(list);
+            await _organization.SaveChangesAsync();
+        }
         public async Task AddPopularity(PopularityModel popularity)
         {
             await _organization.Popularity.AddAsync(popularity);

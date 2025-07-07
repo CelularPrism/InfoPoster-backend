@@ -483,6 +483,7 @@ namespace InfoPoster_backend.Controllers
                 return NotFound();
 
             return Ok(result);
+        }
 
         [HttpPost("file/upload")]
         public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
