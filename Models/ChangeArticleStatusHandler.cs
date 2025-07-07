@@ -2,7 +2,7 @@
 using InfoPoster_backend.Repos;
 using MediatR;
 
-namespace InfoPoster_backend.Models.Contexts
+namespace InfoPoster_backend.Models
 {
     public class ChangeArticleStatusRequest : IRequest<ChangeArticleStatusResponse>
     {

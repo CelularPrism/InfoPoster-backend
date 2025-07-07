@@ -151,11 +151,6 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        //public async Task<PopularityModel> GetPopularity(Guid id, Guid categoryId, Guid subcategoryId) =>
-        //    await _organization.PopularityApplications.FirstOrDefaultAsync(p => p.ApplicationId == id &&
-        //                                                                        p.CategoryId == categoryId &&
-        //                                                                        p.SubcategoryId == subcategoryId);
-
         public async Task<List<OrganizationMultilangModel>> GetMultilang(IEnumerable<Guid> organizations) =>
             await _organization.OrganizationsMultilang.Where(m => m.Lang == _lang && organizations.Contains(m.OrganizationId)).ToListAsync();
 
@@ -527,6 +522,75 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
+        {
+            var publishedOrgs = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
+            var result = await _organization.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place)
+        {
+            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categories = await _organization.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+            var subcategories = await _organization.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var orgs = await _organization.OrganizationsMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.OrganizationId))
+                                                                   .Join(_organization.Organizations,
+                                                                   ml => ml.OrganizationId,
+                                                                   org => org.Id,
+                                                                   (ml, o) => new OrganizationResponseModel()
+                                                                   {
+                                                                       Id = ml.OrganizationId,
+                                                                       CategoryId = o.CategoryId,
+                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       CreatedAt = o.CreatedAt,
+                                                                       Name = ml.Name,
+                                                                       Status = o.Status,
+                                                                       SubcategoryId = o.SubcategoryId,
+                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                   }).ToListAsync();
+            var result = new List<OrganizationResponseModel>();
+            foreach (var item in popularityOrgs)
+            {
+                var org = orgs.Where(o => o.Id == item).FirstOrDefault();
+                result.Add(org);
+            }
+
+            return result;
+        }
+
+        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationListByCategory(POPULARITY_PLACE place, Guid categoryId)
+        {
+            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place && p.CategoryId == categoryId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categories = await _organization.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+            var subcategories = await _organization.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var orgs = await _organization.OrganizationsMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.OrganizationId))
+                                                                   .Join(_organization.Organizations,
+                                                                   ml => ml.OrganizationId,
+                                                                   org => org.Id,
+                                                                   (ml, o) => new OrganizationResponseModel()
+                                                                   {
+                                                                       Id = ml.OrganizationId,
+                                                                       CategoryId = o.CategoryId,
+                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       CreatedAt = o.CreatedAt,
+                                                                       Name = ml.Name,
+                                                                       Status = o.Status,
+                                                                       SubcategoryId = o.SubcategoryId,
+                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                   }).ToListAsync();
+            var result = new List<OrganizationResponseModel>();
+            foreach (var item in popularityOrgs)
+            {
+                var org = orgs.Where(o => o.Id == item).FirstOrDefault();
+                result.Add(org);
+            }
+
+            return result;
+        }
+
         public async Task AddOrganization(OrganizationModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()
@@ -659,29 +723,29 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
-        public async Task AddCategories(List<ApplicationCategoryModel> list)
+        public async Task AddPopularity(PopularityModel popularity)
         {
-            await _organization.ApplicationCategories.AddRangeAsync(list);
+            await _organization.Popularity.AddAsync(popularity);
             await _organization.SaveChangesAsync();
         }
 
-        public async Task RemoveCategories(List<ApplicationCategoryModel> list)
+        public async Task AddPopularity(List<PopularityModel> popularity)
         {
-            _organization.ApplicationCategories.RemoveRange(list);
+            await _organization.Popularity.AddRangeAsync(popularity);
             await _organization.SaveChangesAsync();
         }
 
-        //public async Task AddPopularity(PopularityModel model)
-        //{
-        //    await _organization.PopularityApplications.AddAsync(model);
-        //    await _organization.SaveChangesAsync();
-        //}
+        public async Task RemovePopularity(PopularityModel popularity)
+        {
+            _organization.Popularity.Remove(popularity);
+            await _organization.SaveChangesAsync();
+        }
 
-        //public async Task UpdatePopularity(PopularityModel model)
-        //{
-        //    _organization.PopularityApplications.Update(model);
-        //    await _organization.SaveChangesAsync();
-        //}
+        public async Task RemovePopularity(List<PopularityModel> popularity)
+        {
+            _organization.Popularity.RemoveRange(popularity);
+            await _organization.SaveChangesAsync();
+        }
 
         private IQueryable<OrganizationModel> FilterOrganization(IQueryable<OrganizationModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {

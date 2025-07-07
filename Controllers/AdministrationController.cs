@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Administration.Organization;
 using InfoPoster_backend.Handlers.Offers;
 using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Handlers.Posters;
@@ -454,15 +455,34 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [HttpPost("organization/popularity/set")]
-        public async Task<IActionResult> SetPopularityOrganization([FromForm] SetPopularityOrganizationRequest request)
+        [HttpPost("organization/popularity/add")]
+        public async Task<IActionResult> AddPopularityOrganization([FromBody] AddPopularityOrganizationRequest request)
         {
             var result = await _mediator.Send(request);
-            if (result == false)
-                return BadRequest();
+            if (result == null)
+                return NotFound();
 
-            return Ok();
+            return Ok(result);
         }
+
+        [HttpGet("organization/popularity/get")]
+        public async Task<IActionResult> GetPopularityOrganization()
+        {
+            var result = await _mediator.Send(new GetPopularityOrganizationRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("organization/published/get")]
+        public async Task<IActionResult> GetPublishedOrganization()
+        {
+            var result = await _mediator.Send(new GetPublishedOrganizationRequest());
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
 
         [HttpPost("file/upload")]
         public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)

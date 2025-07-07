@@ -6,6 +6,7 @@ using InfoPoster_backend.Models.Organizations.Menu;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Models.Selectel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace InfoPoster_backend.Models.Contexts
 {
@@ -21,6 +22,16 @@ namespace InfoPoster_backend.Models.Contexts
             {
                 var exc = ex;
             }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            var popularityPlaceConverter = new EnumToNumberConverter<POPULARITY_PLACE, int>();
+            modelBuilder.Entity<PopularityModel>(entity =>
+            {
+                entity.Property(prop => prop.Place).HasConversion(popularityPlaceConverter);
+
+            });
         }
 
         public DbSet<OrganizationModel> Organizations { get; set; }
@@ -47,7 +58,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<ApplicationChangeHistory> ApplicationChangeHistory { get; set; }
         public DbSet<RejectedComments> RejectedComments { get; set; }
         public DbSet<PosterViewLogModel> PosterViewLogs { get; set; }
-        //public DbSet<PopularityModel> PopularityApplications { get; set; }
-        public DbSet<ApplicationCategoryModel> ApplicationCategories { get; set; }
+        public DbSet<PopularityModel> Popularity { get; set; }
     }
 }
