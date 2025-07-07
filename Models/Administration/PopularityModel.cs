@@ -15,4 +15,12 @@
         public POPULARITY_PLACE Place { get; set; }
         public int Popularity { get; set; }
     }
+
+    public class PopularityResponseModel
+    {
+        public Guid Id { get; set; }
+        public Guid ApplicationId { get; set; }
+        public string Name { get; set; }
+        public int Popularity { get; set; }
+    }
 }

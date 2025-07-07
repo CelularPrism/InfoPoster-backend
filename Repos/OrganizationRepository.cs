@@ -147,45 +147,6 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        private IQueryable<OrganizationModel> FilterOrganization(IQueryable<OrganizationModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
-        {
-            if (categoryId != null)
-            {
-                query = query.Where(q => q.CategoryId == categoryId);
-            }
-
-            if (status != null)
-            {
-                query = query.Where(q => q.Status == status);
-            }
-
-            if (startDate != null)
-            {
-                query = query.Where(q => q.CreatedAt >= startDate);
-            }
-
-            if (endDate != null)
-            {
-                query = query.Where(q => q.CreatedAt <= endDate);
-            }
-
-            if (userId != null)
-            {
-                query = query.Where(q => q.UserId == userId);
-            }
-
-            if (cityId != null)
-            {
-                query = query.Join(_organization.OrganizationsFullInfo,
-                                   q => q.Id,
-                                   f => f.OrganizationId,
-                                   (q, f) => new { Organization = q, CityId = f.City })
-                             .Where(q => q.CityId == cityId)
-                             .Select(q => q.Organization);
-            }
-            return query;
-        }
-
         public async Task<List<OrganizationMultilangModel>> GetMultilang(IEnumerable<Guid> organizations) =>
             await _organization.OrganizationsMultilang.Where(m => m.Lang == _lang && organizations.Contains(m.OrganizationId)).ToListAsync();
 
@@ -509,6 +470,13 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
+        {
+            var publishedOrgs = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
+            var result = await _organization.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place).ToListAsync();
+            return result;
+        }
+
         public async Task<List<OrganizationResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place)
         {
             var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
@@ -709,10 +677,61 @@ namespace InfoPoster_backend.Repos
             await _organization.SaveChangesAsync();
         }
 
+        public async Task AddPopularity(List<PopularityModel> popularity)
+        {
+            await _organization.Popularity.AddRangeAsync(popularity);
+            await _organization.SaveChangesAsync();
+        }
+
         public async Task RemovePopularity(PopularityModel popularity)
         {
             _organization.Popularity.Remove(popularity);
             await _organization.SaveChangesAsync();
+        }
+
+        public async Task RemovePopularity(List<PopularityModel> popularity)
+        {
+            _organization.Popularity.RemoveRange(popularity);
+            await _organization.SaveChangesAsync();
+        }
+
+        private IQueryable<OrganizationModel> FilterOrganization(IQueryable<OrganizationModel> query, Guid? categoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        {
+            if (categoryId != null)
+            {
+                query = query.Where(q => q.CategoryId == categoryId);
+            }
+
+            if (status != null)
+            {
+                query = query.Where(q => q.Status == status);
+            }
+
+            if (startDate != null)
+            {
+                query = query.Where(q => q.CreatedAt >= startDate);
+            }
+
+            if (endDate != null)
+            {
+                query = query.Where(q => q.CreatedAt <= endDate);
+            }
+
+            if (userId != null)
+            {
+                query = query.Where(q => q.UserId == userId);
+            }
+
+            if (cityId != null)
+            {
+                query = query.Join(_organization.OrganizationsFullInfo,
+                                   q => q.Id,
+                                   f => f.OrganizationId,
+                                   (q, f) => new { Organization = q, CityId = f.City })
+                             .Where(q => q.CityId == cityId)
+                             .Select(q => q.Organization);
+            }
+            return query;
         }
     }
 }

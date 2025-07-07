@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Articles;
+using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Contexts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

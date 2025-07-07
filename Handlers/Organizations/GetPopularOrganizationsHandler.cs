@@ -34,6 +34,8 @@ namespace InfoPoster_backend.Handlers.Organizations
                 result = await _repository.GetPopularOrganizationList(request.Place);
             }
 
+            result = result.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).ToList();
+
             return result;
         }
     }

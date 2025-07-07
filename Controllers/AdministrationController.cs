@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Administration.Organization;
 using InfoPoster_backend.Handlers.Offers;
 using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Handlers.Posters;
@@ -410,6 +411,36 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetOrganizationFieldsHistory([FromQuery] Guid articleId)
         {
             var result = await _mediator.Send(new GetOrganizationChangeHistoryRequest() { Id = articleId });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpPost("organization/popularity/add")]
+        public async Task<IActionResult> AddPopularityOrganization([FromBody] AddPopularityOrganizationRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("organization/popularity/get")]
+        public async Task<IActionResult> GetPopularityOrganization()
+        {
+            var result = await _mediator.Send(new GetPopularityOrganizationRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("organization/published/get")]
+        public async Task<IActionResult> GetPublishedOrganization()
+        {
+            var result = await _mediator.Send(new GetPublishedOrganizationRequest());
             if (result == null)
                 return NotFound();
 
