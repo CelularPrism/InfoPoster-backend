@@ -531,7 +531,6 @@ namespace InfoPoster_backend.Repos
                                                                        CategoryId = p.CategoryId,
                                                                        CategoryName = categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
                                                                        Name = ml.Name,
-                                                                       SubcategoryId = p.SubcategoryId,
                                                                        SubcategoryName = subcategories.Where(s => s.Id == p.SubcategoryId).Select(s => s.Name).FirstOrDefault()
                                                                    }).ToListAsync();
             var result = new List<PosterResponseModel>();
@@ -560,7 +559,6 @@ namespace InfoPoster_backend.Repos
                                                                        CategoryId = o.CategoryId,
                                                                        CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
                                                                        Name = ml.Name,
-                                                                       SubcategoryId = o.SubcategoryId,
                                                                        SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
                                                                    }).ToListAsync();
             var result = new List<PosterResponseModel>();
