@@ -28,15 +28,15 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
 
         public async Task<List<GetPopularityPosterResponse>> Handle(GetPopularityPosterRequest request, CancellationToken cancellation = default)
         {
-            var organizations = await _repository.GetPopularOrganizationList(request.Place);
+            var posters = await _repository.GetPopularPosterList(request.Place);
             var popularity = await _repository.GetPopularityList(request.Place);
 
-            var result = organizations.Select(o => new GetPopularityPosterResponse()
+            var result = posters.Select(o => new GetPopularityPosterResponse()
             {
-                Id = popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Id).FirstOrDefault(),
+                Id = popularity.Any(p => p.ApplicationId == o.Id) ? popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Id).FirstOrDefault() : null,
                 PosterId = o.Id,
                 Name = o.Name,
-                Popularity = popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Popularity).FirstOrDefault()
+                Popularity = popularity.Any(p => p.ApplicationId == o.Id) ? popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Popularity).FirstOrDefault() : null
             }).ToList();
             return result;
         }

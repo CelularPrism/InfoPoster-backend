@@ -515,26 +515,25 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<PosterResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place)
+        public async Task<List<PosterResponseModel>> GetPopularPosterList(POPULARITY_PLACE place)
         {
-            var popularityOrgs = await _context.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var popularityPosters = await _context.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
             var subcategories = await _context.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
 
-            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.PosterId))
+            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityPosters.Contains(ml.PosterId))
                                                                    .Join(_context.Posters,
                                                                    ml => ml.PosterId,
                                                                    p => p.Id,
                                                                    (ml, p) => new PosterResponseModel()
                                                                    {
                                                                        Id = ml.PosterId,
-                                                                       CategoryId = p.CategoryId,
-                                                                       CategoryName = categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
-                                                                       Name = ml.Name,
-                                                                       SubcategoryName = subcategories.Where(s => s.Id == p.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                       //CategoryId = p.CategoryId,
+                                                                       //CategoryName = categories.Where(c => c.CategoryId == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       Name = ml.Name
                                                                    }).ToListAsync();
             var result = new List<PosterResponseModel>();
-            foreach (var item in popularityOrgs)
+            foreach (var item in popularityPosters)
             {
                 var poster = posters.Where(o => o.Id == item).FirstOrDefault();
                 result.Add(poster);
@@ -543,26 +542,26 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<PosterResponseModel>> GetPopularOrganizationListByCategory(POPULARITY_PLACE place, Guid categoryId)
+        public async Task<List<PosterResponseModel>> GetPopularPosterListByCategory(POPULARITY_PLACE place, Guid categoryId)
         {
-            var popularityOrgs = await _context.Popularity.Where(p => p.Place == place && p.CategoryId == categoryId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var popularityPosters = await _context.Popularity.Where(p => p.Place == place && p.CategoryId == categoryId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
             var subcategories = await _context.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
 
-            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.PosterId))
+            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityPosters.Contains(ml.PosterId))
                                                                    .Join(_context.Posters,
                                                                    ml => ml.PosterId,
                                                                    org => org.Id,
                                                                    (ml, o) => new PosterResponseModel()
                                                                    {
                                                                        Id = ml.PosterId,
-                                                                       CategoryId = o.CategoryId,
-                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       //CategoryId = o.CategoryId,
+                                                                       //CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
                                                                        Name = ml.Name,
-                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                       //SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
                                                                    }).ToListAsync();
             var result = new List<PosterResponseModel>();
-            foreach (var item in popularityOrgs)
+            foreach (var item in popularityPosters)
             {
                 var poster = posters.Where(o => o.Id == item).FirstOrDefault();
                 result.Add(poster);
