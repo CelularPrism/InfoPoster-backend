@@ -32,6 +32,12 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
 
         public async Task<AddPopularityOrganizationResponse> Handle(AddPopularityOrganizationRequest request, CancellationToken cancellation = default)
         {
+            var anyIdentical = request.Popularity.GroupBy(p => p.Id).Select(p => new { Id = p.Key, Count = p.Count() }).Any(p => p.Count > 1);
+            if (anyIdentical)
+            {
+                return null;
+            }
+
             var popularity = await _repository.GetPopularityList(request.Place);
             var removeList = new List<PopularityModel>();
             var addList = new List<PopularityModel>();

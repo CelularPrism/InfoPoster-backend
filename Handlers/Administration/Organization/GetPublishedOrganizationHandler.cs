@@ -21,9 +21,9 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
         public async Task<List<OrganizationModel>> Handle(GetPublishedOrganizationRequest request, CancellationToken cancellation = default)
         {
             var organizations = await _repository.GetOrganizationList();
-            var popularity = await _repository.GetPopularityList(Models.Administration.POPULARITY_PLACE.MAIN);
+            //var popularity = await _repository.GetPopularityList(Models.Administration.POPULARITY_PLACE.MAIN);
 
-            var result = organizations.Where(o => !popularity.Select(p => p.ApplicationId).Contains(o.Id) && o.Name.Contains(request.SearchText)).ToList();
+            var result = organizations.Where(o => o.Name.Contains(request.SearchText)).ToList();
             return result;
         }
     }

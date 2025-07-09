@@ -11,10 +11,10 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
 
     public class GetPopularityOrganizationResponse
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public Guid OrganizationId { get; set; }
         public string Name { get; set; }
-        public int Popularity { get; set; }
+        public int? Popularity { get; set; }
     }
 
     public class GetPopularityOrganizationHandler : IRequestHandler<GetPopularityOrganizationRequest, List<GetPopularityOrganizationResponse>>
