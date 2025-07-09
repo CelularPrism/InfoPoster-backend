@@ -476,9 +476,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("organization/published/get")]
-        public async Task<IActionResult> GetPublishedOrganization()
+        public async Task<IActionResult> GetPublishedOrganization([FromQuery] string SearchText)
         {
-            var result = await _mediator.Send(new GetPublishedOrganizationRequest());
+            var result = await _mediator.Send(new GetPublishedOrganizationRequest() { SearchText = SearchText });
             if (result == null)
                 return NotFound();
 
