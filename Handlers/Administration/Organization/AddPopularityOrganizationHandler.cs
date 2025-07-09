@@ -39,17 +39,10 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
             }
 
             var popularity = await _repository.GetPopularityList(request.Place);
-            var removeList = new List<PopularityModel>();
             var addList = new List<PopularityModel>();
 
             foreach (var item in request.Popularity)
             {
-                if (popularity.Any(p => p.ApplicationId == item.Id))
-                {
-                    var remove = popularity.FirstOrDefault(p => p.ApplicationId == item.Id);
-                    removeList.Add(remove);
-                }
-
                 addList.Add(new PopularityModel()
                 {
                     Id = Guid.NewGuid(),
@@ -59,7 +52,7 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
                 });
             }
 
-            await _repository.RemovePopularity(removeList);
+            await _repository.RemovePopularity(popularity);
             await _repository.AddPopularity(addList);
             return new AddPopularityOrganizationResponse();
         }
