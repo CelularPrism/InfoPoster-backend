@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Articles;
+using InfoPoster_backend.Handlers.Articles.Popularity;
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Contexts;
 using MediatR;
@@ -35,7 +36,7 @@ namespace InfoPoster_backend.Controllers
 
         [Authorize(AuthenticationSchemes = "Asymmetric")]
         [HttpPost("save")]
-        public async Task<IActionResult> SaveArticle([FromForm] SaveArticleRequest request)
+        public async Task<IActionResult> SaveArticle([FromBody] SaveArticleRequest request)
         {
             var result = await _mediator.Send(request);
             if (result == null)
@@ -54,6 +55,26 @@ namespace InfoPoster_backend.Controllers
         }
 
         [Authorize(AuthenticationSchemes = "Asymmetric")]
+        [HttpPost("draft")]
+        public async Task<IActionResult> DraftArticle([FromForm] Guid id)
+        {
+            var result = await _mediator.Send(new ChangeArticleStatusRequest() { Id = id, Status = Models.Posters.POSTER_STATUS.DRAFT });
+            if (result == null)
+                return BadRequest();
+            return Ok(result);
+        }
+
+        [Authorize(AuthenticationSchemes = "Asymmetric")]
+        [HttpPost("delete")]
+        public async Task<IActionResult> DeleteArticle([FromForm] Guid id)
+        {
+            var result = await _mediator.Send(new ChangeArticleStatusRequest() { Id = id, Status = Models.Posters.POSTER_STATUS.DELETED });
+            if (result == null)
+                return BadRequest();
+            return Ok(result);
+        }
+
+        [Authorize(AuthenticationSchemes = "Asymmetric")]
         [HttpPost("publish")]
         public async Task<IActionResult> PublishArticle([FromForm] Guid id)
         {
@@ -68,6 +89,36 @@ namespace InfoPoster_backend.Controllers
         {
             var result = await _mediator.Send(new GetArticleListRequest() { Page = 0, CountPerPage = 3 });
             return Ok(result.Data);
+        }
+
+        [HttpPost("popularity/add")]
+        public async Task<IActionResult> AddPopularityPoster([FromBody] AddPopularityArticleRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("popularity/get")]
+        public async Task<IActionResult> GetPopularityPoster()
+        {
+            var result = await _mediator.Send(new GetPopularityArticleRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("published/get")]
+        public async Task<IActionResult> GetPublishedPoster([FromQuery] string SearchText)
+        {
+            var result = await _mediator.Send(new GetPublishedArticleRequest() { SearchText = SearchText });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
         }
     }
 }

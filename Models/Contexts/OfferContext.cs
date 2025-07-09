@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Offers;
 using InfoPoster_backend.Models.Posters;
@@ -38,5 +39,6 @@ namespace InfoPoster_backend.Models.Contexts
         public DbSet<OffersModel> Offers { get; set; }
         public DbSet<OffersMultilangModel> OffersMultilang { get; set; }
         public DbSet<UserModel> Users { get; set; }
+        public DbSet<PopularityModel> Popularity { get; set; }
     }
 }

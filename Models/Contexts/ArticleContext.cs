@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Posters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -31,5 +32,6 @@ namespace InfoPoster_backend.Models.Contexts
 
         public DbSet<UserModel> Users { get; set; }
         public DbSet<ArticleModel> Articles { get; set; }
+        public DbSet<PopularityModel> Popularity { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Administration.Offer;
 using InfoPoster_backend.Handlers.Administration.Organization;
 using InfoPoster_backend.Handlers.Administration.Poster;
 using InfoPoster_backend.Handlers.Offers;
@@ -590,6 +591,36 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> PublishOffer([FromForm] Guid id)
         {
             var result = await _mediator.Send(new SetStatusOfferRequest() { Id = id, Status = POSTER_STATUS.PUBLISHED });
+            return Ok(result);
+        }
+
+        [HttpPost("offer/popularity/add")]
+        public async Task<IActionResult> AddPopularityOffer([FromBody] AddPopularityOfferRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("offer/popularity/get")]
+        public async Task<IActionResult> GetPopularityOffer()
+        {
+            var result = await _mediator.Send(new GetPopularityOfferRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("offer/published/get")]
+        public async Task<IActionResult> GetPublishedOffer([FromQuery] string SearchText)
+        {
+            var result = await _mediator.Send(new GetPublishedOfferRequest() { SearchText = SearchText });
+            if (result == null)
+                return NotFound();
+
             return Ok(result);
         }
     }
