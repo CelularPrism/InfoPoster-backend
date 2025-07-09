@@ -2,6 +2,7 @@
 {
     public class PosterResponseModel
     {
+        public PosterResponseModel() { }
         public PosterResponseModel(PosterModel poster, PosterMultilangModel multilang)
         {
             Id = poster.Id;

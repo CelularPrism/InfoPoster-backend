@@ -1,6 +1,8 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
@@ -530,6 +532,71 @@ namespace InfoPoster_backend.Repos
             return history;
         }
 
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
+        {
+            var publishedOrgs = await _context.Posters.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
+            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<PosterResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place)
+        {
+            var popularityOrgs = await _context.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+            var subcategories = await _context.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.PosterId))
+                                                                   .Join(_context.Posters,
+                                                                   ml => ml.PosterId,
+                                                                   p => p.Id,
+                                                                   (ml, p) => new PosterResponseModel()
+                                                                   {
+                                                                       Id = ml.PosterId,
+                                                                       CategoryId = p.CategoryId,
+                                                                       CategoryName = categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       Name = ml.Name,
+                                                                       SubcategoryId = p.SubcategoryId,
+                                                                       SubcategoryName = subcategories.Where(s => s.Id == p.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                   }).ToListAsync();
+            var result = new List<PosterResponseModel>();
+            foreach (var item in popularityOrgs)
+            {
+                var poster = posters.Where(o => o.Id == item).FirstOrDefault();
+                result.Add(poster);
+            }
+
+            return result;
+        }
+
+        public async Task<List<PosterResponseModel>> GetPopularOrganizationListByCategory(POPULARITY_PLACE place, Guid categoryId)
+        {
+            var popularityOrgs = await _context.Popularity.Where(p => p.Place == place && p.CategoryId == categoryId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+            var subcategories = await _context.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.PosterId))
+                                                                   .Join(_context.Posters,
+                                                                   ml => ml.PosterId,
+                                                                   org => org.Id,
+                                                                   (ml, o) => new PosterResponseModel()
+                                                                   {
+                                                                       Id = ml.PosterId,
+                                                                       CategoryId = o.CategoryId,
+                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       Name = ml.Name,
+                                                                       SubcategoryId = o.SubcategoryId,
+                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                   }).ToListAsync();
+            var result = new List<PosterResponseModel>();
+            foreach (var item in popularityOrgs)
+            {
+                var poster = posters.Where(o => o.Id == item).FirstOrDefault();
+                result.Add(poster);
+            }
+
+            return result;
+        }
+
         public async Task AddPoster(PosterModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()
@@ -666,6 +733,30 @@ namespace InfoPoster_backend.Repos
         public async Task AddChangeHistory(List<ApplicationChangeHistory> list)
         {
             await _context.ApplicationChangeHistory.AddRangeAsync(list);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddPopularity(PopularityModel popularity)
+        {
+            await _context.Popularity.AddAsync(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddPopularity(List<PopularityModel> popularity)
+        {
+            await _context.Popularity.AddRangeAsync(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemovePopularity(PopularityModel popularity)
+        {
+            _context.Popularity.Remove(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemovePopularity(List<PopularityModel> popularity)
+        {
+            _context.Popularity.RemoveRange(popularity);
             await _context.SaveChangesAsync();
         }
     }
