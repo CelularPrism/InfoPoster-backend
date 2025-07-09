@@ -32,6 +32,27 @@ namespace InfoPoster_backend.Repos
         public async Task<PosterModel> GetPoster(Guid id) =>
             await _context.Posters.FirstOrDefaultAsync(x => x.Id == id);
 
+        public async Task<List<PosterModel>> GetPosterList() =>
+            await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED)
+                                  .Join(_context.PostersMultilang,
+                                        p => p.Id,
+                                        ml => ml.PosterId,
+                                        (p, ml) => new { p, ml })
+                                  .Where(p => p.ml.Lang == _lang)
+                                  .Select(p => new PosterModel()
+                                  {
+                                      Id = p.p.Id,
+                                      CategoryId = p.p.CategoryId,
+                                      CreatedAt = p.p.CreatedAt,
+                                      Name = p.ml.Name,
+                                      ReleaseDate = p.p.ReleaseDate,
+                                      ReleaseDateEnd = p.p.ReleaseDateEnd,
+                                      Status = p.p.Status,
+                                      SubcategoryId = p.p.SubcategoryId,
+                                      UpdatedAt = p.p.UpdatedAt,
+                                      UserId = p.p.UserId
+                                  }).ToListAsync();
+
         public async Task<List<PosterModel>> GetPosterListByUserId(Guid userId) =>
             await _context.Posters.Where(p => p.UserId == userId).ToListAsync();
 
@@ -133,51 +154,6 @@ namespace InfoPoster_backend.Repos
             query = FilterPosters(query, categoryId, subcategoryId, status, startDate, endDate, userId, cityId);
             var result = await query.ToListAsync();
             return result;
-        }
-
-        private IQueryable<PosterModel> FilterPosters(IQueryable<PosterModel> query, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
-        {
-
-            if (categoryId != null)
-            {
-                query = query.Where(q => q.CategoryId == categoryId);
-            }
-
-            if (subcategoryId != null)
-            {
-                query = query.Where(q => q.SubcategoryId == subcategoryId);
-            }
-
-            if (status != null)
-            {
-                query = query.Where(q => q.Status == status);
-            }
-
-            if (startDate != null)
-            {
-                query = query.Where(q => q.CreatedAt >= startDate);
-            }
-
-            if (endDate != null)
-            {
-                query = query.Where(q => q.CreatedAt <= endDate);
-            }
-
-            if (userId != null)
-            {
-                query = query.Where(q => q.UserId == userId);
-            }
-
-            if (cityId != null)
-            {
-                query = query.Join(_context.PostersFullInfo,
-                                   q => q.Id,
-                                   f => f.PosterId,
-                                   (q, f) => new { Poster = q, CityId = f.City })
-                             .Where(q => q.CityId == cityId)
-                             .Select(q => q.Poster);
-            }
-            return query;
         }
 
         public async Task<List<PosterResponseModel>> GetPosters(IEnumerable<Guid> posters)
@@ -758,6 +734,51 @@ namespace InfoPoster_backend.Repos
         {
             _context.Popularity.RemoveRange(popularity);
             await _context.SaveChangesAsync();
+        }
+
+        private IQueryable<PosterModel> FilterPosters(IQueryable<PosterModel> query, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        {
+
+            if (categoryId != null)
+            {
+                query = query.Where(q => q.CategoryId == categoryId);
+            }
+
+            if (subcategoryId != null)
+            {
+                query = query.Where(q => q.SubcategoryId == subcategoryId);
+            }
+
+            if (status != null)
+            {
+                query = query.Where(q => q.Status == status);
+            }
+
+            if (startDate != null)
+            {
+                query = query.Where(q => q.CreatedAt >= startDate);
+            }
+
+            if (endDate != null)
+            {
+                query = query.Where(q => q.CreatedAt <= endDate);
+            }
+
+            if (userId != null)
+            {
+                query = query.Where(q => q.UserId == userId);
+            }
+
+            if (cityId != null)
+            {
+                query = query.Join(_context.PostersFullInfo,
+                                   q => q.Id,
+                                   f => f.PosterId,
+                                   (q, f) => new { Poster = q, CityId = f.City })
+                             .Where(q => q.CityId == cityId)
+                             .Select(q => q.Poster);
+            }
+            return query;
         }
     }
 }

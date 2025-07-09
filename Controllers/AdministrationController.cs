@@ -239,25 +239,25 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("organization/popularity/get")]
-        //public async Task<IActionResult> GetPopularityPoster()
-        //{
-        //    var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
-        //    if (result == null)
-        //        return NotFound();
+        [HttpGet("poster/popularity/get")]
+        public async Task<IActionResult> GetPopularityPoster()
+        {
+            var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            if (result == null)
+                return NotFound();
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
-        //[HttpGet("organization/published/get")]
-        //public async Task<IActionResult> GetPublishedPoster([FromQuery] string SearchText)
-        //{
-        //    var result = await _mediator.Send(new GetPublishedPosterRequest() { SearchText = SearchText });
-        //    if (result == null)
-        //        return NotFound();
+        [HttpGet("poster/published/get")]
+        public async Task<IActionResult> GetPublishedPoster([FromQuery] string SearchText)
+        {
+            var result = await _mediator.Send(new GetPublishedPosterRequest() { SearchText = SearchText });
+            if (result == null)
+                return NotFound();
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
         [HttpPost("poster/upload/file")]
         public async Task<IActionResult> UploadFileForPosters([FromForm] IFormFile file)
