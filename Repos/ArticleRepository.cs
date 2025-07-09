@@ -1,5 +1,9 @@
-﻿using InfoPoster_backend.Models;
+﻿using InfoPoster_backend.Handlers.Organizations;
+using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Contexts;
+using InfoPoster_backend.Models.Posters;
+using InfoPoster_backend.Tools;
 using Microsoft.EntityFrameworkCore;
 
 namespace InfoPoster_backend.Repos
@@ -7,10 +11,12 @@ namespace InfoPoster_backend.Repos
     public class ArticleRepository
     {
         private readonly ArticleContext _context;
+        private readonly string _lang;
 
-        public ArticleRepository(ArticleContext context)
+        public ArticleRepository(ArticleContext context, IHttpContextAccessor accessor)
         {
             _context = context;
+            _lang = accessor.HttpContext.Items[Constants.HTTP_ITEM_ClientLang].ToString();
         }
 
         public async Task<ArticleModel> GetArticle(Guid id) => await _context.Articles.FirstOrDefaultAsync(x => x.Id == id);
@@ -31,6 +37,31 @@ namespace InfoPoster_backend.Repos
                                                                                                                 CreatedAt = a.CreatedAt
                                                                                                             }).ToListAsync();
 
+        public async Task<List<ArticleModel>> GetArticleListByStatus(POSTER_STATUS status) => await _context.Articles.Where(a => a.Status == status).ToListAsync();
+
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
+        {
+            var publishedOrgs = await _context.Articles.Where(o => o.Status == POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
+            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<ArticleModel>> GetPopularArticleList(POPULARITY_PLACE place)
+        {
+            var popularityArticles = await _context.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+
+            var articleList = await _context.Articles.Where(ml => popularityArticles.Contains(ml.Id)).ToListAsync();
+            var result = new List<ArticleModel>();
+            foreach (var item in popularityArticles)
+            {
+                var article = articleList.Where(o => o.Id == item).FirstOrDefault();
+                if (article != null)
+                    result.Add(article);
+            }
+
+            return result;
+        }
+
         public async Task AddArticle(ArticleModel model)
         {
             await _context.Articles.AddAsync(model);
@@ -46,6 +77,30 @@ namespace InfoPoster_backend.Repos
         public async Task RemoveArticle(ArticleModel model)
         {
             _context.Articles.Remove(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddPopularity(PopularityModel popularity)
+        {
+            await _context.Popularity.AddAsync(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddPopularity(List<PopularityModel> popularity)
+        {
+            await _context.Popularity.AddRangeAsync(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemovePopularity(PopularityModel popularity)
+        {
+            _context.Popularity.Remove(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemovePopularity(List<PopularityModel> popularity)
+        {
+            _context.Popularity.RemoveRange(popularity);
             await _context.SaveChangesAsync();
         }
     }
