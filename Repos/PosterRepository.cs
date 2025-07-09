@@ -536,7 +536,8 @@ namespace InfoPoster_backend.Repos
             foreach (var item in popularityPosters)
             {
                 var poster = posters.Where(o => o.Id == item).FirstOrDefault();
-                result.Add(poster);
+                if (poster != null)
+                    result.Add(poster);
             }
 
             return result;
@@ -564,7 +565,8 @@ namespace InfoPoster_backend.Repos
             foreach (var item in popularityPosters)
             {
                 var poster = posters.Where(o => o.Id == item).FirstOrDefault();
-                result.Add(poster);
+                if (poster != null)
+                    result.Add(poster);
             }
 
             return result;
