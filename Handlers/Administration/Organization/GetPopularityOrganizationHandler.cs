@@ -33,10 +33,10 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
 
             var result = organizations.Select(o => new GetPopularityOrganizationResponse()
             {
-                Id = popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Id).FirstOrDefault(),
+                Id = popularity.Any(p => p.ApplicationId == o.Id) ? popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Id).FirstOrDefault() : null,
                 OrganizationId = o.Id,
                 Name = o.Name,
-                Popularity = popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Popularity).FirstOrDefault()
+                Popularity = popularity.Any(p => p.ApplicationId == o.Id) ? popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Popularity).FirstOrDefault() : null
             }).ToList();
             return result;
         }
