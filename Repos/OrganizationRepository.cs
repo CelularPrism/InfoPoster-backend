@@ -570,7 +570,8 @@ namespace InfoPoster_backend.Repos
             foreach (var item in popularityOrgs)
             {
                 var org = orgs.Where(o => o.Id == item).FirstOrDefault();
-                result.Add(org);
+                if (org != null)
+                    result.Add(org);
             }
 
             return result;
@@ -617,7 +618,8 @@ namespace InfoPoster_backend.Repos
             foreach (var item in popularityOrgs)
             {
                 var org = orgs.Where(o => o.Id == item).FirstOrDefault();
-                result.Add(org);
+                if (org != null)
+                    result.Add(org);
             }
 
             return result;

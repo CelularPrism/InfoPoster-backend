@@ -1,42 +1,33 @@
-﻿using InfoPoster_backend.Models.Administration;
+﻿using InfoPoster_backend.Handlers.Administration.Organization;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Repos;
 using MediatR;
+using Org.BouncyCastle.Asn1.Ocsp;
 
-namespace InfoPoster_backend.Handlers.Administration.Organization
+namespace InfoPoster_backend.Handlers.Administration.Poster
 {
-    public class AddPopularityOrganizationRequest : IRequest<AddPopularityOrganizationResponse>
+    public class AddPopularityPosterRequest : IRequest<AddPopularityPosterResponse>
     {
         public POPULARITY_PLACE Place { get; set; }
         public List<PopularityRequestModel> Popularity { get; set; }
     }
 
-    public class PopularityRequestModel
+    public class AddPopularityPosterResponse
     {
-        public Guid Id { get; set; }
-        public int Popularity { get; set; }
+
     }
 
-    public class AddPopularityOrganizationResponse
+    public class AddPopularityPosterHandler : IRequestHandler<AddPopularityPosterRequest, AddPopularityPosterResponse>
     {
-        
-    }
+        private readonly PosterRepository _repository;
 
-    public class AddPopularityOrganizationHandler : IRequestHandler<AddPopularityOrganizationRequest, AddPopularityOrganizationResponse>
-    {
-        private readonly OrganizationRepository _repository;
-
-        public AddPopularityOrganizationHandler(OrganizationRepository repository)
+        public AddPopularityPosterHandler(PosterRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<AddPopularityOrganizationResponse> Handle(AddPopularityOrganizationRequest request, CancellationToken cancellation = default)
+        public async Task<AddPopularityPosterResponse> Handle(AddPopularityPosterRequest request, CancellationToken cancellation = default)
         {
-            var anyIdentical = request.Popularity.GroupBy(p => p.Id).Select(p => new { Id = p.Key, Count = p.Count() }).Any(p => p.Count > 1);
-            if (anyIdentical)
-            {
-                return null;
-            }
 
             var popularity = await _repository.GetPopularityList(request.Place);
             var removeList = new List<PopularityModel>();
@@ -61,7 +52,7 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
 
             await _repository.RemovePopularity(removeList);
             await _repository.AddPopularity(addList);
-            return new AddPopularityOrganizationResponse();
+            return new AddPopularityPosterResponse();
         }
     }
 }

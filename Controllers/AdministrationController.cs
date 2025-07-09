@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
 using InfoPoster_backend.Handlers.Administration.Organization;
+using InfoPoster_backend.Handlers.Administration.Poster;
 using InfoPoster_backend.Handlers.Offers;
 using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Handlers.Posters;
@@ -255,6 +256,36 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpPost("poster/popularity/add")]
+        public async Task<IActionResult> AddPopularityPoster([FromBody] AddPopularityPosterRequest request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("poster/popularity/get")]
+        public async Task<IActionResult> GetPopularityPoster()
+        {
+            var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet("poster/published/get")]
+        public async Task<IActionResult> GetPublishedPoster([FromQuery] string SearchText)
+        {
+            var result = await _mediator.Send(new GetPublishedPosterRequest() { SearchText = SearchText });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
         [HttpPost("poster/upload/file")]
         public async Task<IActionResult> UploadFileForPosters([FromForm] IFormFile file)
         {
@@ -460,7 +491,7 @@ namespace InfoPoster_backend.Controllers
         {
             var result = await _mediator.Send(request);
             if (result == null)
-                return NotFound();
+                return BadRequest();
 
             return Ok(result);
         }

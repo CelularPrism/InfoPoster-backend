@@ -1,6 +1,8 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Account;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Cities;
 using InfoPoster_backend.Models.Contexts;
 using InfoPoster_backend.Models.Organizations;
@@ -29,6 +31,27 @@ namespace InfoPoster_backend.Repos
 
         public async Task<PosterModel> GetPoster(Guid id) =>
             await _context.Posters.FirstOrDefaultAsync(x => x.Id == id);
+
+        public async Task<List<PosterModel>> GetPosterList() =>
+            await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED)
+                                  .Join(_context.PostersMultilang,
+                                        p => p.Id,
+                                        ml => ml.PosterId,
+                                        (p, ml) => new { p, ml })
+                                  .Where(p => p.ml.Lang == _lang)
+                                  .Select(p => new PosterModel()
+                                  {
+                                      Id = p.p.Id,
+                                      CategoryId = p.p.CategoryId,
+                                      CreatedAt = p.p.CreatedAt,
+                                      Name = p.ml.Name,
+                                      ReleaseDate = p.p.ReleaseDate,
+                                      ReleaseDateEnd = p.p.ReleaseDateEnd,
+                                      Status = p.p.Status,
+                                      SubcategoryId = p.p.SubcategoryId,
+                                      UpdatedAt = p.p.UpdatedAt,
+                                      UserId = p.p.UserId
+                                  }).ToListAsync();
 
         public async Task<List<PosterModel>> GetPosterListByUserId(Guid userId) =>
             await _context.Posters.Where(p => p.UserId == userId).ToListAsync();
@@ -131,51 +154,6 @@ namespace InfoPoster_backend.Repos
             query = FilterPosters(query, categoryId, subcategoryId, status, startDate, endDate, userId, cityId);
             var result = await query.ToListAsync();
             return result;
-        }
-
-        private IQueryable<PosterModel> FilterPosters(IQueryable<PosterModel> query, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
-        {
-
-            if (categoryId != null)
-            {
-                query = query.Where(q => q.CategoryId == categoryId);
-            }
-
-            if (subcategoryId != null)
-            {
-                query = query.Where(q => q.SubcategoryId == subcategoryId);
-            }
-
-            if (status != null)
-            {
-                query = query.Where(q => q.Status == status);
-            }
-
-            if (startDate != null)
-            {
-                query = query.Where(q => q.CreatedAt >= startDate);
-            }
-
-            if (endDate != null)
-            {
-                query = query.Where(q => q.CreatedAt <= endDate);
-            }
-
-            if (userId != null)
-            {
-                query = query.Where(q => q.UserId == userId);
-            }
-
-            if (cityId != null)
-            {
-                query = query.Join(_context.PostersFullInfo,
-                                   q => q.Id,
-                                   f => f.PosterId,
-                                   (q, f) => new { Poster = q, CityId = f.City })
-                             .Where(q => q.CityId == cityId)
-                             .Select(q => q.Poster);
-            }
-            return query;
         }
 
         public async Task<List<PosterResponseModel>> GetPosters(IEnumerable<Guid> posters)
@@ -530,6 +508,71 @@ namespace InfoPoster_backend.Repos
             return history;
         }
 
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
+        {
+            var publishedOrgs = await _context.Posters.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
+            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<PosterResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place)
+        {
+            var popularityOrgs = await _context.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+            var subcategories = await _context.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.PosterId))
+                                                                   .Join(_context.Posters,
+                                                                   ml => ml.PosterId,
+                                                                   p => p.Id,
+                                                                   (ml, p) => new PosterResponseModel()
+                                                                   {
+                                                                       Id = ml.PosterId,
+                                                                       CategoryId = p.CategoryId,
+                                                                       CategoryName = categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       Name = ml.Name,
+                                                                       SubcategoryId = p.SubcategoryId,
+                                                                       SubcategoryName = subcategories.Where(s => s.Id == p.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                   }).ToListAsync();
+            var result = new List<PosterResponseModel>();
+            foreach (var item in popularityOrgs)
+            {
+                var poster = posters.Where(o => o.Id == item).FirstOrDefault();
+                result.Add(poster);
+            }
+
+            return result;
+        }
+
+        public async Task<List<PosterResponseModel>> GetPopularOrganizationListByCategory(POPULARITY_PLACE place, Guid categoryId)
+        {
+            var popularityOrgs = await _context.Popularity.Where(p => p.Place == place && p.CategoryId == categoryId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+            var subcategories = await _context.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
+
+            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.PosterId))
+                                                                   .Join(_context.Posters,
+                                                                   ml => ml.PosterId,
+                                                                   org => org.Id,
+                                                                   (ml, o) => new PosterResponseModel()
+                                                                   {
+                                                                       Id = ml.PosterId,
+                                                                       CategoryId = o.CategoryId,
+                                                                       CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                                                                       Name = ml.Name,
+                                                                       SubcategoryId = o.SubcategoryId,
+                                                                       SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
+                                                                   }).ToListAsync();
+            var result = new List<PosterResponseModel>();
+            foreach (var item in popularityOrgs)
+            {
+                var poster = posters.Where(o => o.Id == item).FirstOrDefault();
+                result.Add(poster);
+            }
+
+            return result;
+        }
+
         public async Task AddPoster(PosterModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()
@@ -667,6 +710,75 @@ namespace InfoPoster_backend.Repos
         {
             await _context.ApplicationChangeHistory.AddRangeAsync(list);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task AddPopularity(PopularityModel popularity)
+        {
+            await _context.Popularity.AddAsync(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddPopularity(List<PopularityModel> popularity)
+        {
+            await _context.Popularity.AddRangeAsync(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemovePopularity(PopularityModel popularity)
+        {
+            _context.Popularity.Remove(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemovePopularity(List<PopularityModel> popularity)
+        {
+            _context.Popularity.RemoveRange(popularity);
+            await _context.SaveChangesAsync();
+        }
+
+        private IQueryable<PosterModel> FilterPosters(IQueryable<PosterModel> query, Guid? categoryId, Guid? subcategoryId, int? status, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
+        {
+
+            if (categoryId != null)
+            {
+                query = query.Where(q => q.CategoryId == categoryId);
+            }
+
+            if (subcategoryId != null)
+            {
+                query = query.Where(q => q.SubcategoryId == subcategoryId);
+            }
+
+            if (status != null)
+            {
+                query = query.Where(q => q.Status == status);
+            }
+
+            if (startDate != null)
+            {
+                query = query.Where(q => q.CreatedAt >= startDate);
+            }
+
+            if (endDate != null)
+            {
+                query = query.Where(q => q.CreatedAt <= endDate);
+            }
+
+            if (userId != null)
+            {
+                query = query.Where(q => q.UserId == userId);
+            }
+
+            if (cityId != null)
+            {
+                query = query.Join(_context.PostersFullInfo,
+                                   q => q.Id,
+                                   f => f.PosterId,
+                                   (q, f) => new { Poster = q, CityId = f.City })
+                             .Where(q => q.CityId == cityId)
+                             .Select(q => q.Poster);
+            }
+            return query;
         }
     }
 }
