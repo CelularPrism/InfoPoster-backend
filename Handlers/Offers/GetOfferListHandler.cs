@@ -33,15 +33,27 @@ namespace InfoPoster_backend.Handlers.Offers
 
         public async Task<List<GetOfferListResponse>> Handle(GetOfferListRequest request, CancellationToken cancellationToken = default)
         {
+            var popularOffers = await _repository.GetPopularOfferList(Models.Administration.POPULARITY_PLACE.MAIN);
             var offers = await _repository.GetOffersByCity();
 
-            var result = offers.Select(o => new GetOfferListResponse()
+            var nonPopularOffers = offers.Where(o => !popularOffers.Select(p => p.Id).Contains(o.Id))
+                .Select(o => new GetOfferListResponse()
+                {
+                    Id = o.Id,
+                    DateEnd = o.DateEnd,
+                    DateStart = o.DateStart,
+                    Name = o.Name
+                }).ToList();
+
+            var result = popularOffers.Select(o => new GetOfferListResponse()
             {
                 Id = o.Id,
                 DateEnd = o.DateEnd,
                 DateStart = o.DateStart,
                 Name = o.Name
             }).ToList();
+            result.AddRange(nonPopularOffers);
+
             var loggedIn = await _selectelAuth.Login();
             if (loggedIn)
             {
