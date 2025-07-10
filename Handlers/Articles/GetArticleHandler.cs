@@ -36,7 +36,8 @@ namespace InfoPoster_backend.Handlers.Articles
                 Lang = article.Lang,
                 UserName = user.FirstName + " " + user.LastName,
                 Status = (int)article.Status,
-                CreatedAt = article.CreatedAt
+                CreatedAt = article.CreatedAt,
+                ShortDescription = article.ShortDescription
             };
 
             var loggedIn = await _selectelAuthService.Login();
