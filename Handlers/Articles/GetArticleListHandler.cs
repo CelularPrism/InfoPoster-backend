@@ -53,7 +53,7 @@ namespace InfoPoster_backend.Handlers.Articles
             var total = list.Count;
             list = list.Skip(request.Page * request.CountPerPage).Take(request.CountPerPage).Select(a => new ArticleResponse()
             {
-                Body = !string.IsNullOrEmpty(a.Body) ? a.Body.Substring(0, 30) : string.Empty,
+                Body = !string.IsNullOrEmpty(a.Body) ? a.Body.Length > 30 ? a.Body.Substring(0, 30) : a.Body : string.Empty,
                 Id = a.Id,
                 Lang = a.Lang,
                 Title = a.Title,

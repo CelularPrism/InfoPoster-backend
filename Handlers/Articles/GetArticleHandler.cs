@@ -39,6 +39,30 @@ namespace InfoPoster_backend.Handlers.Articles
                 CreatedAt = article.CreatedAt
             };
 
+            var loggedIn = await _selectelAuthService.Login();
+            var files = await _file.GetSelectelFiles(request.Id, (int)FILE_PLACES.GALLERY);
+            var primaryFile = await _file.GetPrimaryFile(request.Id, (int)FILE_PLACES.GALLERY);
+            if (loggedIn && files.Any())
+            {
+                result.GaleryUrls = new List<GetFileResponse>();
+                var selectelUUID = await _selectelAuthService.GetContainerUUID("dosdoc");
+                var imageSrc = string.Empty;
+                GetFileResponse response = null;
+                foreach (var file in files)
+                {
+                    imageSrc = string.Concat("https://", selectelUUID, ".selstorage.ru/", file.Id);
+                    response = new GetFileResponse()
+                    {
+                        Id = file.Id,
+                        Type = file.Type,
+                        URL = imageSrc,
+                        IsPrimary = primaryFile != null && primaryFile.FileId == file.Id ? true : false,
+                    };
+                    result.GaleryUrls.Add(response);
+                }
+                result.GaleryUrls = result.GaleryUrls.OrderByDescending(f => f.IsPrimary).ToList();
+            }
+
             return result;
         }
     }
