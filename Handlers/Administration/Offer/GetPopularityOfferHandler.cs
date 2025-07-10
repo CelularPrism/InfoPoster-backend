@@ -29,7 +29,7 @@ namespace InfoPoster_backend.Handlers.Administration.Offer
 
         public async Task<List<GetPopularityOfferResponse>> Handle(GetPopularityOfferRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetPopularPosterList(request.Place);
+            var posters = await _repository.GetPopularOfferList(request.Place);
             var popularity = await _repository.GetPopularityList(request.Place);
 
             var result = posters.Select(o => new GetPopularityOfferResponse()

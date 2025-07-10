@@ -39,6 +39,8 @@ namespace InfoPoster_backend.Handlers.Organizations
         public int Status { get; set; }
         public Guid? CityId { get; set; }
         public string CityName { get; set; }
+        public Guid? FileId { get; set; }
+        public string FileURL { get; set; }
     }
 
     public class GetOrganizationListHandler : IRequestHandler<GetOrganizationListRequest, GetOrganizationListResponse>
