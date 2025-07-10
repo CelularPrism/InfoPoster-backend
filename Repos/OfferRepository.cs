@@ -121,7 +121,7 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<OffersModel>> GetPopularPosterList(POPULARITY_PLACE place)
+        public async Task<List<OffersModel>> GetPopularOfferList(POPULARITY_PLACE place)
         {
             var popularityOffers = await _context.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
 

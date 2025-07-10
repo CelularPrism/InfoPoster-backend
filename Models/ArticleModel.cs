@@ -24,6 +24,7 @@ namespace InfoPoster_backend.Models
         public Guid UserId { get; set; }
         public string UserName { get; set; }
         public int Status { get; set; }
+        public string FileURL { get; set; }
         public List<GetFileResponse> GaleryUrls { get; set; }
     }
 }

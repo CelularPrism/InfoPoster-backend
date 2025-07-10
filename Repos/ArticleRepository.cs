@@ -11,11 +11,13 @@ namespace InfoPoster_backend.Repos
     public class ArticleRepository
     {
         private readonly ArticleContext _context;
+        private readonly AccountContext _account;
         private readonly string _lang;
 
-        public ArticleRepository(ArticleContext context, IHttpContextAccessor accessor)
+        public ArticleRepository(ArticleContext context, AccountContext account, IHttpContextAccessor accessor)
         {
             _context = context;
+            _account = account;
             _lang = accessor.HttpContext.Items[Constants.HTTP_ITEM_ClientLang].ToString();
         }
 
@@ -36,6 +38,48 @@ namespace InfoPoster_backend.Repos
                                                                                                                 Status = (int)a.Status,
                                                                                                                 CreatedAt = a.CreatedAt
                                                                                                             }).ToListAsync();
+
+        public async Task<List<Guid>> GetRoles(Guid userId) => await _account.User_To_Roles.Where(u => u.UserId == userId).Select(u => u.RoleId).ToListAsync();
+
+        public async Task<List<ArticleResponse>> GetArticleList(Guid userId)
+        {
+            var roles = await GetRoles(userId);
+            var isAdmin = roles.Any(r => r == Constants.ROLE_ADMIN);
+
+            var result = await _context.Articles.Where(a => isAdmin ? true : a.UserId == userId)
+                                                .Join(_context.Users,
+                                                      a => a.UserId,
+                                                      u => u.Id,
+                                                      (a, u) => new ArticleResponse()
+                                                      {
+                                                        Id = a.Id,
+                                                        UserId = a.UserId,
+                                                        Body = a.Body,
+                                                        Lang = a.Lang,
+                                                        Title = a.Title,
+                                                        UserName = u.FirstName + " " + u.LastName,
+                                                        Status = (int)a.Status,
+                                                        CreatedAt = a.CreatedAt
+                                                      }).ToListAsync();
+
+            return result;
+        }
+
+        public async Task<List<ArticleResponse>> GetArticleList(POSTER_STATUS status) => await _context.Articles.Where(a => a.Status == status)
+                                                                                                                .Join(_context.Users,
+                                                                                                                      a => a.UserId,
+                                                                                                                      u => u.Id,
+                                                                                                                      (a, u) => new ArticleResponse()
+                                                                                                                      {
+                                                                                                                        Id = a.Id,
+                                                                                                                        UserId = a.UserId,
+                                                                                                                        Body = a.Body,
+                                                                                                                        Lang = a.Lang,
+                                                                                                                        Title = a.Title,
+                                                                                                                        UserName = u.FirstName + " " + u.LastName,
+                                                                                                                        Status = (int)a.Status,
+                                                                                                                        CreatedAt = a.CreatedAt
+                                                                                                                      }).ToListAsync();
 
         public async Task<List<ArticleModel>> GetArticleListByStatus(POSTER_STATUS status) => await _context.Articles.Where(a => a.Status == status).ToListAsync();
 

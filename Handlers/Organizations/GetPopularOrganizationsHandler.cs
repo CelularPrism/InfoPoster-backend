@@ -15,11 +15,13 @@ namespace InfoPoster_backend.Handlers.Organizations
     public class GetPopularOrganizationsHandler : IRequestHandler<GetPopularOrganizationsRequest, List<OrganizationResponseModel>>
     {
         private readonly OrganizationRepository _repository;
+        private readonly FileRepository _file;
         private readonly SelectelAuthService _selectel;
 
-        public GetPopularOrganizationsHandler(OrganizationRepository repository, SelectelAuthService selectel)
+        public GetPopularOrganizationsHandler(OrganizationRepository repository, FileRepository file, SelectelAuthService selectel)
         {
             _repository = repository;
+            _file = file;
             _selectel = selectel;
         }
 
@@ -35,6 +37,21 @@ namespace InfoPoster_backend.Handlers.Organizations
             }
 
             result = result.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).ToList();
+
+            var isLoggedIn = await _selectel.Login();
+
+            if (isLoggedIn)
+            {
+                var selectelUUID = await _selectel.GetContainerUUID("dosdoc");
+                foreach (var item in result)
+                {
+                    var file = await _file.GetPrimaryFile(item.Id, 0);
+                    if (file == null)
+                        file = await _file.GetApplicationFileByApplication(item.Id);
+
+                    item.FileURL = string.Concat("https://", selectelUUID, ".selstorage.ru/", file.FileId);
+                }
+            }
 
             return result;
         }
