@@ -11,6 +11,7 @@ namespace InfoPoster_backend.Models
         public POSTER_STATUS Status { get; set; }
         public string Title { get; set; }
         public string Body { get; set; }
+        public string ShortDescription { get; set; }
         public string Lang { get; set; }
     }
 
@@ -20,6 +21,7 @@ namespace InfoPoster_backend.Models
         public DateTime CreatedAt { get; set; }
         public string Title { get; set; }
         public string Body { get; set; }
+        public string ShortDescription { get; set; }
         public string Lang { get; set; }
         public Guid UserId { get; set; }
         public string UserName { get; set; }

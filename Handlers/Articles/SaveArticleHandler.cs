@@ -10,6 +10,7 @@ namespace InfoPoster_backend.Handlers.Articles
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string Body { get; set; }
+        public string ShortDescription { get; set; }
         public string Lang { get; set; }
     }
 
@@ -37,6 +38,7 @@ namespace InfoPoster_backend.Handlers.Articles
             article.Title = request.Title;
             article.Body = request.Body;
             article.Lang = request.Lang;
+            article.ShortDescription = request.ShortDescription;
             await _repository.UpdateArticle(article);
 
             return new SaveArticleResponse() { Id = article.Id };

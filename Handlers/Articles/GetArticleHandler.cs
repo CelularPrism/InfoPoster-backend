@@ -42,7 +42,8 @@ namespace InfoPoster_backend.Handlers.Articles
                 Lang = article.Lang,
                 UserName = user.FirstName + " " + user.LastName,
                 Status = (int)article.Status,
-                CreatedAt = article.CreatedAt
+                CreatedAt = article.CreatedAt,
+                ShortDescription = article.ShortDescription
             };
 
             var loggedIn = await _selectelAuthService.Login();
@@ -50,6 +51,7 @@ namespace InfoPoster_backend.Handlers.Articles
             var primaryFile = await _file.GetPrimaryFile(request.Id, (int)FILE_PLACES.GALLERY);
             if (loggedIn && files.Any())
             {
+                result.GaleryUrls = new List<GetFileResponse>();
                 var selectelUUID = await _selectelAuthService.GetContainerUUID("dosdoc");
                 var imageSrc = string.Empty;
                 GetFileResponse response = null;
