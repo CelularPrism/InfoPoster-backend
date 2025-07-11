@@ -42,12 +42,15 @@ namespace InfoPoster_backend.Handlers.Articles
             {
                 var isAdmin = roles.Any(r => r == Constants.ROLE_ADMIN);
                 if (isAdmin)
-                    list = await _repository.GetArticleList(_user);
-                else
                     list = await _repository.GetArticleList();
+                else
+                    list = await _repository.GetArticleList(_user);
             } else
             {
-                list = await _repository.GetArticleList(Models.Posters.POSTER_STATUS.DRAFT);
+                var draft = await _repository.GetArticleList(Models.Posters.POSTER_STATUS.DRAFT);
+                var published = await _repository.GetArticleList(Models.Posters.POSTER_STATUS.PUBLISHED);
+                list.AddRange(draft);
+                list.AddRange(published);
             }
 
             var total = list.Count;
