@@ -65,7 +65,7 @@ namespace InfoPoster_backend.Handlers.Articles
                 UserName = a.UserName,
                 Status = a.Status,
                 CreatedAt = a.CreatedAt
-            }).ToList();
+            }).OrderByDescending(a => a.CreatedAt).ToList();
 
             var result = new GetArticleListResponse()
             {
