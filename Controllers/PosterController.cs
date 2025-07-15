@@ -62,7 +62,7 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("popular")]
         public async Task<IActionResult> GetPopular()
         {
-            var result = await _mediator.Send(new GetPopularPostersRequest());
+            var result = await _mediator.Send(new GetPopularPostersRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
             return Ok(result);
         }
 

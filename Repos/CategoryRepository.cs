@@ -43,7 +43,7 @@ namespace InfoPoster_backend.Repos
             {
                 if (type == CategoryType.EVENT)
                 {
-                    categories = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= DateTime.UtcNow || p.ReleaseDateEnd > DateTime.UtcNow)).GroupBy(p => p.CategoryId).Select(p => (Guid)p.Key).ToListAsync();
+                    categories = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= DateTime.UtcNow || p.ReleaseDateEnd != null && p.ReleaseDateEnd > DateTime.UtcNow)).GroupBy(p => p.CategoryId).Select(p => (Guid)p.Key).ToListAsync();
                 }
                 else
                 {

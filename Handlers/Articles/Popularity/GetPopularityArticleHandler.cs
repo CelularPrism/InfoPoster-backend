@@ -14,7 +14,7 @@ namespace InfoPoster_backend.Handlers.Articles.Popularity
     {
         public Guid? Id { get; set; }
         public Guid ArticleId { get; set; }
-        public string Name { get; set; }
+        public string Title { get; set; }
         public int? Popularity { get; set; }
     }
 
@@ -35,7 +35,7 @@ namespace InfoPoster_backend.Handlers.Articles.Popularity
             {
                 Id = popularity.Any(p => p.ApplicationId == o.Id) ? popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Id).FirstOrDefault() : null,
                 ArticleId = o.Id,
-                Name = o.Title,
+                Title = o.Title,
                 Popularity = popularity.Any(p => p.ApplicationId == o.Id) ? popularity.Where(p => p.ApplicationId == o.Id).Select(p => p.Popularity).FirstOrDefault() : null
             }).ToList();
             return result;
