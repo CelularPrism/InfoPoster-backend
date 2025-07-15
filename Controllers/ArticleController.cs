@@ -84,11 +84,11 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
-        [HttpGet("get")]
+        [HttpGet("main/get")]
         public async Task<IActionResult> GetPublishedArticleList()
         {
-            var result = await _mediator.Send(new GetArticleListRequest() { Page = 0, CountPerPage = 3 });
-            return Ok(result.Data);
+            var result = await _mediator.Send(new GetPublishedArticlesListRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            return Ok(result);
         }
 
         [HttpPost("popularity/add")]
