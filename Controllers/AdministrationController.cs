@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Administration.Banner;
 using InfoPoster_backend.Handlers.Administration.Offer;
 using InfoPoster_backend.Handlers.Administration.Organization;
 using InfoPoster_backend.Handlers.Administration.Poster;
@@ -618,6 +619,29 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetPublishedOffer([FromQuery] string SearchText)
         {
             var result = await _mediator.Send(new GetPublishedOfferRequest() { SearchText = SearchText });
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpPost("banner/popularity/add")]
+        public async Task<IActionResult> AddPopularityBanner([FromBody] List<AddPopularityBannerRequest> request)
+        {
+            var result = new List<Guid>();
+            foreach (var item in request)
+            {
+                var banner = await _mediator.Send(item);
+                result.Add(banner.Id);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet("banner/popularity/get")]
+        public async Task<IActionResult> GetPopularityBanner()
+        {
+            var result = await _mediator.Send(new GetPopularityBannerRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
             if (result == null)
                 return NotFound();
 

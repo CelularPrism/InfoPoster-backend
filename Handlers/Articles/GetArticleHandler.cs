@@ -1,5 +1,7 @@
-﻿using InfoPoster_backend.Models;
+﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Models;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Services.Selectel_API;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Articles
@@ -13,11 +15,15 @@ namespace InfoPoster_backend.Handlers.Articles
     {
         private readonly ArticleRepository _article;
         private readonly AccountRepository _account;
+        private readonly FileRepository _file;
+        private readonly SelectelAuthService _selectelAuthService;
 
-        public GetArticleHandler(ArticleRepository article, AccountRepository account)
+        public GetArticleHandler(ArticleRepository article, AccountRepository account, FileRepository file, SelectelAuthService selectelAuthService)
         {
             _article = article;
             _account = account;
+            _file = file;
+            _selectelAuthService = selectelAuthService;
         }
 
         public async Task<ArticleResponse> Handle(GetArticleRequest request, CancellationToken cancellationToken)
