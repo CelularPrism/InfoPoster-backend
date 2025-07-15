@@ -2,6 +2,7 @@
 using InfoPoster_backend.Models.Offers;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Offers
@@ -23,17 +24,19 @@ namespace InfoPoster_backend.Handlers.Offers
         private readonly OfferRepository _repository;
         private readonly FileRepository _file;
         private readonly SelectelAuthService _selectelAuth;
+        private readonly Guid _city;
 
-        public GetOfferListHandler(OfferRepository repository, FileRepository file, SelectelAuthService selectelAuthService)
+        public GetOfferListHandler(OfferRepository repository, FileRepository file, SelectelAuthService selectelAuthService, IHttpContextAccessor accessor)
         {
             _repository = repository;
             _file = file;
             _selectelAuth = selectelAuthService;
+            _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
         public async Task<List<GetOfferListResponse>> Handle(GetOfferListRequest request, CancellationToken cancellationToken = default)
         {
-            var popularOffers = await _repository.GetPopularOfferList(Models.Administration.POPULARITY_PLACE.MAIN);
+            var popularOffers = await _repository.GetPopularOfferList(Models.Administration.POPULARITY_PLACE.MAIN, _city);
             var offers = await _repository.GetOffersByCity();
 
             var nonPopularOffers = offers.Where(o => !popularOffers.Select(p => p.Id).Contains(o.Id))
