@@ -511,7 +511,7 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
         {
             var publishedOrgs = await _context.Posters.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
-            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place).ToListAsync();
+            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place && p.Type == POPULARITY_TYPE.POSTER).ToListAsync();
             return result;
         }
 

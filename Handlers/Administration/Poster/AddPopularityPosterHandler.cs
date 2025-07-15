@@ -39,7 +39,8 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
                     Id = Guid.NewGuid(),
                     ApplicationId = item.Id,
                     Place = request.Place,
-                    Popularity = item.Popularity
+                    Popularity = item.Popularity,
+                    Type = POPULARITY_TYPE.POSTER
                 });
             }
 

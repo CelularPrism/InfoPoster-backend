@@ -6,6 +6,15 @@
         CATEGORY
     }
 
+    public enum POPULARITY_TYPE
+    {
+        POSTER,
+        ORGANIZATION,
+        ARTICLE,
+        OFFER,
+        BANNER
+    }
+
     public class PopularityModel
     {
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -13,6 +22,7 @@
         public Guid? CategoryId { get; set; }
         public Guid? SubcategoryId { get; set; }
         public POPULARITY_PLACE Place { get; set; }
+        public POPULARITY_TYPE Type { get; set; }
         public int Popularity { get; set; }
     }
 
