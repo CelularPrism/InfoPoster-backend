@@ -19,9 +19,11 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PopularityModel>> GetPopularity(POPULARITY_PLACE place, int popularity) => 
             await _banner.Popularity.Where(p => p.Place == place && p.Popularity == popularity).ToListAsync();
 
-        public async Task<List<BannerModel>> GetPopularBannerList(POPULARITY_PLACE place)
+        public async Task<List<BannerModel>> GetPopularBannerList(POPULARITY_PLACE place, Guid city)
         {
-            var popularity = await _banner.Popularity.Where(p => p.Place == place && p.Type == POPULARITY_TYPE.BANNER).Select(p => p.ApplicationId).ToListAsync();
+            var popularity = await _banner.Popularity.Where(p => p.Place == place && 
+                                                                 p.CityId == city &&
+                                                                 p.Type == POPULARITY_TYPE.BANNER).Select(p => p.ApplicationId).ToListAsync();
             var banner = await _banner.Banners.Where(b => popularity.Contains(b.Id)).ToListAsync();
 
             return banner;

@@ -18,6 +18,7 @@ namespace InfoPoster_backend.Handlers.Articles
         private readonly FileRepository _file;
         private readonly SelectelAuthService _selectelAuth;
         private readonly string _lang;
+        private readonly Guid _city;
 
         public GetPublishedArticlesListHandler(ArticleRepository repository, FileRepository file, SelectelAuthService selectelAuth, IHttpContextAccessor accessor)
         {
@@ -25,11 +26,12 @@ namespace InfoPoster_backend.Handlers.Articles
             _file = file;
             _selectelAuth = selectelAuth;
             _lang = accessor.HttpContext.Items[Constants.HTTP_ITEM_ClientLang].ToString();
+            _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
         public async Task<List<ArticleResponse>> Handle(GetPublishedArticlesListRequest request, CancellationToken cancellation = default)
         {
-            var popular = await _repository.GetPopularArticleList(request.Place);
+            var popular = await _repository.GetPopularArticleList(request.Place, _city);
             var published = await _repository.GetArticleListByStatus(Models.Posters.POSTER_STATUS.PUBLISHED);
 
             var nonPopular = published.Where(p => !popular.Select(pop => pop.Id).Contains(p.Id) && p.Lang == _lang)

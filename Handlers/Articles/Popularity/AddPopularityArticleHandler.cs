@@ -9,6 +9,7 @@ namespace InfoPoster_backend.Handlers.Articles.Popularity
     {
         public POPULARITY_PLACE Place { get; set; }
         public List<PopularityRequestModel> Popularity { get; set; }
+        public Guid CityId { get; set; }
     }
 
     public class AddPopularityArticleResponse
@@ -33,7 +34,7 @@ namespace InfoPoster_backend.Handlers.Articles.Popularity
                 return null;
             }
 
-            var popularity = await _repository.GetPopularityList(request.Place);
+            var popularity = await _repository.GetPopularityList(request.Place, request.CityId);
             var addList = new List<PopularityModel>();
 
             foreach (var item in request.Popularity)
@@ -44,7 +45,8 @@ namespace InfoPoster_backend.Handlers.Articles.Popularity
                     ApplicationId = item.Id,
                     Place = request.Place,
                     Popularity = item.Popularity,
-                    Type = POPULARITY_TYPE.ARTICLE
+                    Type = POPULARITY_TYPE.ARTICLE,
+                    CityId = request.CityId
                 });
             }
 

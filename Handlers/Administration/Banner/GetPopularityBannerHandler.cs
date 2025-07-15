@@ -2,6 +2,7 @@
 using InfoPoster_backend.Models.Banner;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Administration.Banner
@@ -9,6 +10,7 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
     public class GetPopularityBannerRequest : IRequest<List<BannerResponseModel>>
     {
         public POPULARITY_PLACE Place { get; set; }
+        public Guid CityId { get; set; }
     }
 
     public class GetPopularityBannerHandler : IRequestHandler<GetPopularityBannerRequest, List<BannerResponseModel>>
@@ -26,7 +28,7 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
 
         public async Task<List<BannerResponseModel>> Handle(GetPopularityBannerRequest request, CancellationToken cancellationToken = default)
         {
-            var popular = await _repository.GetPopularBannerList(POPULARITY_PLACE.MAIN);
+            var popular = await _repository.GetPopularBannerList(POPULARITY_PLACE.MAIN, request.CityId);
             var loggedIn = await _selectelAuthService.Login();
             var result = new List<BannerResponseModel>();
 

@@ -21,6 +21,7 @@
         public Guid ApplicationId { get; set; }
         public Guid? CategoryId { get; set; }
         public Guid? SubcategoryId { get; set; }
+        public Guid CityId { get; set; }
         public POPULARITY_PLACE Place { get; set; }
         public POPULARITY_TYPE Type { get; set; }
         public int Popularity { get; set; }

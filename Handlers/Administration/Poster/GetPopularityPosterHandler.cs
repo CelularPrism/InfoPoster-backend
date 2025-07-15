@@ -8,6 +8,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
     public class GetPopularityPosterRequest : IRequest<List<GetPopularityPosterResponse>>
     {
         public POPULARITY_PLACE Place { get; set; }
+        public Guid CityId { get; set; }
     }
 
     public class GetPopularityPosterResponse
@@ -28,8 +29,8 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
 
         public async Task<List<GetPopularityPosterResponse>> Handle(GetPopularityPosterRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetPopularPosterList(request.Place);
-            var popularity = await _repository.GetPopularityList(request.Place);
+            var posters = await _repository.GetPopularPosterList(request.Place, request.CityId);
+            var popularity = await _repository.GetPopularityList(request.Place, request.CityId);
 
             var result = posters.Select(o => new GetPopularityPosterResponse()
             {

@@ -3,6 +3,7 @@ using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Posters
@@ -18,12 +19,14 @@ namespace InfoPoster_backend.Handlers.Posters
         private readonly PosterRepository _repository;
         private readonly FileRepository _file;
         private readonly SelectelAuthService _selectel;
+        private readonly Guid _city;
 
-        public GetPopularPostersHandler(PosterRepository repository, FileRepository file, SelectelAuthService selectel)
+        public GetPopularPostersHandler(PosterRepository repository, FileRepository file, SelectelAuthService selectel, IHttpContextAccessor accessor)
         {
             _repository = repository;
             _file = file;
             _selectel = selectel;
+            _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
         public async Task<List<PosterResponseModel>> Handle(GetPopularPostersRequest request, CancellationToken cancellationToken = default)
@@ -47,7 +50,7 @@ namespace InfoPoster_backend.Handlers.Posters
 
             //var posters = await _repository.GetPosters(popularPosters);
 
-            var result = await _repository.GetPopularPosterList(request.Place);
+            var result = await _repository.GetPopularPosterList(request.Place, _city);
             var isLoggedIn = await _selectel.Login();
 
             if (isLoggedIn)

@@ -43,6 +43,7 @@ namespace InfoPoster_backend
             builder.Services.AddDbContext<OrganizationContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
             builder.Services.AddDbContext<OfferContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
             builder.Services.AddDbContext<ArticleContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
+            builder.Services.AddDbContext<BannerContext>(opt => opt.UseMySql(connection, ServerVersion.AutoDetect(connection)));
 
             builder.Services.AddScoped<CategoryRepository>();
             builder.Services.AddScoped<AccountRepository>();
@@ -52,6 +53,7 @@ namespace InfoPoster_backend
             builder.Services.AddScoped<StatisticRepository>();
             builder.Services.AddScoped<OfferRepository>();
             builder.Services.AddScoped<ArticleRepository>();
+            builder.Services.AddScoped<BannerRepository>();
 
             builder.Services.AddSpaStaticFiles(configuration =>
             {

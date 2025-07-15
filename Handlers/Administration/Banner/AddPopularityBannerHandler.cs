@@ -12,6 +12,7 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
         public DateTime ReleaseDate { get; set; }
         public string Comment { get; set; }
         public int Popularity { get; set; }
+        public Guid CityId { get; set; }
     }
 
     public class AddPopularityBannerResponse 
@@ -48,7 +49,8 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                 ApplicationId = banner.Id,
                 Place = POPULARITY_PLACE.MAIN,
                 Popularity = request.Popularity,
-                Type = POPULARITY_TYPE.BANNER
+                Type = POPULARITY_TYPE.BANNER,
+                CityId = request.CityId
             };
 
             await _repository.Add(banner);

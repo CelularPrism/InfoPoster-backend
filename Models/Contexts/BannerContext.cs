@@ -8,7 +8,7 @@ namespace InfoPoster_backend.Models.Contexts
 {
     public class BannerContext : DbContext
     {
-        public BannerContext(DbContextOptions<ArticleContext> options) : base(options)
+        public BannerContext(DbContextOptions<BannerContext> options) : base(options)
         {
             try
             {

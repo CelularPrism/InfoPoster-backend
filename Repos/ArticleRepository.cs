@@ -13,12 +13,14 @@ namespace InfoPoster_backend.Repos
         private readonly ArticleContext _context;
         private readonly AccountContext _account;
         private readonly string _lang;
+        private readonly Guid _city;
 
         public ArticleRepository(ArticleContext context, AccountContext account, IHttpContextAccessor accessor)
         {
             _context = context;
             _account = account;
             _lang = accessor.HttpContext.Items[Constants.HTTP_ITEM_ClientLang].ToString();
+            _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
         public async Task<ArticleModel> GetArticle(Guid id) => await _context.Articles.FirstOrDefaultAsync(x => x.Id == id);
@@ -82,16 +84,19 @@ namespace InfoPoster_backend.Repos
 
         public async Task<List<ArticleModel>> GetArticleListByStatus(POSTER_STATUS status) => await _context.Articles.Where(a => a.Status == status).ToListAsync();
 
-        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place, Guid city)
         {
             var publishedOrgs = await _context.Articles.Where(o => o.Status == POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
-            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place && p.Type == POPULARITY_TYPE.ARTICLE).ToListAsync();
+            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && 
+                                                              p.Place == place &&
+                                                              p.CityId == city &&
+                                                              p.Type == POPULARITY_TYPE.ARTICLE).ToListAsync();
             return result;
         }
 
-        public async Task<List<ArticleModel>> GetPopularArticleList(POPULARITY_PLACE place)
+        public async Task<List<ArticleModel>> GetPopularArticleList(POPULARITY_PLACE place, Guid city)
         {
-            var popularityArticles = await _context.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var popularityArticles = await _context.Popularity.Where(p => p.Place == place && p.CityId == city).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
 
             var articleList = await _context.Articles.Where(ml => popularityArticles.Contains(ml.Id)).ToListAsync();
             var result = new List<ArticleModel>();

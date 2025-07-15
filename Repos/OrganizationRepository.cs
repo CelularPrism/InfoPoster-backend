@@ -522,16 +522,19 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place, Guid city)
         {
             var publishedOrgs = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
-            var result = await _organization.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place && p.Type == POPULARITY_TYPE.ORGANIZATION).ToListAsync();
+            var result = await _organization.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && 
+                                                                   p.Place == place && 
+                                                                   p.CityId == city &&
+                                                                   p.Type == POPULARITY_TYPE.ORGANIZATION).ToListAsync();
             return result;
         }
 
-        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place)
+        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place, Guid city)
         {
-            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place && p.CityId == city).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
             var categories = await _organization.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
             var subcategories = await _organization.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
 
