@@ -242,9 +242,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("poster/popularity/get")]
-        public async Task<IActionResult> GetPopularityPoster()
+        public async Task<IActionResult> GetPopularityPoster([FromQuery] Guid cityId)
         {
-            var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId });
             if (result == null)
                 return NotFound();
 
@@ -461,9 +461,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("organization/popularity/get")]
-        public async Task<IActionResult> GetPopularityOrganization()
+        public async Task<IActionResult> GetPopularityOrganization([FromQuery] Guid cityId)
         {
-            var result = await _mediator.Send(new GetPopularityOrganizationRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            var result = await _mediator.Send(new GetPopularityOrganizationRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId });
             if (result == null)
                 return NotFound();
 
@@ -606,9 +606,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("offer/popularity/get")]
-        public async Task<IActionResult> GetPopularityOffer()
+        public async Task<IActionResult> GetPopularityOffer([FromQuery] Guid cityId)
         {
-            var result = await _mediator.Send(new GetPopularityOfferRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            var result = await _mediator.Send(new GetPopularityOfferRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId });
             if (result == null)
                 return NotFound();
 
@@ -639,9 +639,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("banner/popularity/get")]
-        public async Task<IActionResult> GetPopularityBanner()
+        public async Task<IActionResult> GetPopularityBanner([FromQuery] Guid cityId)
         {
-            var result = await _mediator.Send(new GetPopularityBannerRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            var result = await _mediator.Send(new GetPopularityBannerRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId });
             if (result == null)
                 return NotFound();
 

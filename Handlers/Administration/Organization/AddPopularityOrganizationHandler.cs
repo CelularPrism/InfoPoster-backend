@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Administration.Organization
@@ -8,6 +9,7 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
     {
         public POPULARITY_PLACE Place { get; set; }
         public List<PopularityRequestModel> Popularity { get; set; }
+        public Guid CityId { get; set; }
     }
 
     public class PopularityRequestModel
@@ -38,7 +40,7 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
                 return null;
             }
 
-            var popularity = await _repository.GetPopularityList(request.Place);
+            var popularity = await _repository.GetPopularityList(request.Place, request.CityId);
             var addList = new List<PopularityModel>();
 
             foreach (var item in request.Popularity)
@@ -49,7 +51,8 @@ namespace InfoPoster_backend.Handlers.Administration.Organization
                     ApplicationId = item.Id,
                     Place = request.Place,
                     Popularity = item.Popularity,
-                    Type = POPULARITY_TYPE.ORGANIZATION
+                    Type = POPULARITY_TYPE.ORGANIZATION,
+                    CityId = request.CityId
                 });
             }
 

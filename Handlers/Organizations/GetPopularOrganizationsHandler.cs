@@ -2,6 +2,7 @@
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
+using InfoPoster_backend.Tools;
 using MediatR;
 
 namespace InfoPoster_backend.Handlers.Organizations
@@ -17,12 +18,14 @@ namespace InfoPoster_backend.Handlers.Organizations
         private readonly OrganizationRepository _repository;
         private readonly FileRepository _file;
         private readonly SelectelAuthService _selectel;
+        private readonly Guid _city;
 
-        public GetPopularOrganizationsHandler(OrganizationRepository repository, FileRepository file, SelectelAuthService selectel)
+        public GetPopularOrganizationsHandler(OrganizationRepository repository, FileRepository file, SelectelAuthService selectel, IHttpContextAccessor accessor)
         {
             _repository = repository;
             _file = file;
             _selectel = selectel;
+            _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
         public async Task<List<OrganizationResponseModel>> Handle(GetPopularOrganizationsRequest request, CancellationToken cancellationToken = default)
@@ -33,7 +36,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 result = await _repository.GetPopularOrganizationListByCategory(request.Place, (Guid)request.CategoryId);
             } else
             {
-                result = await _repository.GetPopularOrganizationList(request.Place);
+                result = await _repository.GetPopularOrganizationList(request.Place, _city);
             }
 
             result = result.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).ToList();

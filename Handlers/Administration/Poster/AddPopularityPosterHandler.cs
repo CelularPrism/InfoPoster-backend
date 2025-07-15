@@ -10,6 +10,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
     {
         public POPULARITY_PLACE Place { get; set; }
         public List<PopularityRequestModel> Popularity { get; set; }
+        public Guid CityId { get; set; }
     }
 
     public class AddPopularityPosterResponse
@@ -29,7 +30,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
         public async Task<AddPopularityPosterResponse> Handle(AddPopularityPosterRequest request, CancellationToken cancellation = default)
         {
 
-            var popularity = await _repository.GetPopularityList(request.Place);
+            var popularity = await _repository.GetPopularityList(request.Place, request.CityId);
             var addList = new List<PopularityModel>();
 
             foreach (var item in request.Popularity)
@@ -40,7 +41,8 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
                     ApplicationId = item.Id,
                     Place = request.Place,
                     Popularity = item.Popularity,
-                    Type = POPULARITY_TYPE.POSTER
+                    Type = POPULARITY_TYPE.POSTER,
+                    CityId = request.CityId
                 });
             }
 

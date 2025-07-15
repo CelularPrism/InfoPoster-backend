@@ -1,13 +1,16 @@
 ﻿using InfoPoster_backend.Handlers.Administration.Poster;
 using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Repos;
+using InfoPoster_backend.Tools;
 using MediatR;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace InfoPoster_backend.Handlers.Administration.Offer
 {
     public class GetPopularityOfferRequest : IRequest<List<GetPopularityOfferResponse>>
     {
         public POPULARITY_PLACE Place { get; set; }
+        public Guid CityId { get; set; }
 
     }
 
@@ -29,8 +32,8 @@ namespace InfoPoster_backend.Handlers.Administration.Offer
 
         public async Task<List<GetPopularityOfferResponse>> Handle(GetPopularityOfferRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetPopularOfferList(request.Place);
-            var popularity = await _repository.GetPopularityList(request.Place);
+            var posters = await _repository.GetPopularOfferList(request.Place, request.CityId);
+            var popularity = await _repository.GetPopularityList(request.Place, request.CityId);
 
             var result = posters.Select(o => new GetPopularityOfferResponse()
             {

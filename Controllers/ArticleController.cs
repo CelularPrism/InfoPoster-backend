@@ -102,9 +102,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("popularity/get")]
-        public async Task<IActionResult> GetPopularityPoster()
+        public async Task<IActionResult> GetPopularityPoster([FromQuery] Guid cityId)
         {
-            var result = await _mediator.Send(new GetPopularityArticleRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            var result = await _mediator.Send(new GetPopularityArticleRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId });
             if (result == null)
                 return NotFound();
 

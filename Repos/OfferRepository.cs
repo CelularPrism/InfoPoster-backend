@@ -69,16 +69,19 @@ namespace InfoPoster_backend.Repos
         public async Task<List<UserModel>> GetUserList(IEnumerable<Guid> users) =>
             await _context.Users.Where(o => users.Contains(o.Id)).ToListAsync();
 
-        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place)
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place, Guid city)
         {
             var publishedOrgs = await _context.Offers.Where(o => o.Status == POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
-            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && p.Place == place && p.Type == POPULARITY_TYPE.OFFER).ToListAsync();
+            var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && 
+                                                              p.Place == place && 
+                                                              p.CityId == city &&
+                                                              p.Type == POPULARITY_TYPE.OFFER).ToListAsync();
             return result;
         }
 
-        public async Task<List<OffersModel>> GetPopularOfferList(POPULARITY_PLACE place)
+        public async Task<List<OffersModel>> GetPopularOfferList(POPULARITY_PLACE place, Guid city)
         {
-            var popularityOffers = await _context.Popularity.Where(p => p.Place == place).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var popularityOffers = await _context.Popularity.Where(p => p.Place == place && p.CityId == city).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
 
             var offerList = await _context.OffersMultilang.Where(ml => ml.Lang == _lang && popularityOffers.Contains(ml.OfferId))
                                                                    .Join(_context.Offers,
