@@ -37,12 +37,16 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                 var selectelUUID = await _selectelAuthService.GetContainerUUID("dosdoc");
                 foreach (var item in popular)
                 {
-                    var fileList = await _file.GetSelectelFiles(item.Id, 0);
+                    var id = item.Id;
+                    if (item.ApplicationId != null && item.Type != null)
+                        id = (Guid)item.ApplicationId;
+
+                    var fileList = await _file.GetSelectelFiles(id, 0);
                     var file = fileList.FirstOrDefault();
                     var url = string.Empty;
 
                     if (file != null)
-                        url = string.Concat("https://", selectelUUID, ".selstorage.ru/", file.Id);
+                        url = string.Concat("https://", selectelUUID, ".selstorage.ru/", id);
 
                     result.Add(new BannerResponseModel()
                     {

@@ -126,6 +126,28 @@ namespace InfoPoster_backend.Repos
                                                                      UserId = o.Organization.UserId
                                                                  }).ToListAsync();
 
+        public async Task<List<OrganizationModel>> GetOrganizationList(Guid cityId) => await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED)
+                                                                 .Join(_organization.OrganizationsFullInfo,
+                                                                       o => o.Id,
+                                                                       f => f.OrganizationId,
+                                                                       (o, f) => new { Organization = o, f.City })
+                                                                 .Where(f => f.City == cityId)
+                                                                 .Join(_organization.OrganizationsMultilang,
+                                                                       o => o.Organization.Id,
+                                                                       m => m.OrganizationId,
+                                                                       (o, m) => new { o.Organization, Multilang = m })
+                                                                 .Where(m => m.Multilang.Lang == _lang)
+                                                                 .Select(o => new OrganizationModel()
+                                                                 {
+                                                                     Id = o.Organization.Id,
+                                                                     CategoryId = o.Organization.CategoryId,
+                                                                     CreatedAt = o.Organization.CreatedAt,
+                                                                     Name = o.Multilang.Name,
+                                                                     Status = o.Organization.Status,
+                                                                     SubcategoryId = o.Organization.SubcategoryId,
+                                                                     UserId = o.Organization.UserId
+                                                                 }).ToListAsync();
+
         public async Task<List<OrganizationModel>> GetOrganizationList(string lang, Guid adminId, List<int> statuses, Guid? categoryId, DateTime? startDate, DateTime? endDate, Guid? userId, Guid? cityId)
         {
             //var query = _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PENDING ||

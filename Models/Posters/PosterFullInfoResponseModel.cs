@@ -24,6 +24,7 @@ namespace InfoPoster_backend.Models.Posters
             AgeRestriction = fullInfo.AgeRestriction;
             Tickets = multilang.Tickets;
             AttachedOrganizationId = fullInfo.OrganizationId;
+            SubcategoryId = poster.SubcategoryId;
         }
 
         public Guid Id { get; set; }
@@ -33,6 +34,8 @@ namespace InfoPoster_backend.Models.Posters
         public DateTime? ReleaseDateEnd { get; set; }
         public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
+        public Guid? SubcategoryId { get; set; }
+        public string SubcategoryName { get; set; }
         public string Place { get; set; }
         public Guid? City { get; set; }
         public string TimeStart { get; set; }

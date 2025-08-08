@@ -53,6 +53,32 @@ namespace InfoPoster_backend.Repos
                                       UserId = p.p.UserId
                                   }).ToListAsync();
 
+        public async Task<List<PosterModel>> GetPosterList(Guid cityId) =>
+            await _context.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED)
+                                  .Join(_context.PostersFullInfo,
+                                        p => p.Id,
+                                        f => f.PosterId,
+                                        (p, f) => new { p, f.City })
+                                  .Where(p => p.City == cityId)
+                                  .Join(_context.PostersMultilang,
+                                        p => p.p.Id,
+                                        ml => ml.PosterId,
+                                        (p, ml) => new { p.p, ml })
+                                  .Where(p => p.ml.Lang == _lang)
+                                  .Select(p => new PosterModel()
+                                  {
+                                      Id = p.p.Id,
+                                      CategoryId = p.p.CategoryId,
+                                      CreatedAt = p.p.CreatedAt,
+                                      Name = p.ml.Name,
+                                      ReleaseDate = p.p.ReleaseDate,
+                                      ReleaseDateEnd = p.p.ReleaseDateEnd,
+                                      Status = p.p.Status,
+                                      SubcategoryId = p.p.SubcategoryId,
+                                      UpdatedAt = p.p.UpdatedAt,
+                                      UserId = p.p.UserId
+                                  }).ToListAsync();
+
         public async Task<List<PosterModel>> GetPosterListByUserId(Guid userId) =>
             await _context.Posters.Where(p => p.UserId == userId).ToListAsync();
 
@@ -424,6 +450,11 @@ namespace InfoPoster_backend.Repos
                                                                     .AsNoTracking()
                                                                     .Select(c => c.Name)
                                                                     .FirstOrDefaultAsync();
+
+            poster.SubcategoryName = await _context.SubcategoriesMultilang.Where(s => s.SubcategoryId == poster.SubcategoryId && s.lang == lang)
+                                                                          .AsNoTracking()
+                                                                          .Select(s => s.Name)
+                                                                          .FirstOrDefaultAsync();
             var files = await _context.FileUrls.Where(f => f.PosterId == Id)
                                                .AsNoTracking()
                                                .ToListAsync();

@@ -7,6 +7,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
     public class GetPublishedPosterRequest : IRequest<List<PosterModel>>
     {
         public string SearchText { get; set; }
+        public Guid CityId { get; set; }
     }
 
     public class GetPublishedPosterHandler : IRequestHandler<GetPublishedPosterRequest, List<PosterModel>>
@@ -20,7 +21,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
 
         public async Task<List<PosterModel>> Handle(GetPublishedPosterRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetPosterList();
+            var posters = await _repository.GetPosterList(request.CityId);
 
             var result = posters.Where(o => o.Name.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
             return result;

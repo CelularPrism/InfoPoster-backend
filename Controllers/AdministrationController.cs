@@ -279,9 +279,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("poster/published/get")]
-        public async Task<IActionResult> GetPublishedPoster([FromQuery] string SearchText)
+        public async Task<IActionResult> GetPublishedPoster([FromQuery] string SearchText, [FromQuery] Guid cityId)
         {
-            var result = await _mediator.Send(new GetPublishedPosterRequest() { SearchText = SearchText });
+            var result = await _mediator.Send(new GetPublishedPosterRequest() { SearchText = SearchText, CityId = cityId });
             if (result == null)
                 return NotFound();
 
@@ -509,9 +509,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("organization/published/get")]
-        public async Task<IActionResult> GetPublishedOrganization([FromQuery] string SearchText)
+        public async Task<IActionResult> GetPublishedOrganization([FromQuery] string SearchText, [FromQuery] Guid cityId)
         {
-            var result = await _mediator.Send(new GetPublishedOrganizationRequest() { SearchText = SearchText });
+            var result = await _mediator.Send(new GetPublishedOrganizationRequest() { SearchText = SearchText, CityId = cityId });
             if (result == null)
                 return NotFound();
 
@@ -686,17 +686,17 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("offer/published/get")]
-        public async Task<IActionResult> GetPublishedOffer([FromQuery] string SearchText)
+        public async Task<IActionResult> GetPublishedOffer([FromQuery] string SearchText, [FromQuery] Guid cityId)
         {
-            var result = await _mediator.Send(new GetPublishedOfferRequest() { SearchText = SearchText });
+            var result = await _mediator.Send(new GetPublishedOfferRequest() { SearchText = SearchText, CityId = cityId });
             if (result == null)
                 return NotFound();
 
             return Ok(result);
         }
 
-        [HttpPost("banner/popularity/add")]
-        public async Task<IActionResult> AddPopularityBanner([FromBody] List<AddPopularityBannerRequest> request)
+        [HttpPost("banner/popularity/save")]
+        public async Task<IActionResult> SavePopularityBanner([FromBody] List<AddPopularityBannerRequest> request)
         {
             var result = new List<Guid>();
             foreach (var item in request)

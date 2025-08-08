@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Administration;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Banner;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Login;
@@ -8,11 +9,16 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
 {
     public class AddPopularityBannerRequest : IRequest<AddPopularityBannerResponse>
     {
+        public Guid Id { get; set; } = Guid.Empty;
         public string ExternalLink { get; set; }
         public DateTime ReleaseDate { get; set; }
         public string Comment { get; set; }
         public int Popularity { get; set; }
         public Guid CityId { get; set; }
+        public Guid? PlaceId { get; set; }
+        public Guid? ApplicationId { get; set; }
+        public CategoryType? Type { get; set; }
+        public POPULARITY_PLACE PopularityPlace { get; set; }
     }
 
     public class AddPopularityBannerResponse 
@@ -32,14 +38,49 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
 
         public async Task<AddPopularityBannerResponse> Handle(AddPopularityBannerRequest request, CancellationToken cancellationToken = default)
         {
-            var banner = new BannerModel()
+            var applicationId = Guid.Empty;
+            if (request.Type != null && request.ApplicationId != null)
             {
-                ExternalLink = request.ExternalLink,
-                ReleaseDate = request.ReleaseDate,
-                Comment = request.Comment,
-                Id = Guid.NewGuid(),
-                UserId = _user
-            };
+                if (request.Type == CategoryType.PLACE)
+                {
+                    var anyOrganization = await _repository.AnyOrganization((Guid)request.ApplicationId);
+                    if (!anyOrganization)
+                        return null;
+                } else
+                {
+                    var anyPoster = await _repository.AnyPoster((Guid)request.ApplicationId);
+                    if (!anyPoster) 
+                        return null;
+                }
+                applicationId = (Guid)request.ApplicationId;
+            }
+
+            var banner = await _repository.GetBanner(request.Id);
+            if (banner == null)
+            {
+                banner = new BannerModel()
+                {
+                    ExternalLink = request.ExternalLink,
+                    ReleaseDate = request.ReleaseDate,
+                    Comment = request.Comment,
+                    Id = Guid.NewGuid(),
+                    UserId = _user,
+                    ApplicationId = request.ApplicationId,
+                    PlaceId = request.PlaceId,
+                    Type = request.Type
+                };
+
+                await _repository.Add(banner);
+            } else
+            {
+                banner.ExternalLink = request.ExternalLink;
+                banner.ReleaseDate = request.ReleaseDate;
+                banner.Comment = request.Comment;
+                banner.ApplicationId = request.ApplicationId;
+                banner.PlaceId = request.PlaceId;
+                banner.Type = request.Type;
+                await _repository.Update(banner);
+            }
 
             var oldPopularity = await _repository.GetPopularity(POPULARITY_PLACE.MAIN, request.Popularity);
 
@@ -47,13 +88,11 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
             {
                 Id = Guid.NewGuid(),
                 ApplicationId = banner.Id,
-                Place = POPULARITY_PLACE.MAIN,
+                Place = request.PopularityPlace,
                 Popularity = request.Popularity,
                 Type = POPULARITY_TYPE.BANNER,
                 CityId = request.CityId
             };
-
-            await _repository.Add(banner);
             await _repository.AddPopularity(popularity);
             await _repository.RemoveRangePopularity(oldPopularity);
 

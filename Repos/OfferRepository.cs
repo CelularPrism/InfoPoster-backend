@@ -47,7 +47,26 @@ namespace InfoPoster_backend.Repos
                                                                                         Status = o.Offer.Status,
                                                                                         Type = o.Offer.Type,
                                                                                         UserId = o.Offer.UserId
-                                                                                    }).ToListAsync();                                         
+                                                                                    }).ToListAsync();
+
+        public async Task<List<OffersModel>> GetOfferList(Guid cityId) => await _context.Offers.Where(o => o.Status == POSTER_STATUS.PUBLISHED && o.CityId == cityId)
+                                                                                    .Join(_context.OffersMultilang,
+                                                                                          offer => offer.Id,
+                                                                                          ml => ml.OfferId,
+                                                                                          (offer, ml) => new { Offer = offer, Multilang = ml })
+                                                                                    .Where(o => o.Multilang.Lang == _lang)
+                                                                                    .Select(o => new OffersModel()
+                                                                                    {
+                                                                                        CityId = o.Offer.CityId,
+                                                                                        CreatedAt = o.Offer.CreatedAt,
+                                                                                        DateEnd = o.Offer.DateEnd,
+                                                                                        DateStart = o.Offer.DateStart,
+                                                                                        Id = o.Offer.Id,
+                                                                                        Name = o.Multilang.Name,
+                                                                                        Status = o.Offer.Status,
+                                                                                        Type = o.Offer.Type,
+                                                                                        UserId = o.Offer.UserId
+                                                                                    }).ToListAsync();
 
         public async Task<List<CityModel>> GetCities(string lang) => await _context.CitiesMultilang.Where(c => c.Lang == lang).Select(c => new CityModel()
                                                                                                                                     {

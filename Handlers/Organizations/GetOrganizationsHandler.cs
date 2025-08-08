@@ -58,7 +58,7 @@ namespace InfoPoster_backend.Handlers.Organizations
 
         public async Task<GetOrganizationsResponse> Handle(GetOrganizationsRequest request, CancellationToken cancellationToken = default)
         {
-            var categsTask = _repository.GetApplicationCategories();
+            var categs = await _repository.GetApplicationCategories();
             var organizationList = await _repository.GetOrganizationList(string.Empty, Guid.Empty, new List<int>() { (int)POSTER_STATUS.PUBLISHED }, request.categoryId, request.startDate, request.endDate, null, _city);
             if (request.subcategoryId != null)
             {
@@ -76,7 +76,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 var categories = await _repository.GetCategories();
                 var subcategories = await _repository.GetSubcategories();
 
-                var categs = await categsTask;
+                //var categs = await categsTask;
                 var orgs = categs.Where(c => c.CategoryId == request.categoryId && c.SubcategoryId == request.subcategoryId).Select(c => c.ApplicationId).ToList();
  
                 data = organizationList.Where(o => orgs.Contains(o.Id))
@@ -103,7 +103,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 var categories = await _repository.GetCategories();
                 var subcategories = await _repository.GetSubcategories();
 
-                var categs = await categsTask;
+                //var categs = await categsTask;
                 var orgs = categs.Where(c => c.SubcategoryId == request.subcategoryId).Select(c => c.ApplicationId).ToList();
 
                 data = organizationList.Where(o => orgs.Contains(o.Id))
@@ -130,7 +130,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 var categories = await _repository.GetCategories();
                 var subcategories = await _repository.GetSubcategories();
 
-                var categs = await categsTask;
+                //var categs = await categsTask;
                 var orgs = categs.Where(c => c.CategoryId == request.categoryId).Select(c => c.ApplicationId).ToList();
 
                 data = organizationList.Where(o => orgs.Contains(o.Id))
@@ -157,7 +157,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 var categories = await _repository.GetCategories();
                 var subcategories = await _repository.GetSubcategories();
 
-                var categs = await categsTask;
+                //var categs = await categsTask;
 
                 data = organizationList.Select(o => new InfoOrganization()
                                          {

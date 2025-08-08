@@ -1,5 +1,6 @@
 ﻿using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Banner;
+using InfoPoster_backend.Models.Organizations;
 using InfoPoster_backend.Models.Posters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -33,5 +34,9 @@ namespace InfoPoster_backend.Models.Contexts
 
         public DbSet<BannerModel> Banners { get; set; }
         public DbSet<PopularityModel> Popularity { get; set; }
+        public DbSet<OrganizationModel> Organizations { get; set; }
+        public DbSet<PosterModel> Posters { get; set; }
+        public DbSet<CategoryModel> Categories { get; set; }
+        public DbSet<SubcategoryModel> Subcategories { get; set; }
     }
 }
