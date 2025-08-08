@@ -3,8 +3,12 @@
     public enum POPULARITY_PLACE
     {
         MAIN,
-        CATEGORY,
-        SUBCATEGORY
+        CATEGORY_PLACE,
+        SUBCATEGORY_PLACE,
+        CATEGORY_EVENT,
+        SUBCATEGORY_EVENT,
+        LIST_APPLICATION_EVENT,
+        LIST_APPLICATION_PLACE
     }
 
     public enum POPULARITY_TYPE

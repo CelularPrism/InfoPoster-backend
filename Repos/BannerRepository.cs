@@ -35,13 +35,11 @@ namespace InfoPoster_backend.Repos
             var banner = await _banner.Banners.Where(b => popularity.Contains(b.Id))
                                               .Select(b => new BannerModel()
                                               {
-                                                  ApplicationId = b.ApplicationId,
                                                   Comment = b.Comment,
-                                                  ExternalLink = b.Type == CategoryType.PLACE ? string.Concat("application/place/" + b.ApplicationId) : b.Type == CategoryType.EVENT ? string.Concat("application/event/" + b.ApplicationId) : b.ExternalLink,
+                                                  ExternalLink = b.ExternalLink,
                                                   Id = b.Id,
                                                   PlaceId = b.PlaceId,
                                                   ReleaseDate = b.ReleaseDate,
-                                                  Type = b.Type,
                                                   UserId = b.UserId
                                               }).ToListAsync();
 

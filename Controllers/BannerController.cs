@@ -27,7 +27,7 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("place/get")]
         public async Task<IActionResult> GetPopularOnCategoryPlace()
         {
-            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.CATEGORY, Type = Models.CategoryType.PLACE });
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.CATEGORY_PLACE });
             return Ok(result);
         }
 
@@ -35,21 +35,35 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("event/get")]
         public async Task<IActionResult> GetPopularOnCategoryEvent()
         {
-            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.CATEGORY, Type = Models.CategoryType.EVENT });
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.CATEGORY_EVENT });
             return Ok(result);
         }
 
-        [HttpGet("category/get")]
+        [HttpGet("place/category/get")]
+        public async Task<IActionResult> GetPopularOnPlaceSubcategory([FromQuery] Guid categoryId)
+        {
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.SUBCATEGORY_PLACE, PlaceId = categoryId });
+            return Ok(result);
+        }
+
+        [HttpGet("event/category/get")]
         public async Task<IActionResult> GetPopularOnSubcategory([FromQuery] Guid categoryId)
         {
-            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.CATEGORY, PlaceId = categoryId });
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.SUBCATEGORY_EVENT, PlaceId = categoryId });
             return Ok(result);
         }
 
-        [HttpGet("subcategory/get")]
-        public async Task<IActionResult> GetPopularOnApplicationList([FromQuery] Guid subcategoryId)
+        [HttpGet("place/subcategory/get")]
+        public async Task<IActionResult> GetPopularOnPlaceList([FromQuery] Guid subcategoryId)
         {
-            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.SUBCATEGORY, PlaceId = subcategoryId });
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.SUBCATEGORY_PLACE, PlaceId = subcategoryId });
+            return Ok(result);
+        }
+
+        [HttpGet("event/subcategory/get")]
+        public async Task<IActionResult> GetPopularOnEventList([FromQuery] Guid subcategoryId)
+        {
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.SUBCATEGORY_EVENT, PlaceId = subcategoryId });
             return Ok(result);
         }
     }

@@ -38,8 +38,6 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                 foreach (var item in popular)
                 {
                     var id = item.Id;
-                    if (item.ApplicationId != null && item.Type != null)
-                        id = (Guid)item.ApplicationId;
 
                     var fileList = await _file.GetSelectelFiles(id, 0);
                     var file = fileList.FirstOrDefault();
@@ -50,7 +48,6 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
 
                     result.Add(new BannerResponseModel()
                     {
-                        Comment = item.Comment,
                         ExternalLink = item.ExternalLink,
                         FileURL = url,
                         Id = item.Id,

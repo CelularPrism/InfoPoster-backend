@@ -12,7 +12,6 @@ namespace InfoPoster_backend.Handlers.Banner
     {
         public POPULARITY_PLACE Place { get; set; }
         public Guid? PlaceId { get; set; }
-        public CategoryType? Type { get; set; }
     }
 
     public class GetPublishedBannerListHandler : IRequestHandler<GetPublishedBannerListRequest, List<BannerResponseModel>>
@@ -37,66 +36,48 @@ namespace InfoPoster_backend.Handlers.Banner
         public async Task<List<BannerResponseModel>> Handle(GetPublishedBannerListRequest request, CancellationToken cancellationToken = default)
         {
             var bannerList = await _repository.GetPopularBannerList(request.Place, _city);
+            var result = new List<BannerResponseModel>();
 
             if (request.PlaceId != null)
             {
                 bannerList = bannerList.Where(b => b.PlaceId == request.PlaceId).ToList();
-                if (request.Place == POPULARITY_PLACE.CATEGORY)
-                {
-                    var category = await _repository.GetCategoryById((Guid)request.PlaceId);
-                    if (category != null)
-                        request.Type = (CategoryType)category.Type;
-                } else if (request.Place == POPULARITY_PLACE.SUBCATEGORY)
-                {
-                    var subcategory = await _repository.GetCategoryById((Guid)request.PlaceId);
-                    if (subcategory != null)
-                        request.Type = (CategoryType)subcategory.Type;
-                }
             }
 
             if (bannerList.Count < 9)
             {
-                if (request.Type != null)
+                if (request.Place == POPULARITY_PLACE.CATEGORY_PLACE || request.Place == POPULARITY_PLACE.SUBCATEGORY_PLACE)
                 {
-                    if (request.Type == CategoryType.EVENT)
+                    var posters = await _poster.GetPopularPosterList(request.Place, _city);
+                    var postersBanner = posters.Select(p => new BannerResponseModel()
                     {
-                        var posters = await _poster.GetPopularPosterList(request.Place, _city);
-                        var postersBanner = posters.Select(p => new BannerModel()
-                        {
-                            ApplicationId = p.Id,
-                            Id = Guid.NewGuid(),
-                            Comment = p.Name,
-                            ExternalLink = string.Concat("application/event/" + p.Id),
-                            ReleaseDate = DateTime.UtcNow,
-                            Type = request.Type,
-                            UserId = Guid.NewGuid()
-                        }).ToList();
-                        bannerList.AddRange(postersBanner);
-                    } else
+                        Id = Guid.NewGuid(),
+                        ExternalLink = string.Concat("application/event/" + p.Id),
+                        ReleaseDate = DateTime.UtcNow,
+                        UserId = Guid.NewGuid(),
+                        ApplicationId = p.Id
+                    }).ToList();
+                    result.AddRange(postersBanner);
+                } else if (request.Place == POPULARITY_PLACE.CATEGORY_EVENT || request.Place == POPULARITY_PLACE.SUBCATEGORY_EVENT)
+                {
+                    var organization = await _organization.GetPopularOrganizationList(request.Place, _city);
+                    var organizationBanner = organization.Select(o => new BannerResponseModel()
                     {
-                        var organization = await _organization.GetPopularOrganizationList(request.Place, _city);
-                        var organizationBanner = organization.Select(o => new BannerModel()
-                        {
-                            ApplicationId = o.Id,
-                            Id = Guid.NewGuid(),
-                            Comment = o.Name,
-                            ExternalLink = string.Concat("application/place/" + o.Id),
-                            ReleaseDate = DateTime.UtcNow,
-                            Type = request.Type,
-                            UserId = Guid.NewGuid()
-                        }).ToList();
-                        bannerList.AddRange(organizationBanner);
-                    }
+                        Id = Guid.NewGuid(),
+                        ExternalLink = string.Concat("application/place/" + o.Id),
+                        ReleaseDate = DateTime.UtcNow,
+                        UserId = Guid.NewGuid(),
+                        ApplicationId = o.Id
+                    }).ToList();
+                    result.AddRange(organizationBanner);
                 }
             }
 
             if (bannerList.Count > 9)
                 bannerList = bannerList.Take(9).ToList();
 
-            var result = bannerList.Select(b => new BannerResponseModel()
+            result = bannerList.Select(b => new BannerResponseModel()
             {
-                Comment = b.Comment,
-                ExternalLink = b.Type == CategoryType.PLACE ? string.Concat("application/place/" + b.ApplicationId) : b.Type == CategoryType.EVENT ? string.Concat("application/event/" + b.ApplicationId) : b.ExternalLink,
+                ExternalLink = b.ExternalLink,
                 Id = b.Id,
                 ReleaseDate = b.ReleaseDate,
                 UserId = b.UserId,
@@ -109,7 +90,7 @@ namespace InfoPoster_backend.Handlers.Banner
                 foreach (var item in result)
                 {
                     var id = item.Id;
-                    if (item.ApplicationId != null && item.Type != null)
+                    if (item.ApplicationId != null)
                         id = (Guid)item.ApplicationId;
 
                     var file = await _file.GetPrimaryFile(id, (int)FILE_PLACES.GALLERY);

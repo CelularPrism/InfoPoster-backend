@@ -16,8 +16,6 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
         public int Popularity { get; set; }
         public Guid CityId { get; set; }
         public Guid? PlaceId { get; set; }
-        public Guid? ApplicationId { get; set; }
-        public CategoryType? Type { get; set; }
         public POPULARITY_PLACE PopularityPlace { get; set; }
     }
 
@@ -38,23 +36,6 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
 
         public async Task<AddPopularityBannerResponse> Handle(AddPopularityBannerRequest request, CancellationToken cancellationToken = default)
         {
-            var applicationId = Guid.Empty;
-            if (request.Type != null && request.ApplicationId != null)
-            {
-                if (request.Type == CategoryType.PLACE)
-                {
-                    var anyOrganization = await _repository.AnyOrganization((Guid)request.ApplicationId);
-                    if (!anyOrganization)
-                        return null;
-                } else
-                {
-                    var anyPoster = await _repository.AnyPoster((Guid)request.ApplicationId);
-                    if (!anyPoster) 
-                        return null;
-                }
-                applicationId = (Guid)request.ApplicationId;
-            }
-
             var banner = await _repository.GetBanner(request.Id);
             if (banner == null)
             {
@@ -65,9 +46,7 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                     Comment = request.Comment,
                     Id = Guid.NewGuid(),
                     UserId = _user,
-                    ApplicationId = request.ApplicationId,
-                    PlaceId = request.PlaceId,
-                    Type = request.Type
+                    PlaceId = request.PlaceId
                 };
 
                 await _repository.Add(banner);
@@ -76,9 +55,7 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                 banner.ExternalLink = request.ExternalLink;
                 banner.ReleaseDate = request.ReleaseDate;
                 banner.Comment = request.Comment;
-                banner.ApplicationId = request.ApplicationId;
                 banner.PlaceId = request.PlaceId;
-                banner.Type = request.Type;
                 await _repository.Update(banner);
             }
 
