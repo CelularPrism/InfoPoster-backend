@@ -31,8 +31,8 @@ namespace InfoPoster_backend.Repos
         {
             var popularity = await _banner.Popularity.Where(p => p.Place == place && 
                                                                  p.CityId == city &&
-                                                                 p.Type == POPULARITY_TYPE.BANNER).Select(p => p.ApplicationId).ToListAsync();
-            var banner = await _banner.Banners.Where(b => popularity.Contains(b.Id))
+                                                                 p.Type == POPULARITY_TYPE.BANNER).OrderBy(p => p.Popularity).Select(p => new { p.ApplicationId, p.Popularity }).ToListAsync();
+            var banner = await _banner.Banners.Where(b => popularity.Select(p => p.ApplicationId).Contains(b.Id))
                                               .Select(b => new BannerModel()
                                               {
                                                   Comment = b.Comment,
@@ -40,7 +40,8 @@ namespace InfoPoster_backend.Repos
                                                   Id = b.Id,
                                                   PlaceId = b.PlaceId,
                                                   ReleaseDate = b.ReleaseDate,
-                                                  UserId = b.UserId
+                                                  UserId = b.UserId,
+                                                  Popularity = popularity.Where(p => p.ApplicationId == b.Id).Select(p => p.Popularity).FirstOrDefault()
                                               }).ToListAsync();
 
             return banner;

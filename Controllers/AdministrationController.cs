@@ -7,6 +7,7 @@ using InfoPoster_backend.Handlers.Offers;
 using InfoPoster_backend.Handlers.Organizations;
 using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Models.Offers;
 using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
@@ -709,9 +710,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("banner/popularity/get")]
-        public async Task<IActionResult> GetPopularityBanner([FromQuery] Guid cityId)
+        public async Task<IActionResult> GetPopularityBanner([FromQuery] Guid cityId, [FromQuery] POPULARITY_PLACE place)
         {
-            var result = await _mediator.Send(new GetPopularityBannerRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId });
+            var result = await _mediator.Send(new GetPopularityBannerRequest() { Place = place, CityId = cityId });
             if (result == null)
                 return NotFound();
 

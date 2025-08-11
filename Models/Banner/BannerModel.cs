@@ -1,4 +1,6 @@
-﻿namespace InfoPoster_backend.Models.Banner
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace InfoPoster_backend.Models.Banner
 {
     public class BannerModel
     {
@@ -8,6 +10,9 @@
         public DateTime ReleaseDate { get; set; }
         public string Comment { get; set; }
         public Guid? PlaceId { get; set; }
+
+        [NotMapped]
+        public int Popularity { get; set; }
     }
 
     public class BannerResponseModel
@@ -18,6 +23,6 @@
         public DateTime ReleaseDate { get; set; }
         public string FileURL { get; set; }
         public Guid? ApplicationId { get; set; }
-        public CategoryType? Type { get; set; }
+        public int? Popularity { get; set; }
     }
 }

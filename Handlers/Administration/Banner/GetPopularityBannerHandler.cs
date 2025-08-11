@@ -28,7 +28,7 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
 
         public async Task<List<BannerResponseModel>> Handle(GetPopularityBannerRequest request, CancellationToken cancellationToken = default)
         {
-            var popular = await _repository.GetPopularBannerList(POPULARITY_PLACE.MAIN, request.CityId);
+            var popular = await _repository.GetPopularBannerList(request.Place, request.CityId);
             var loggedIn = await _selectelAuthService.Login();
             var result = new List<BannerResponseModel>();
 
@@ -52,7 +52,8 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                         FileURL = url,
                         Id = item.Id,
                         ReleaseDate = item.ReleaseDate,
-                        UserId = item.UserId
+                        UserId = item.UserId,
+                        Popularity = item.Popularity,
                     });
                 }
             }
