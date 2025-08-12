@@ -31,13 +31,13 @@ namespace InfoPoster_backend.Handlers.Organizations
         public async Task<List<OrganizationResponseModel>> Handle(GetPopularOrganizationsRequest request, CancellationToken cancellationToken = default)
         {
             var result = new List<OrganizationResponseModel>();
-            if (request.CategoryId != null && request.CategoryId != Guid.Empty)
-            {
-                result = await _repository.GetPopularOrganizationListByCategory(request.Place, (Guid)request.CategoryId);
-            } else
-            {
-                result = await _repository.GetPopularOrganizationList(request.Place, _city);
-            }
+            //if (request.CategoryId != null && request.CategoryId != Guid.Empty)
+            //{
+            //    result = await _repository.GetPopularOrganizationListByCategory(request.Place, (Guid)request.CategoryId);
+            //} else
+            //{
+                result = await _repository.GetPopularOrganizationList(request.Place, _city, request.CategoryId);
+            //}
 
             result = result.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).ToList();
 

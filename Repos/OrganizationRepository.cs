@@ -544,67 +544,20 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place, Guid city)
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place, Guid city, Guid? placeId)
         {
             var publishedOrgs = await _organization.Organizations.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
             var result = await _organization.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && 
                                                                    p.Place == place && 
                                                                    p.CityId == city &&
+                                                                   p.PlaceId == placeId &&
                                                                    p.Type == POPULARITY_TYPE.ORGANIZATION).ToListAsync();
             return result;
         }
 
-        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place, Guid city)
+        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationList(POPULARITY_PLACE place, Guid city, Guid? placeId)
         {
-            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place && p.CityId == city).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
-            var categories = await _organization.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
-            var subcategories = await _organization.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
-
-            var orgs = await _organization.OrganizationsMultilang.Where(ml => ml.Lang == _lang && popularityOrgs.Contains(ml.OrganizationId))
-                                                                   .Join(_organization.Organizations,
-                                                                   ml => ml.OrganizationId,
-                                                                   org => org.Id,
-                                                                   (ml, o) => new OrganizationResponseModel()
-                                                                   {
-                                                                       Id = ml.OrganizationId,
-                                                                       Category = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.CategoriesMultilang,
-                                                                                                                                                   c => c.CategoryId,
-                                                                                                                                                   ml => ml.CategoryId,
-                                                                                                                                                   (c, ml) => ml)
-                                                                                                                                             .Where(ml => ml.lang == _lang)
-                                                                                                                                             .Select(ml => new IdNameModel()
-                                                                                                                                             {
-                                                                                                                                                 Id = ml.CategoryId,
-                                                                                                                                                 Name = ml.Name
-                                                                                                                                             }).ToList(),
-                                                                       Subcategory = _organization.ApplicationCategories.Where(c => c.ApplicationId == o.Id).Join(_organization.SubcategoriesMultilang,
-                                                                                                                                                   c => c.SubcategoryId,
-                                                                                                                                                   ml => ml.SubcategoryId,
-                                                                                                                                                   (c, ml) => ml)
-                                                                                                                                             .Where(ml => ml.lang == _lang)
-                                                                                                                                             .Select(ml => new IdNameModel()
-                                                                                                                                             {
-                                                                                                                                                 Id = ml.SubcategoryId,
-                                                                                                                                                 Name = ml.Name
-                                                                                                                                             }).ToList(),
-                                                                       CreatedAt = o.CreatedAt,
-                                                                       Name = ml.Name,
-                                                                       Status = o.Status
-                                                                   }).ToListAsync();
-            var result = new List<OrganizationResponseModel>();
-            foreach (var item in popularityOrgs)
-            {
-                var org = orgs.Where(o => o.Id == item).FirstOrDefault();
-                if (org != null)
-                    result.Add(org);
-            }
-
-            return result;
-        }
-
-        public async Task<List<OrganizationResponseModel>> GetPopularOrganizationListByCategory(POPULARITY_PLACE place, Guid categoryId)
-        {
-            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place && p.CategoryId == categoryId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var popularityOrgs = await _organization.Popularity.Where(p => p.Place == place && p.CityId == city && p.PlaceId == placeId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
             var categories = await _organization.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
             var subcategories = await _organization.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
 

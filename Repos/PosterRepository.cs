@@ -539,19 +539,20 @@ namespace InfoPoster_backend.Repos
             return history;
         }
 
-        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place, Guid city)
+        public async Task<List<PopularityModel>> GetPopularityList(POPULARITY_PLACE place, Guid city, Guid? placeId)
         {
             var publishedOrgs = await _context.Posters.Where(o => o.Status == (int)POSTER_STATUS.PUBLISHED).Select(o => o.Id).ToListAsync();
             var result = await _context.Popularity.Where(p => publishedOrgs.Contains(p.ApplicationId) && 
                                                               p.Place == place && 
                                                               p.CityId == city &&
+                                                              p.PlaceId == placeId &&
                                                               p.Type == POPULARITY_TYPE.POSTER).ToListAsync();
             return result;
         }
 
-        public async Task<List<PosterResponseModel>> GetPopularPosterList(POPULARITY_PLACE place, Guid city)
+        public async Task<List<PosterResponseModel>> GetPopularPosterList(POPULARITY_PLACE place, Guid city, Guid? placeId)
         {
-            var popularityPosters = await _context.Popularity.Where(p => p.Place == place && p.CityId == city).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var popularityPosters = await _context.Popularity.Where(p => p.Place == place && p.CityId == city && p.PlaceId == placeId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
             var subcategories = await _context.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
 
@@ -565,35 +566,6 @@ namespace InfoPoster_backend.Repos
                                                                        //CategoryId = p.CategoryId,
                                                                        //CategoryName = categories.Where(c => c.CategoryId == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
                                                                        Name = ml.Name
-                                                                   }).ToListAsync();
-            var result = new List<PosterResponseModel>();
-            foreach (var item in popularityPosters)
-            {
-                var poster = posters.Where(o => o.Id == item).FirstOrDefault();
-                if (poster != null)
-                    result.Add(poster);
-            }
-
-            return result;
-        }
-
-        public async Task<List<PosterResponseModel>> GetPopularPosterListByCategory(POPULARITY_PLACE place, Guid categoryId)
-        {
-            var popularityPosters = await _context.Popularity.Where(p => p.Place == place && p.CategoryId == categoryId).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
-            var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
-            var subcategories = await _context.SubcategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
-
-            var posters = await _context.PostersMultilang.Where(ml => ml.Lang == _lang && popularityPosters.Contains(ml.PosterId))
-                                                                   .Join(_context.Posters,
-                                                                   ml => ml.PosterId,
-                                                                   org => org.Id,
-                                                                   (ml, o) => new PosterResponseModel()
-                                                                   {
-                                                                       Id = ml.PosterId,
-                                                                       //CategoryId = o.CategoryId,
-                                                                       //CategoryName = categories.Where(c => c.Id == o.CategoryId).Select(c => c.Name).FirstOrDefault(),
-                                                                       Name = ml.Name,
-                                                                       //SubcategoryName = subcategories.Where(s => s.Id == o.SubcategoryId).Select(s => s.Name).FirstOrDefault()
                                                                    }).ToListAsync();
             var result = new List<PosterResponseModel>();
             foreach (var item in popularityPosters)

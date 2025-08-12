@@ -50,7 +50,7 @@ namespace InfoPoster_backend.Handlers.Posters
 
             //var posters = await _repository.GetPosters(popularPosters);
 
-            var result = await _repository.GetPopularPosterList(request.Place, _city);
+            var result = await _repository.GetPopularPosterList(request.Place, _city, request.SubcategoryId);
             var isLoggedIn = await _selectel.Login();
 
             if (isLoggedIn)

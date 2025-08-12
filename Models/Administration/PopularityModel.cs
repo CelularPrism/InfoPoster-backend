@@ -24,12 +24,11 @@
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid ApplicationId { get; set; }
-        public Guid? CategoryId { get; set; }
-        public Guid? SubcategoryId { get; set; }
         public Guid CityId { get; set; }
         public POPULARITY_PLACE Place { get; set; }
         public POPULARITY_TYPE Type { get; set; }
         public int Popularity { get; set; }
+        public Guid? PlaceId { get; set; }
     }
 
     public class PopularityResponseModel

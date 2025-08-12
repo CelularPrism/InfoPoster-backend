@@ -270,9 +270,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("poster/popularity/get")]
-        public async Task<IActionResult> GetPopularityPoster([FromQuery] Guid cityId)
+        public async Task<IActionResult> GetPopularityPoster([FromQuery] Guid cityId, [FromQuery] Guid? placeId)
         {
-            var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId });
+            var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId, PlaceId = placeId });
             if (result == null)
                 return NotFound();
 
@@ -500,9 +500,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("organization/popularity/get")]
-        public async Task<IActionResult> GetPopularityOrganization([FromQuery] Guid cityId)
+        public async Task<IActionResult> GetPopularityOrganization([FromQuery] Guid cityId, [FromQuery] Guid? placeId)
         {
-            var result = await _mediator.Send(new GetPopularityOrganizationRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId });
+            var result = await _mediator.Send(new GetPopularityOrganizationRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId, PlaceId = placeId });
             if (result == null)
                 return NotFound();
 

@@ -1,6 +1,7 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
 using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Administration;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,9 +61,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("popular")]
-        public async Task<IActionResult> GetPopular()
+        public async Task<IActionResult> GetPopular([FromQuery] POPULARITY_PLACE place, [FromQuery] Guid? subcategoryId)
         {
-            var result = await _mediator.Send(new GetPopularPostersRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN });
+            var result = await _mediator.Send(new GetPopularPostersRequest() { Place = place, SubcategoryId = subcategoryId });
             return Ok(result);
         }
 

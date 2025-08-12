@@ -47,7 +47,7 @@ namespace InfoPoster_backend.Handlers.Banner
             {
                 if (request.Place == POPULARITY_PLACE.CATEGORY_PLACE || request.Place == POPULARITY_PLACE.SUBCATEGORY_PLACE)
                 {
-                    var posters = await _poster.GetPopularPosterList(request.Place, _city);
+                    var posters = await _poster.GetPopularPosterList(request.Place, _city, request.PlaceId);
                     var postersBanner = posters.Select(p => new BannerResponseModel()
                     {
                         Id = Guid.NewGuid(),
@@ -59,7 +59,7 @@ namespace InfoPoster_backend.Handlers.Banner
                     result.AddRange(postersBanner);
                 } else if (request.Place == POPULARITY_PLACE.CATEGORY_EVENT || request.Place == POPULARITY_PLACE.SUBCATEGORY_EVENT)
                 {
-                    var organization = await _organization.GetPopularOrganizationList(request.Place, _city);
+                    var organization = await _organization.GetPopularOrganizationList(request.Place, _city, request.PlaceId);
                     var organizationBanner = organization.Select(o => new BannerResponseModel()
                     {
                         Id = Guid.NewGuid(),

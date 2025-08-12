@@ -3,6 +3,7 @@ using InfoPoster_backend.Models.Administration;
 using InfoPoster_backend.Repos;
 using MediatR;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace InfoPoster_backend.Handlers.Administration.Poster
 {
@@ -11,6 +12,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
         public POPULARITY_PLACE Place { get; set; }
         public List<PopularityRequestModel> Popularity { get; set; }
         public Guid CityId { get; set; }
+        public Guid? PlaceId { get; set; }
     }
 
     public class AddPopularityPosterResponse
@@ -30,7 +32,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
         public async Task<AddPopularityPosterResponse> Handle(AddPopularityPosterRequest request, CancellationToken cancellation = default)
         {
 
-            var popularity = await _repository.GetPopularityList(request.Place, request.CityId);
+            var popularity = await _repository.GetPopularityList(request.Place, request.CityId, request.PlaceId);
             var addList = new List<PopularityModel>();
 
             foreach (var item in request.Popularity)
@@ -42,7 +44,8 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
                     Place = request.Place,
                     Popularity = item.Popularity,
                     Type = POPULARITY_TYPE.POSTER,
-                    CityId = request.CityId
+                    CityId = request.CityId,
+                    PlaceId = request.PlaceId,
                 });
             }
 
