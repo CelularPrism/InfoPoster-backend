@@ -21,28 +21,36 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PopularityModel>> GetPopularity(POPULARITY_PLACE place, int popularity) => 
             await _banner.Popularity.Where(p => p.Place == place && p.Popularity == popularity).ToListAsync();
 
+        public async Task<List<PopularityModel>> GetPopularity(POPULARITY_PLACE place) =>
+            await _banner.Popularity.Where(p => p.Place == place).ToListAsync();
+
         public async Task<bool> AnyOrganization(Guid id) =>
             await _banner.Organizations.AnyAsync(o => o.Id == id);
 
         public async Task<bool> AnyPoster(Guid id) =>
             await _banner.Posters.AnyAsync(o => o.Id == id);
 
-        public async Task<List<BannerModel>> GetPopularBannerList(POPULARITY_PLACE place, Guid city)
+        public async Task<List<BannerModel>> GetPopularBannerList(POPULARITY_PLACE place, Guid city, Guid? placeId)
         {
-            var popularity = await _banner.Popularity.Where(p => p.Place == place && 
-                                                                 p.CityId == city &&
-                                                                 p.Type == POPULARITY_TYPE.BANNER).OrderBy(p => p.Popularity).Select(p => new { p.ApplicationId, p.Popularity }).ToListAsync();
-            var banner = await _banner.Banners.Where(b => popularity.Select(p => p.ApplicationId).Contains(b.Id))
-                                              .Select(b => new BannerModel()
-                                              {
-                                                  Comment = b.Comment,
-                                                  ExternalLink = b.ExternalLink,
-                                                  Id = b.Id,
-                                                  PlaceId = b.PlaceId,
-                                                  ReleaseDate = b.ReleaseDate,
-                                                  UserId = b.UserId,
-                                                  Popularity = popularity.Where(p => p.ApplicationId == b.Id).Select(p => p.Popularity).FirstOrDefault()
-                                              }).ToListAsync();
+            var popularity = _banner.Popularity.Where(p => p.Place == place && 
+                                                           p.CityId == city &&
+                                                           p.Type == POPULARITY_TYPE.BANNER).OrderBy(p => p.Popularity).Select(p => new { p.ApplicationId, p.Popularity }).AsEnumerable();
+
+            var banner = new List<BannerModel>();
+            if (popularity.Count() > 0)
+            {
+                banner = await _banner.Banners.Where(b => popularity.Select(p => p.ApplicationId).Contains(b.Id) && b.PlaceId == placeId)
+                                                  .Select(b => new BannerModel()
+                                                  {
+                                                      Comment = b.Comment,
+                                                      ExternalLink = b.ExternalLink,
+                                                      Id = b.Id,
+                                                      PlaceId = b.PlaceId,
+                                                      ReleaseDate = b.ReleaseDate,
+                                                      UserId = b.UserId,
+                                                      Popularity = popularity.Where(p => p.ApplicationId == b.Id).Select(p => p.Popularity).FirstOrDefault()
+                                                  }).ToListAsync();
+            }
 
             return banner;
         }

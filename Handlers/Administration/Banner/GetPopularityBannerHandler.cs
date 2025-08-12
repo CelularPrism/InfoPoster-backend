@@ -7,13 +7,26 @@ using MediatR;
 
 namespace InfoPoster_backend.Handlers.Administration.Banner
 {
-    public class GetPopularityBannerRequest : IRequest<List<BannerResponseModel>>
+    public class GetPopularityBannerRequest : IRequest<List<GetPopularityBannerResponse>>
     {
         public POPULARITY_PLACE Place { get; set; }
         public Guid CityId { get; set; }
+        public Guid? PlaceId { get; set; }
     }
 
-    public class GetPopularityBannerHandler : IRequestHandler<GetPopularityBannerRequest, List<BannerResponseModel>>
+    public class GetPopularityBannerResponse
+    {
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
+        public string ExternalLink { get; set; }
+        public string Comment { get; set; }
+        public DateTime ReleaseDate { get; set; }
+        public string FileURL { get; set; }
+        public Guid? FileId { get; set; }
+        public int? Popularity { get; set; }
+    }
+
+    public class GetPopularityBannerHandler : IRequestHandler<GetPopularityBannerRequest, List<GetPopularityBannerResponse>>
     {
         private readonly BannerRepository _repository;
         private readonly FileRepository _file;
@@ -26,11 +39,11 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
             _selectelAuthService = selectelAuthService;
         }
 
-        public async Task<List<BannerResponseModel>> Handle(GetPopularityBannerRequest request, CancellationToken cancellationToken = default)
+        public async Task<List<GetPopularityBannerResponse>> Handle(GetPopularityBannerRequest request, CancellationToken cancellationToken = default)
         {
-            var popular = await _repository.GetPopularBannerList(request.Place, request.CityId);
+            var popular = await _repository.GetPopularBannerList(request.Place, request.CityId, request.PlaceId);
             var loggedIn = await _selectelAuthService.Login();
-            var result = new List<BannerResponseModel>();
+            var result = new List<GetPopularityBannerResponse>();
 
             if (loggedIn)
             {
@@ -44,16 +57,18 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                     var url = string.Empty;
 
                     if (file != null)
-                        url = string.Concat("https://", selectelUUID, ".selstorage.ru/", id);
+                        url = string.Concat("https://", selectelUUID, ".selstorage.ru/", file.Id);
 
-                    result.Add(new BannerResponseModel()
+                    result.Add(new GetPopularityBannerResponse()
                     {
                         ExternalLink = item.ExternalLink,
                         FileURL = url,
+                        FileId = file != null ? file.Id : null,
                         Id = item.Id,
                         ReleaseDate = item.ReleaseDate,
                         UserId = item.UserId,
                         Popularity = item.Popularity,
+                        Comment = item.Comment,
                     });
                 }
             }

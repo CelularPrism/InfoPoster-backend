@@ -35,7 +35,7 @@ namespace InfoPoster_backend.Handlers.Banner
 
         public async Task<List<BannerResponseModel>> Handle(GetPublishedBannerListRequest request, CancellationToken cancellationToken = default)
         {
-            var bannerList = await _repository.GetPopularBannerList(request.Place, _city);
+            var bannerList = await _repository.GetPopularBannerList(request.Place, _city, request.PlaceId);
             var result = new List<BannerResponseModel>();
 
             if (request.PlaceId != null)

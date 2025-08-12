@@ -700,6 +700,13 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> SavePopularityBanner([FromBody] List<AddPopularityBannerRequest> request)
         {
             var result = new List<Guid>();
+
+            var group = request.GroupBy(r => r.PopularityPlace).Select(r => r.Key).ToList();
+            foreach (var item in group)
+            {
+                await _mediator.Send(new RemovePopularityRequest() { PopularityPlace = item });
+            }
+
             foreach (var item in request)
             {
                 var banner = await _mediator.Send(item);
@@ -710,9 +717,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("banner/popularity/get")]
-        public async Task<IActionResult> GetPopularityBanner([FromQuery] Guid cityId, [FromQuery] POPULARITY_PLACE place)
+        public async Task<IActionResult> GetPopularityBanner([FromQuery] Guid cityId, [FromQuery] POPULARITY_PLACE place, [FromQuery] Guid? placeId)
         {
-            var result = await _mediator.Send(new GetPopularityBannerRequest() { Place = place, CityId = cityId });
+            var result = await _mediator.Send(new GetPopularityBannerRequest() { Place = place, CityId = cityId, PlaceId = placeId });
             if (result == null)
                 return NotFound();
 

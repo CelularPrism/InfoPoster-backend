@@ -59,8 +59,6 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                 await _repository.Update(banner);
             }
 
-            var oldPopularity = await _repository.GetPopularity(POPULARITY_PLACE.MAIN, request.Popularity);
-
             var popularity = new PopularityModel()
             {
                 Id = Guid.NewGuid(),
@@ -71,7 +69,6 @@ namespace InfoPoster_backend.Handlers.Administration.Banner
                 CityId = request.CityId
             };
             await _repository.AddPopularity(popularity);
-            await _repository.RemoveRangePopularity(oldPopularity);
 
             return new AddPopularityBannerResponse() { Id = banner.Id };
         }
