@@ -32,7 +32,7 @@ namespace InfoPoster_backend.Handlers.Organizations
 
         public async Task<GetOrganizationListResponse> Handle(GetRejectedOrganizationListRequest request, CancellationToken cancellationToken = default)
         {
-            var categsTask = _repository.GetApplicationCategories();
+            //var categsTask = _repository.GetApplicationCategories();
             var userId = _loginService.GetUserId();
             var organizations = await _repository.GetRejectedOrganizationList(_lang, userId, request.CategoryId, request.Status, request.StartDate, request.EndDate, userId, request.CityId);
             var cities = await _repository.GetCities(_lang);
@@ -58,7 +58,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             var idEnum = organizations.Select(x => x.Id);
             var multilang = await _repository.GetMultilang(idEnum);
             var fullInfo = await _repository.GetFullInfo(idEnum);
-            var categs = await categsTask;
+            var categs = await _repository.GetApplicationCategories();
 
             var orgList = organizations.Select(o => new OrganizationResponseModel()
             {
