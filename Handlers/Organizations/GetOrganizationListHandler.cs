@@ -71,7 +71,7 @@ namespace InfoPoster_backend.Handlers.Organizations
                 (int)POSTER_STATUS.REVIEWING
             };
 
-            var categsTask = _repository.GetApplicationCategories();
+            //var categsTask = _repository.GetApplicationCategories();
 
             if (!isAdmin)
             {
@@ -110,7 +110,7 @@ namespace InfoPoster_backend.Handlers.Organizations
             var idEnum = organizations.Select(x => x.Id);
             var multilang = await _repository.GetMultilang(idEnum);
             var fullInfo = await _repository.GetFullInfo(idEnum);
-            var categs = await categsTask;
+            var categs = await _repository.GetApplicationCategories();
 
             var orgList = organizations.Select(o => new OrganizationResponseModel()
             {

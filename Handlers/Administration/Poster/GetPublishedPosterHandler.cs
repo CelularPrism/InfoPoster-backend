@@ -8,6 +8,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
     {
         public string SearchText { get; set; }
         public Guid CityId { get; set; }
+        public Guid? SubcategoryId { get; set; }
     }
 
     public class GetPublishedPosterHandler : IRequestHandler<GetPublishedPosterRequest, List<PosterModel>>
@@ -23,7 +24,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
         {
             var posters = await _repository.GetPosterList(request.CityId);
 
-            var result = posters.Where(o => o.Name.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            var result = posters.Where(o => o.Name.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase) && (request.SubcategoryId != null ? o.SubcategoryId == request.SubcategoryId : true)).ToList();
             return result;
         }
     }

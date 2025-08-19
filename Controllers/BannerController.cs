@@ -56,14 +56,14 @@ namespace InfoPoster_backend.Controllers
         [HttpGet("place/subcategory/get")]
         public async Task<IActionResult> GetPopularOnPlaceList([FromQuery] Guid subcategoryId)
         {
-            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.SUBCATEGORY_PLACE, PlaceId = subcategoryId });
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.LIST_APPLICATION_PLACE, PlaceId = subcategoryId });
             return Ok(result);
         }
 
         [HttpGet("event/subcategory/get")]
         public async Task<IActionResult> GetPopularOnEventList([FromQuery] Guid subcategoryId)
         {
-            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.SUBCATEGORY_EVENT, PlaceId = subcategoryId });
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.LIST_APPLICATION_EVENT, PlaceId = subcategoryId });
             return Ok(result);
         }
     }

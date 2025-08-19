@@ -270,9 +270,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("poster/popularity/get")]
-        public async Task<IActionResult> GetPopularityPoster([FromQuery] Guid cityId, [FromQuery] Guid? placeId)
+        public async Task<IActionResult> GetPopularityPoster([FromQuery] Guid cityId, [FromQuery] Guid? placeId, [FromQuery] POPULARITY_PLACE place = POPULARITY_PLACE.MAIN)
         {
-            var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId, PlaceId = placeId });
+            var result = await _mediator.Send(new GetPopularityPosterRequest() { Place = place, CityId = cityId, PlaceId = placeId });
             if (result == null)
                 return NotFound();
 
@@ -280,7 +280,7 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("poster/published/get")]
-        public async Task<IActionResult> GetPublishedPoster([FromQuery] string SearchText, [FromQuery] Guid cityId)
+        public async Task<IActionResult> GetPublishedPoster([FromQuery] string SearchText, [FromQuery] Guid cityId, [FromQuery] Guid? placeId)
         {
             var result = await _mediator.Send(new GetPublishedPosterRequest() { SearchText = SearchText, CityId = cityId });
             if (result == null)
@@ -500,9 +500,9 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("organization/popularity/get")]
-        public async Task<IActionResult> GetPopularityOrganization([FromQuery] Guid cityId, [FromQuery] Guid? placeId)
+        public async Task<IActionResult> GetPopularityOrganization([FromQuery] Guid cityId, [FromQuery] Guid? placeId, [FromQuery] POPULARITY_PLACE place = POPULARITY_PLACE.MAIN)
         {
-            var result = await _mediator.Send(new GetPopularityOrganizationRequest() { Place = Models.Administration.POPULARITY_PLACE.MAIN, CityId = cityId, PlaceId = placeId });
+            var result = await _mediator.Send(new GetPopularityOrganizationRequest() { Place = place, CityId = cityId, PlaceId = placeId });
             if (result == null)
                 return NotFound();
 

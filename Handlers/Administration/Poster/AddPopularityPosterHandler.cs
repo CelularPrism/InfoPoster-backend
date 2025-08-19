@@ -9,7 +9,7 @@ namespace InfoPoster_backend.Handlers.Administration.Poster
 {
     public class AddPopularityPosterRequest : IRequest<AddPopularityPosterResponse>
     {
-        public POPULARITY_PLACE Place { get; set; }
+        public POPULARITY_PLACE Place { get; set; } = POPULARITY_PLACE.MAIN;
         public List<PopularityRequestModel> Popularity { get; set; }
         public Guid CityId { get; set; }
         public Guid? PlaceId { get; set; }

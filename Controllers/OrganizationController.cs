@@ -75,7 +75,7 @@ namespace InfoPoster_backend.Controllers
         }
 
         [HttpGet("popular")]
-        public async Task<IActionResult> GetPopularOrganizations([FromQuery] POPULARITY_PLACE place, [FromQuery] Guid? categoryId)
+        public async Task<IActionResult> GetPopularOrganizations([FromQuery] Guid? categoryId, [FromQuery] POPULARITY_PLACE place = POPULARITY_PLACE.MAIN)
         {
             var result = await _mediator.Send(new GetPopularOrganizationsRequest() { Place = place, CategoryId = categoryId });
             return Ok(result);

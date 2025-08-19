@@ -85,6 +85,9 @@ namespace InfoPoster_backend.Repos
         public async Task<int> GetCountByStatus(int status) =>
             await _context.Posters.Where(p => p.Status == status).CountAsync();
 
+        public async Task<int> GetCountBySubcategory(Guid subcategoryId) =>
+            await _context.Posters.Where(p => p.SubcategoryId == subcategoryId).CountAsync();
+
         public async Task<List<CategoryModel>> GetCategories() =>
             await _context.CategoriesMultilang.Where(c => c.lang == _lang)
                                               .Join(_context.Categories,
@@ -373,7 +376,8 @@ namespace InfoPoster_backend.Repos
 
         public async Task<(List<PosterResponseModel>, int)> GetListNoTracking(int limit, int offset, DateTime start, DateTime end, Guid categoryId, string lang = "en")
         {
-            var query = _context.Posters.Where(p => (p.CategoryId == categoryId || p.SubcategoryId == categoryId) && p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= start.Date || p.ReleaseDateEnd <= start.Date));
+            var popular = await _context.Popularity.Where(p => p.CityId == _city && p.Type == POPULARITY_TYPE.POSTER && p.PlaceId == categoryId).Select(p => p.ApplicationId).ToListAsync();
+            var query = _context.Posters.Where(p => !popular.Contains(p.Id) && (p.CategoryId == categoryId || p.SubcategoryId == categoryId) && p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= start.Date || p.ReleaseDateEnd >= start.Date));
             var total = query.Count();
 
             query = query.Skip(offset).Take(limit);

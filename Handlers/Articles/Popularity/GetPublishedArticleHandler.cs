@@ -21,9 +21,9 @@ namespace InfoPoster_backend.Handlers.Articles.Popularity
 
         public async Task<List<ArticleModel>> Handle(GetPublishedArticleRequest request, CancellationToken cancellation = default)
         {
-            var posters = await _repository.GetArticleListByStatus(POSTER_STATUS.PUBLISHED);
+            var articles = await _repository.GetArticleListByStatus(POSTER_STATUS.PUBLISHED);
 
-            var result = posters.Where(o => o.Title.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            var result = articles.Where(o => o.Title.Contains(request.SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
             return result;
         }
     }
