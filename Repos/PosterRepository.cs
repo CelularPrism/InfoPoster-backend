@@ -196,7 +196,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == _lang)
+                                  .Where(p => p.m.Lang == _lang && p.p.f.City == _city)
                                   .OrderBy(p => p.p.p.ReleaseDate)
                                   .AsNoTracking()
                                   .ToListAsync();

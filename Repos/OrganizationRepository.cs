@@ -87,6 +87,7 @@ namespace InfoPoster_backend.Repos
                                                                                                 .Select(c => new SubcategoryModel()
                                                                                                 {
                                                                                                     Id = c.Subcategory.Id,
+                                                                                                    CategoryId = c.Subcategory.CategoryId,
                                                                                                     Name = c.Multilang.Name,
                                                                                                     ImageSrc = c.Subcategory.ImageSrc
                                                                                                 }).ToListAsync();
