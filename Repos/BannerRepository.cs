@@ -49,7 +49,7 @@ namespace InfoPoster_backend.Repos
                                                       ReleaseDate = b.ReleaseDate,
                                                       UserId = b.UserId,
                                                       Popularity = popularity.Where(p => p.ApplicationId == b.Id).Select(p => p.Popularity).FirstOrDefault()
-                                                  }).ToListAsync();
+                                                  }).OrderBy(p => p.Popularity).ToListAsync();
             }
 
             return banner;
