@@ -1,4 +1,5 @@
-﻿using InfoPoster_backend.Models.Posters;
+﻿using InfoPoster_backend.Models;
+using InfoPoster_backend.Models.Posters;
 using InfoPoster_backend.Repos;
 using InfoPoster_backend.Services.Selectel_API;
 using MediatR;
@@ -37,7 +38,7 @@ namespace InfoPoster_backend.Handlers.Posters
 
         public async Task<GetPostersByCategoryResponse> Handle(GetPostersByCategoryRequest request, CancellationToken cancellationToken = default)
         {
-            var (list, total) = await _repository.GetListNoTracking(request.Limit, request.Offset, request.startDate, request.endDate, request.categoryId, _lang);
+            var (list, total) = await _repository.GetListNoTracking(request.Limit, request.Offset, request.startDate, Models.Administration.POPULARITY_PLACE.CATEGORY_EVENT, request.categoryId, _lang);
 
             var loggedIn = await _selectelAuth.Login();
             var selectelUUID = string.Empty;

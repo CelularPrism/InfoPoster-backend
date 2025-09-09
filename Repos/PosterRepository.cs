@@ -374,9 +374,9 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
-        public async Task<(List<PosterResponseModel>, int)> GetListNoTracking(int limit, int offset, DateTime start, DateTime end, Guid categoryId, string lang = "en")
+        public async Task<(List<PosterResponseModel>, int)> GetListNoTracking(int limit, int offset, DateTime start, POPULARITY_PLACE place, Guid categoryId, string lang = "en")
         {
-            var popular = await _context.Popularity.Where(p => p.CityId == _city && p.Type == POPULARITY_TYPE.POSTER && p.PlaceId == categoryId).Select(p => p.ApplicationId).ToListAsync();
+            var popular = await _context.Popularity.Where(p => p.CityId == _city && p.Type == POPULARITY_TYPE.POSTER && p.PlaceId == categoryId && p.Place == place).Select(p => p.ApplicationId).ToListAsync();
             var query = _context.Posters.Where(p => !popular.Contains(p.Id) && (p.CategoryId == categoryId || p.SubcategoryId == categoryId) && p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= start.Date || p.ReleaseDateEnd >= start.Date));
             var total = query.Count();
 

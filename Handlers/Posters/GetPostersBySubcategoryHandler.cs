@@ -52,7 +52,7 @@ namespace InfoPoster_backend.Handlers.Posters
             //    var limit = offset == 0 ? request.Offset + request.Limit - popular.Count : request.Limit;
             var offset = request.Offset;
             var limit = request.Limit;
-                var (nonpopular, all) = await _repository.GetListNoTracking(limit, offset, request.startDate, request.endDate, request.subcategoryId, _lang);
+                var (nonpopular, all) = await _repository.GetListNoTracking(limit, offset, request.startDate, POPULARITY_PLACE.SUBCATEGORY_EVENT, request.subcategoryId, _lang);
                 total = all + popular.Count;
                 //popular.AddRange(nonpopular);
             //} else

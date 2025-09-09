@@ -26,6 +26,20 @@ namespace InfoPoster_backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("list")]
+        public async Task<IActionResult> GetArticleListClient([FromQuery] int limit, [FromQuery] int offset)
+        {
+            var result = await _mediator.Send(new GetArticleListClientRequest() { Limit = limit, Offset = offset });
+            return Ok(result);
+        }
+
+        [HttpGet("get")]
+        public async Task<IActionResult> GetArticleForClient([FromQuery] Guid id)
+        {
+            var result = await _mediator.Send(new GetArticleRequest() { Id = id });
+            return Ok(new { Id = result.Id, result.Title, result.Body, result.Lang, result.FileURL, result.GaleryUrls });
+        }
+
         [Authorize(AuthenticationSchemes = "Asymmetric")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateArticle()

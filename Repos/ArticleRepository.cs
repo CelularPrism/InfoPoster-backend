@@ -79,7 +79,8 @@ namespace InfoPoster_backend.Repos
                                                                                                                         Title = a.Title,
                                                                                                                         UserName = u.FirstName + " " + u.LastName,
                                                                                                                         Status = (int)a.Status,
-                                                                                                                        CreatedAt = a.CreatedAt
+                                                                                                                        CreatedAt = a.CreatedAt,
+                                                                                                                        ShortDescription = a.ShortDescription
                                                                                                                       }).ToListAsync();
 
         public async Task<List<ArticleModel>> GetArticleListByStatus(POSTER_STATUS status) => await _context.Articles.Where(a => a.Status == status).ToListAsync();

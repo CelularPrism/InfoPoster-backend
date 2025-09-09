@@ -57,7 +57,8 @@ namespace InfoPoster_backend.Repos
             {
                 if (type == CategoryType.EVENT)
                 {
-                    categories = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= DateTime.UtcNow || p.ReleaseDateEnd != null && p.ReleaseDateEnd > DateTime.UtcNow)).GroupBy(p => p.CategoryId).Select(p => (Guid)p.Key).ToListAsync();
+                    var posters = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= DateTime.UtcNow || (p.ReleaseDateEnd != null && p.ReleaseDateEnd > DateTime.UtcNow)) && p.CategoryId == Guid.Parse("47d15f94-8433-49d8-9762-203ce9872448")).ToListAsync();
+                    categories = await _posters.Posters.Where(p => p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate >= DateTime.UtcNow || (p.ReleaseDateEnd != null && p.ReleaseDateEnd > DateTime.UtcNow))).GroupBy(p => p.CategoryId).Select(p => (Guid)p.Key).ToListAsync();
                 }
                 else
                 {
@@ -90,7 +91,7 @@ namespace InfoPoster_backend.Repos
             } else
             {
                 availableSubcategories  = await _posters.Organizations.Where(c => c.CategoryId == categoryId && c.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(o => o.SubcategoryId).Select(o => new { Id = o.Key, Count = o.Count() }).ToListAsync();
-                var posterSubcategories = await _posters.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED).GroupBy(p => p.SubcategoryId).Select(p => new { Id = p.Key != null ? (Guid)p.Key : Guid.Empty, Count = p.Count() }).ToListAsync();
+                var posterSubcategories = await _posters.Posters.Where(p => p.CategoryId == categoryId && p.Status == (int)POSTER_STATUS.PUBLISHED && (p.ReleaseDate > DateTime.UtcNow || p.ReleaseDateEnd > DateTime.UtcNow)).GroupBy(p => p.SubcategoryId).Select(p => new { Id = p.Key != null ? (Guid)p.Key : Guid.Empty, Count = p.Count() }).ToListAsync();
 
                 availableSubcategories.AddRange(posterSubcategories);
             }
