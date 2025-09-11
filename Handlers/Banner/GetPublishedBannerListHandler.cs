@@ -10,6 +10,7 @@ namespace InfoPoster_backend.Handlers.Banner
 {
     public class GetPublishedBannerListRequest : IRequest<List<BannerResponseModel>>
     {
+        public int LimitBanner { get; set; } = 9;
         public POPULARITY_PLACE Place { get; set; }
         public Guid? PlaceId { get; set; }
     }
@@ -21,15 +22,17 @@ namespace InfoPoster_backend.Handlers.Banner
         private readonly OrganizationRepository _organization;
         private readonly FileRepository _file;
         private readonly SelectelAuthService _selectelAuth;
+        private readonly ArticleRepository _article;
         private readonly Guid _city;
 
-        public GetPublishedBannerListHandler(BannerRepository repository, PosterRepository poster, OrganizationRepository organization, FileRepository file, SelectelAuthService selectelAuth, IHttpContextAccessor accessor)
+        public GetPublishedBannerListHandler(BannerRepository repository, PosterRepository poster, OrganizationRepository organization, FileRepository file, SelectelAuthService selectelAuth, ArticleRepository article, IHttpContextAccessor accessor)
         {
             _repository = repository;
             _poster = poster;
             _organization = organization;
             _file = file;
             _selectelAuth = selectelAuth;
+            _article = article;
             _city = Guid.TryParse(accessor.HttpContext.Request.Headers["X-Testing"].ToString(), out _city) ? Guid.Parse(accessor.HttpContext.Request.Headers["X-Testing"].ToString()) : Constants.DefaultCity;
         }
 
@@ -43,9 +46,9 @@ namespace InfoPoster_backend.Handlers.Banner
                 bannerList = bannerList.Where(b => b.PlaceId == request.PlaceId).ToList();
             }
 
-            if (bannerList.Count < 9)
+            if (bannerList.Count < request.LimitBanner)
             {
-                if (request.Place == POPULARITY_PLACE.CATEGORY_PLACE || request.Place == POPULARITY_PLACE.SUBCATEGORY_PLACE)
+                if (request.Place == POPULARITY_PLACE.CATEGORY_EVENT || request.Place == POPULARITY_PLACE.SUBCATEGORY_EVENT)
                 {
                     var posters = await _poster.GetPopularPosterList(request.Place, _city, request.PlaceId);
                     var postersBanner = posters.Select(p => new BannerResponseModel()
@@ -57,7 +60,7 @@ namespace InfoPoster_backend.Handlers.Banner
                         ApplicationId = p.Id
                     }).ToList();
                     result.AddRange(postersBanner);
-                } else if (request.Place == POPULARITY_PLACE.CATEGORY_EVENT || request.Place == POPULARITY_PLACE.SUBCATEGORY_EVENT)
+                } else if (request.Place == POPULARITY_PLACE.CATEGORY_PLACE || request.Place == POPULARITY_PLACE.SUBCATEGORY_PLACE)
                 {
                     var organization = await _organization.GetPopularOrganizationList(request.Place, _city, request.PlaceId);
                     var organizationBanner = organization.Select(o => new BannerResponseModel()
@@ -69,11 +72,23 @@ namespace InfoPoster_backend.Handlers.Banner
                         ApplicationId = o.Id
                     }).ToList();
                     result.AddRange(organizationBanner);
+                } else if (request.Place == POPULARITY_PLACE.LIST_APPLICATION_ARTICLE)
+                {
+                    var article = await _article.GetPopularArticleList(request.Place, _city);
+                    var articleBanner = article.Select(a => new BannerResponseModel()
+                    {
+                        Id = Guid.NewGuid(),
+                        ExternalLink = string.Concat("application/article/" + a.Id),
+                        ReleaseDate = DateTime.UtcNow,
+                        UserId = Guid.NewGuid(),
+                        ApplicationId = a.Id
+                    }).ToList();
+                    result.AddRange(articleBanner);
                 }
             }
 
-            if (bannerList.Count > 9)
-                bannerList = bannerList.Take(9).ToList();
+            if (bannerList.Count > request.LimitBanner)
+                bannerList = bannerList.Take(request.LimitBanner).ToList();
 
             result = bannerList.Select(b => new BannerResponseModel()
             {

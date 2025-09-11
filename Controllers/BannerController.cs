@@ -66,5 +66,12 @@ namespace InfoPoster_backend.Controllers
             var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.LIST_APPLICATION_EVENT, PlaceId = subcategoryId });
             return Ok(result);
         }
+
+        [HttpGet("article/get")]
+        public async Task<IActionResult> GetPopularOnArticleList()
+        {
+            var result = await _mediator.Send(new GetPublishedBannerListRequest() { Place = Models.Administration.POPULARITY_PLACE.LIST_APPLICATION_ARTICLE, LimitBanner = 1 });
+            return Ok(result);
+        }
     }
 }
