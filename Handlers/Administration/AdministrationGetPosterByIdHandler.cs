@@ -46,6 +46,10 @@ namespace InfoPoster_backend.Handlers.Administration
         public string InternalContacts { get; set; }
         public int Status { get; set; }
         public string Comment { get; set; }
+        public string YouTube { get; set; }
+        public string Facebook { get; set; }
+        public string Instagram { get; set; }
+        public string TikTok { get; set; }
     }
 
     public class AdministrationGetPosterByIdHandler : IRequestHandler<AdministrationGetPosterByIdRequest, AdministrationGetPosterByIdResponse>
@@ -121,6 +125,11 @@ namespace InfoPoster_backend.Handlers.Administration
             //result.GaleryUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.IMAGE).Select(f => f.URL).ToList();
             //result.VideoUrls = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.VIDEO).Select(f => f.URL).ToList();
             //result.SocialLinks = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.SOCIAL_LINKS).Select(f => f.URL).FirstOrDefault();
+
+            result.YouTube = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.YOUTUBE).Select(f => f.URL).FirstOrDefault();
+            result.Facebook = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.FACEBOOK).Select(f => f.URL).FirstOrDefault();
+            result.Instagram = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.INSTAGRAM).Select(f => f.URL).FirstOrDefault();
+            result.TikTok = files.Where(f => f.FileCategory == (int)FILE_CATEGORIES.TIKTOK).Select(f => f.URL).FirstOrDefault();
 
             //var places = await _repository.GetPlaces(request.Id);
             //if (places.Count > 0)

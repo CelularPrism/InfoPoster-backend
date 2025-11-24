@@ -4,7 +4,11 @@
     {
         IMAGE,
         VIDEO,
-        SOCIAL_LINKS
+        SOCIAL_LINKS,
+        YOUTUBE,
+        FACEBOOK,
+        INSTAGRAM,
+        TIKTOK
     }
 
     public class FileURLModel

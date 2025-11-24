@@ -125,6 +125,9 @@ namespace InfoPoster_backend.Repos
         public async Task<List<PosterMultilangModel>> GetMultilangPosterList(Guid posterId) =>
             await _context.PostersMultilang.Where(x => x.PosterId == posterId).ToListAsync();
 
+        public async Task<List<ContactModel>> GetContactList(Guid posterId) =>
+            await _context.Contacts.Where(c => c.ApplicationId == posterId).ToListAsync();
+
         public async Task<ContactModel> GetContact(Guid posterId) =>
             await _context.Contacts.FirstOrDefaultAsync(c => c.ApplicationId == posterId && c.Lang == _lang);
 
@@ -196,8 +199,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == _lang && p.p.f.City == _city)
-                                  .OrderBy(p => p.p.p.ReleaseDate)
+                                  .Where(p => p.m.Lang == _lang && p.p.f.City == _city && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED)
                                   .AsNoTracking()
                                   .ToListAsync();
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == _lang).ToListAsync();
@@ -349,8 +351,7 @@ namespace InfoPoster_backend.Repos
                                         p => p.p.Id,
                                         m => m.PosterId,
                                         (p, m) => new { p, m })
-                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED)
-                                  .OrderBy(p => p.p.p.ReleaseDate)
+                                  .Where(p => p.m.Lang == lang && p.p.p.Status == (int)POSTER_STATUS.PUBLISHED && p.p.p.ReleaseDate > start && p.p.p.ReleaseDate < end)
                                   .AsNoTracking()
                                   .ToListAsync();
             var categories = await _context.CategoriesMultilang.Where(c => c.lang == lang).ToListAsync();
@@ -582,6 +583,29 @@ namespace InfoPoster_backend.Repos
             return result;
         }
 
+        public async Task<List<CategoryModel>> GetPopularCategories(Guid city)
+        {
+            var places = new List<POPULARITY_PLACE>() 
+            {
+                POPULARITY_PLACE.CATEGORY_EVENT,
+                POPULARITY_PLACE.SUBCATEGORY_EVENT,
+                POPULARITY_PLACE.LIST_APPLICATION_EVENT
+            };
+
+            var popularityPosters = await _context.Popularity.Where(p => p.CityId == city && places.Contains(p.Place)).OrderBy(p => p.Popularity).Select(p => p.ApplicationId).ToListAsync();
+            var categoryIds = await _context.Posters.Where(p => popularityPosters.Contains(p.Id)).GroupBy(p => p.CategoryId).Select(p => p.Key).ToListAsync();
+
+            var result = await _context.CategoriesMultilang
+                .Where(c => c.lang == _lang && categoryIds.Contains(c.CategoryId))
+                .Select(c => new CategoryModel()
+                {
+                    Id = c.CategoryId,
+                    Name = c.Name
+                }).ToListAsync();
+
+            return result;
+        }
+
         public async Task AddPoster(PosterModel model, Guid userId)
         {
             var history = new ApplicationHistoryModel()
@@ -667,6 +691,12 @@ namespace InfoPoster_backend.Repos
         public async Task UpdateContact(ContactModel model)
         {
             _context.Contacts.Update(model);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateContact(List<ContactModel> model)
+        {
+            _context.Contacts.UpdateRange(model);
             await _context.SaveChangesAsync();
         }
 

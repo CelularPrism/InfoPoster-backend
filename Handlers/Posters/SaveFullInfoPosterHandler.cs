@@ -131,14 +131,14 @@ namespace InfoPoster_backend.Handlers.Posters
                 }
             }
 
-            var contact = await _repository.GetContact(request.PosterId);
+            var contactList = await _repository.GetContactList(request.PosterId);
 
-            if (contact == null)
+            if (!contactList.Any())
             {
-                var contactList = new List<ContactModel>();
+                contactList = new List<ContactModel>();
                 foreach (var lang in Constants.SystemLangs)
                 {
-                    contact = new ContactModel()
+                    var contact = new ContactModel()
                     {
                         ApplicationId = request.PosterId,
                         Lang = lang
@@ -150,13 +150,44 @@ namespace InfoPoster_backend.Handlers.Posters
                 await _repository.AddContact(contactList, request.PosterId);
             } else
             {
-                history = contact.Update(request, articleId, _user);
-                changeHistory.AddRange(history);
-                await _repository.UpdateContact(contact);
+                foreach (var contact in contactList)
+                {
+                    history = contact.Update(request, articleId, _user);
+                    changeHistory.AddRange(history);
+                }
+                await _repository.UpdateContact(contactList);
             }
 
-            //var files = new List<FileURLModel>();
-            //var filesOld = await _repository.GetFileUrls(request.PosterId);
+            var files = new List<FileURLModel>();
+            var filesOld = await _repository.GetFileUrls(request.PosterId);
+
+            if (!string.IsNullOrEmpty(request.YouTube))
+            {
+                var links = request.YouTube;
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "YouTube", string.Empty, string.Empty, _user));
+                files.Add(new FileURLModel(request.PosterId, links, (int)FILE_CATEGORIES.YOUTUBE));
+            }
+
+            if (!string.IsNullOrEmpty(request.Facebook))
+            {
+                var links = request.Facebook;
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Facebook", string.Empty, string.Empty, _user));
+                files.Add(new FileURLModel(request.PosterId, links, (int)FILE_CATEGORIES.FACEBOOK));
+            }
+
+            if (!string.IsNullOrEmpty(request.Instagram))
+            {
+                var links = request.Instagram;
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "Instagram", string.Empty, string.Empty, _user));
+                files.Add(new FileURLModel(request.PosterId, links, (int)FILE_CATEGORIES.INSTAGRAM));
+            }
+
+            if (!string.IsNullOrEmpty(request.TikTok))
+            {
+                var links = request.TikTok;
+                changeHistory.Add(new ApplicationChangeHistory(articleId, request.PosterId, "TikTok", string.Empty, string.Empty, _user));
+                files.Add(new FileURLModel(request.PosterId, links, (int)FILE_CATEGORIES.TIKTOK));
+            }
 
             //if (request.VideoUrls != null)
             //{
@@ -176,7 +207,7 @@ namespace InfoPoster_backend.Handlers.Posters
             //    files.Add(new FileURLModel(request.PosterId, links, (int)FILE_CATEGORIES.SOCIAL_LINKS));
             //}
 
-            //await _repository.SaveFiles(files, request.PosterId);
+            await _repository.SaveFiles(files, request.PosterId);
 
             //if (request.Parking != null && request.Parking.Count > 0)
             //{

@@ -33,6 +33,12 @@ namespace InfoPoster_backend.Handlers.Posters
             var files = await _fileRepository.GetSelectelFiles(request.Id, (int)FILE_PLACES.GALLERY);
             var primaryFile = await _fileRepository.GetPrimaryFile(request.Id, (int)FILE_PLACES.GALLERY);
 
+            var links = await _repository.GetFileUrls(request.Id);
+            result.YouTube = links.Where(f => f.FileCategory == (int)FILE_CATEGORIES.YOUTUBE).Select(f => f.URL).FirstOrDefault();
+            result.Facebook = links.Where(f => f.FileCategory == (int)FILE_CATEGORIES.FACEBOOK).Select(f => f.URL).FirstOrDefault();
+            result.Instagram = links.Where(f => f.FileCategory == (int)FILE_CATEGORIES.INSTAGRAM).Select(f => f.URL).FirstOrDefault();
+            result.TikTok = links.Where(f => f.FileCategory == (int)FILE_CATEGORIES.TIKTOK).Select(f => f.URL).FirstOrDefault();
+
             var loggedIn = await _selectelAuthService.Login();
 
             result.GaleryUrls = new List<GetFileResponse>();

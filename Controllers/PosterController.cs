@@ -1,4 +1,5 @@
 ﻿using InfoPoster_backend.Handlers.Administration;
+using InfoPoster_backend.Handlers.Administration.Poster;
 using InfoPoster_backend.Handlers.Posters;
 using InfoPoster_backend.Models;
 using InfoPoster_backend.Models.Administration;
@@ -78,6 +79,13 @@ namespace InfoPoster_backend.Controllers
         public async Task<IActionResult> GetRecentlyAdded()
         {
             var result = await _mediator.Send(new GetRecentlyAddedPostersRequest());
+            return Ok(result);
+        }
+
+        [HttpGet("popular/categories")]
+        public async Task<IActionResult> GetPopularCategories()
+        {
+            var result = await _mediator.Send(new GetPopularCategoriesRequest());
             return Ok(result);
         }
     }

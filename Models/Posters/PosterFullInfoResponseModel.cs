@@ -54,5 +54,9 @@ namespace InfoPoster_backend.Models.Posters
         public Guid? AttachedOrganizationId { get; set; }
         public string AttachedOrganizationName { get; set; }
         public string Contacts { get; set; }
+        public string YouTube { get; set; }
+        public string Facebook { get; set; }
+        public string Instagram { get; set; }
+        public string TikTok { get; set; }
     }
 }

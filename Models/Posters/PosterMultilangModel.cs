@@ -39,17 +39,14 @@ namespace InfoPoster_backend.Models.Posters
                 Phone = fullInfo.Phone;
             }
 
-            if (string.IsNullOrEmpty(SiteLink) || fullInfo.Lang == Lang)
-            {
-                history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "SiteLink " + Lang, SiteLink, fullInfo.SiteLink, userId));
-                SiteLink = fullInfo.SiteLink;
-            }
-
             if (string.IsNullOrEmpty(Tickets) || fullInfo.Lang == Lang)
             {
                 history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "Tickets " + Lang, Tickets, fullInfo.Tickets, userId));
                 Tickets = fullInfo.Tickets;
             }
+
+            history.Add(new ApplicationChangeHistory(articleId, fullInfo.PosterId, "SiteLink " + Lang, SiteLink, fullInfo.SiteLink, userId));
+            SiteLink = fullInfo.SiteLink;
             return history;
         }
 
